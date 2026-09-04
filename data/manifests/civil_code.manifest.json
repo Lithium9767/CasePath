@@ -1,0 +1,100 @@
+{
+  "manifest_version": "1.0",
+  "dataset_id": "dataset.civil_code.rules.v1",
+  "source_id": "law.prc.civil_code.2021",
+  "generated_on": "2026-09-04",
+  "generator": "casepath.rule_layer.build:v1",
+  "upstream_repository_url": "https://github.com/litunan/legal-rag",
+  "upstream_revision": "ce7872c7ae343e5ff860d627195ec4e72c7ef7ce",
+  "upstream_license_status": "not_declared",
+  "inputs": [
+    {
+      "path": "../legal-rag/data/laws/民法典_法条.json",
+      "sha256": "405e960cec922c11c466bebfd0ddc3baca11cd2678861ac11e7590b75c0453de",
+      "record_count": 1260,
+      "repository_url": "https://github.com/litunan/legal-rag",
+      "revision": "ce7872c7ae343e5ff860d627195ec4e72c7ef7ce"
+    },
+    {
+      "path": "../legal-rag/data/laws/民法典_统计.json",
+      "sha256": "8e0d6d501651d2e5a0cc23d45deeb8e7451671ef6831a2184662f66d7f40f3eb",
+      "record_count": 1,
+      "repository_url": "https://github.com/litunan/legal-rag",
+      "revision": "ce7872c7ae343e5ff860d627195ec4e72c7ef7ce"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "data/canonical/rules/legal_sources.jsonl",
+      "sha256": "20f6ad08e07b7c67b2f9a2ac35692de0d9912e7c39191226be9bf298258373c4",
+      "record_count": 1,
+      "repository_url": null,
+      "revision": null
+    },
+    {
+      "path": "data/canonical/rules/provisions.jsonl",
+      "sha256": "6a84ab569c5415f0fb595d90f615c9b2d5206ca3f96b93fa85a918d747094c93",
+      "record_count": 1260,
+      "repository_url": null,
+      "revision": null
+    },
+    {
+      "path": "data/canonical/rules/rules.jsonl",
+      "sha256": "e2e32282d01564eaed710aeef731ded2011a1dd85c94cb7518204bc0f708a07d",
+      "record_count": 5,
+      "repository_url": null,
+      "revision": null
+    },
+    {
+      "path": "data/canonical/rules/source_spans.jsonl",
+      "sha256": "4bd95c7ba5f8a6f4598c15511999939537e77314ac5830702ac4581f71ff05f2",
+      "record_count": 1268,
+      "repository_url": null,
+      "revision": null
+    }
+  ],
+  "transformations": [
+    {
+      "transformation_id": "repair.upstream_hierarchy.flush_order.v1",
+      "description": "Correct the pinned upstream converter's one-record-early book, sub-book, chapter, and section metadata using an immutable snapshot.",
+      "affected_records": 109,
+      "guard_sha256": "405e960cec922c11c466bebfd0ddc3baca11cd2678861ac11e7590b75c0453de"
+    }
+  ],
+  "authority_verification": {
+    "review_status": "human_verified",
+    "verified_on": "2026-09-04",
+    "effective_status": "effective",
+    "checked_article_numbers": [
+      509,
+      563,
+      565,
+      566
+    ],
+    "whitespace_normalized_sha256": {
+      "509": "6092893c19fc13285fba96971bc601984509b92c926f45e1275e61e0fa2f12af",
+      "563": "6f8865de12e8358f28a6530d1d76bc1809ea1f6583a4976cd71816c6f67047e9",
+      "565": "52b64f120319276e2a3d437f5d73e6e67383c1eefcf2821f7fe43aa1c54e2c5c",
+      "566": "256a6da55401e696895bc77b22ab5fee4c7ecf253507f8c2d07d12be21e41dc3"
+    },
+    "source_urls": [
+      "https://flk.npc.gov.cn/detail?id=ff808081729d1efe01729d50b5c500bf",
+      "https://www.npc.gov.cn/wxzlhgb/c27214/gb2020/202006/P020230313538731037747.pdf",
+      "https://wb.flk.npc.gov.cn/flfg/PDF/bd53dd912c1048f2aecbaa229238334b.pdf"
+    ],
+    "note": "Articles 509, 563, 565, and 566 matched the official text after removing Unicode whitespace. The database metadata listed the Civil Code as effective."
+  },
+  "rule_review_status": {
+    "rule.contract.performance.good_faith.v1": "human_verified",
+    "rule.contract.termination.delay_after_demand.v1": "human_verified",
+    "rule.contract.termination.nonperformance.v1": "human_verified",
+    "rule.contract.termination.restitution.v1": "human_verified",
+    "rule.service_contract.termination_refund.v1": "needs_additional_authority"
+  },
+  "limitations": [
+    "The upstream repository declares no license; retain source attribution and review redistribution policy before publishing a derived corpus.",
+    "The upstream JSON flattens paragraph and item line breaks into spaces. Source span offsets address the canonical flattened text, not PDF byte or page offsets.",
+    "Article 563 creates a right to terminate rather than automatic termination; Article 565 notice/litigation procedure is included, while Article 564 exercise periods remain outside these demonstration rules.",
+    "No fixed refund formula is inferred from Articles 509/563/565/566. Prepaid service disputes also require review of the 2025 judicial interpretation: https://www.court.gov.cn/zixun/xiangqing/459321.html"
+  ]
+}
