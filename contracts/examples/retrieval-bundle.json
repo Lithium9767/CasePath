@@ -1,0 +1,23 @@
+{
+  "contract_version": "1.0",
+  "rule_refs": [
+    {
+      "object_id": "rule.service_contract.termination_refund.v1",
+      "score": 0.91,
+      "reasons": ["服务合同", "返还未消费余额"]
+    }
+  ],
+  "support_case_refs": [
+    {
+      "object_id": "case.zeng-v-wuhan-fitness.2021",
+      "score": 0.88,
+      "reasons": ["履行地点变化", "合同解除"]
+    }
+  ],
+  "limiting_case_refs": [],
+  "boundary_case_refs": [],
+  "cited_span_ids": ["span.civil-code.563", "span.case.zeng.reasoning"],
+  "degraded": true,
+  "degradation_reason": "第一天样例尚未接入真实限制性案例。"
+}
+

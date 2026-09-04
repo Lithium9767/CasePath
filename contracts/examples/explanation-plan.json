@@ -1,0 +1,22 @@
+{
+  "contract_version": "1.0",
+  "session_id": "demo-session-001",
+  "main_explanation": "仍需确认经营者是否已经无法继续履行。",
+  "candidate_claims": ["服务合同解除与返还"],
+  "applicable_rule_ids": ["rule.service_contract.termination_refund.v1"],
+  "support_case_ids": ["case.zeng-v-wuhan-fitness.2021"],
+  "limiting_case_ids": [],
+  "conditional_branches": [],
+  "unresolved_condition_ids": ["cond.performance_impossible"],
+  "evidence_actions": [],
+  "citations": [
+    {
+      "citation_id": "citation.civil-code.563",
+      "source_span_ids": ["span.civil-code.563"],
+      "supports": "合同解除规则候选依据",
+      "verified": false
+    }
+  ],
+  "disclaimer": "该解释基于当前提供的信息，不替代律师针对完整材料出具的法律意见。"
+}
+

@@ -1,0 +1,244 @@
+{
+  "$defs": {
+    "CandidateClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_type": {
+          "minLength": 1,
+          "title": "Claim Type",
+          "type": "string"
+        },
+        "requested_remedy": {
+          "minLength": 1,
+          "title": "Requested Remedy",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "claim_type",
+        "requested_remedy",
+        "confidence"
+      ],
+      "title": "CandidateClaim",
+      "type": "object"
+    },
+    "ConditionStatus": {
+      "enum": [
+        "SATISFIED",
+        "NOT_SATISFIED",
+        "UNKNOWN",
+        "CONFLICTING",
+        "NOT_APPLICABLE"
+      ],
+      "title": "ConditionStatus",
+      "type": "string"
+    },
+    "DialogueTurn": {
+      "additionalProperties": false,
+      "properties": {
+        "turn_id": {
+          "minimum": 1,
+          "title": "Turn Id",
+          "type": "integer"
+        },
+        "condition_id": {
+          "minLength": 1,
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "question": {
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer"
+        }
+      },
+      "required": [
+        "turn_id",
+        "condition_id",
+        "question"
+      ],
+      "title": "DialogueTurn",
+      "type": "object"
+    },
+    "QueryConditionState": {
+      "additionalProperties": false,
+      "properties": {
+        "condition_id": {
+          "minLength": 1,
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ConditionStatus",
+          "default": "UNKNOWN"
+        },
+        "supporting_fact_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Supporting Fact Ids",
+          "type": "array"
+        },
+        "last_updated_turn": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Last Updated Turn",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "condition_id"
+      ],
+      "title": "QueryConditionState",
+      "type": "object"
+    },
+    "SessionStatus": {
+      "enum": [
+        "INITIAL",
+        "NEEDS_CLARIFICATION",
+        "READY_TO_EXPLAIN",
+        "COMPLETED",
+        "DEGRADED"
+      ],
+      "title": "SessionStatus",
+      "type": "string"
+    },
+    "UserFact": {
+      "additionalProperties": false,
+      "properties": {
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "predicate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Predicate"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "source_turn": {
+          "minimum": 0,
+          "title": "Source Turn",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fact_id",
+        "text",
+        "source_turn"
+      ],
+      "title": "UserFact",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "default": "1.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "session_id": {
+      "minLength": 1,
+      "title": "Session Id",
+      "type": "string"
+    },
+    "initial_query": {
+      "minLength": 1,
+      "title": "Initial Query",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/SessionStatus",
+      "default": "INITIAL"
+    },
+    "user_facts": {
+      "items": {
+        "$ref": "#/$defs/UserFact"
+      },
+      "title": "User Facts",
+      "type": "array"
+    },
+    "candidate_claims": {
+      "items": {
+        "$ref": "#/$defs/CandidateClaim"
+      },
+      "title": "Candidate Claims",
+      "type": "array"
+    },
+    "condition_states": {
+      "items": {
+        "$ref": "#/$defs/QueryConditionState"
+      },
+      "title": "Condition States",
+      "type": "array"
+    },
+    "dialogue_history": {
+      "items": {
+        "$ref": "#/$defs/DialogueTurn"
+      },
+      "title": "Dialogue History",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "initial_query"
+  ],
+  "title": "QueryState",
+  "type": "object"
+}

@@ -1,0 +1,94 @@
+{
+  "$defs": {
+    "ScoredReference": {
+      "additionalProperties": false,
+      "properties": {
+        "object_id": {
+          "minLength": 1,
+          "title": "Object Id",
+          "type": "string"
+        },
+        "score": {
+          "title": "Score",
+          "type": "number"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_id",
+        "score"
+      ],
+      "title": "ScoredReference",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "default": "1.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "rule_refs": {
+      "items": {
+        "$ref": "#/$defs/ScoredReference"
+      },
+      "title": "Rule Refs",
+      "type": "array"
+    },
+    "support_case_refs": {
+      "items": {
+        "$ref": "#/$defs/ScoredReference"
+      },
+      "title": "Support Case Refs",
+      "type": "array"
+    },
+    "limiting_case_refs": {
+      "items": {
+        "$ref": "#/$defs/ScoredReference"
+      },
+      "title": "Limiting Case Refs",
+      "type": "array"
+    },
+    "boundary_case_refs": {
+      "items": {
+        "$ref": "#/$defs/ScoredReference"
+      },
+      "title": "Boundary Case Refs",
+      "type": "array"
+    },
+    "cited_span_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Cited Span Ids",
+      "type": "array"
+    },
+    "degraded": {
+      "default": false,
+      "title": "Degraded",
+      "type": "boolean"
+    },
+    "degradation_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Degradation Reason"
+    }
+  },
+  "title": "RetrievalBundle",
+  "type": "object"
+}

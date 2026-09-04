@@ -1,0 +1,193 @@
+{
+  "$defs": {
+    "CitationRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "citation_id": {
+          "minLength": 1,
+          "title": "Citation Id",
+          "type": "string"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Span Ids",
+          "type": "array"
+        },
+        "supports": {
+          "minLength": 1,
+          "title": "Supports",
+          "type": "string"
+        },
+        "verified": {
+          "default": false,
+          "title": "Verified",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "citation_id",
+        "source_span_ids",
+        "supports"
+      ],
+      "title": "CitationRecord",
+      "type": "object"
+    },
+    "EvidenceAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "related_condition_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Related Condition Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "action_id",
+        "description"
+      ],
+      "title": "EvidenceAction",
+      "type": "object"
+    },
+    "ExplanationBranch": {
+      "additionalProperties": false,
+      "properties": {
+        "branch_id": {
+          "minLength": 1,
+          "title": "Branch Id",
+          "type": "string"
+        },
+        "condition": {
+          "minLength": 1,
+          "title": "Condition",
+          "type": "string"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "citation_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Citation Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "branch_id",
+        "condition",
+        "explanation"
+      ],
+      "title": "ExplanationBranch",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "default": "1.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "session_id": {
+      "minLength": 1,
+      "title": "Session Id",
+      "type": "string"
+    },
+    "main_explanation": {
+      "minLength": 1,
+      "title": "Main Explanation",
+      "type": "string"
+    },
+    "candidate_claims": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Candidate Claims",
+      "type": "array"
+    },
+    "applicable_rule_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Applicable Rule Ids",
+      "type": "array"
+    },
+    "support_case_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Support Case Ids",
+      "type": "array"
+    },
+    "limiting_case_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Limiting Case Ids",
+      "type": "array"
+    },
+    "conditional_branches": {
+      "items": {
+        "$ref": "#/$defs/ExplanationBranch"
+      },
+      "title": "Conditional Branches",
+      "type": "array"
+    },
+    "unresolved_condition_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Unresolved Condition Ids",
+      "type": "array"
+    },
+    "evidence_actions": {
+      "items": {
+        "$ref": "#/$defs/EvidenceAction"
+      },
+      "title": "Evidence Actions",
+      "type": "array"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/CitationRecord"
+      },
+      "title": "Citations",
+      "type": "array"
+    },
+    "disclaimer": {
+      "default": "该解释基于当前提供的信息，不替代律师针对完整材料出具的法律意见。",
+      "title": "Disclaimer",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "main_explanation"
+  ],
+  "title": "ExplanationPlan",
+  "type": "object"
+}

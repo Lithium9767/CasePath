@@ -1,0 +1,51 @@
+{
+  "contract_version": "1.0",
+  "rule_id": "rule.service_contract.termination_refund.v1",
+  "title": "服务合同无法继续履行时的解除与返还规则（演示）",
+  "claim_types": ["服务合同解除与返还"],
+  "provisions": [
+    {
+      "source_id": "law.prc.civil_code.2021",
+      "provision_id": "law.prc.civil_code.2021.article_563",
+      "article_no": "563",
+      "title": "中华人民共和国民法典第五百六十三条",
+      "valid_from": "2021-01-01",
+      "valid_to": null
+    }
+  ],
+  "conditions": [
+    {
+      "condition_id": "cond.performance_impossible",
+      "label": "经营者无法继续履行",
+      "predicate": "经营者是否已经无法继续提供约定服务",
+      "operator": "ALL",
+      "required": true,
+      "user_answerable": true,
+      "evidence_types": ["停业通知", "企业登记状态", "聊天记录"],
+      "source_span_ids": ["span.civil-code.563"]
+    }
+  ],
+  "exceptions": [],
+  "consequences": [
+    {
+      "consequence_id": "consequence.terminate_and_refund",
+      "consequence_type": "解除与返还",
+      "description": "候选后果：解除合同并处理未履行部分",
+      "source_span_ids": ["span.civil-code.566"]
+    }
+  ],
+  "maturity": "L3",
+  "source_spans": [
+    {
+      "span_id": "span.civil-code.563",
+      "source_id": "law.prc.civil_code.2021",
+      "section": "第五百六十三条",
+      "paragraph_id": "article-563",
+      "start_offset": 0,
+      "end_offset": 1,
+      "quote": "演示占位：接入正式法条数据时替换为经核验原文。",
+      "content_hash": null
+    }
+  ]
+}
+

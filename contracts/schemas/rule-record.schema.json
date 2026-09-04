@@ -1,0 +1,364 @@
+{
+  "$defs": {
+    "ConditionOperator": {
+      "enum": [
+        "ALL",
+        "ANY",
+        "UNLESS",
+        "THRESHOLD",
+        "TEMPORAL",
+        "REFERENCE"
+      ],
+      "title": "ConditionOperator",
+      "type": "string"
+    },
+    "LegalConsequence": {
+      "additionalProperties": false,
+      "properties": {
+        "consequence_id": {
+          "minLength": 1,
+          "title": "Consequence Id",
+          "type": "string"
+        },
+        "consequence_type": {
+          "minLength": 1,
+          "title": "Consequence Type",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Source Span Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "consequence_id",
+        "consequence_type",
+        "description"
+      ],
+      "title": "LegalConsequence",
+      "type": "object"
+    },
+    "MaturityLevel": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2",
+        "L3"
+      ],
+      "title": "MaturityLevel",
+      "type": "string"
+    },
+    "ProvisionRef": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "provision_id": {
+          "minLength": 1,
+          "title": "Provision Id",
+          "type": "string"
+        },
+        "article_no": {
+          "title": "Article No",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "valid_from": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid From"
+        },
+        "valid_to": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid To"
+        }
+      },
+      "required": [
+        "source_id",
+        "provision_id",
+        "article_no",
+        "title"
+      ],
+      "title": "ProvisionRef",
+      "type": "object"
+    },
+    "RuleCondition": {
+      "additionalProperties": false,
+      "properties": {
+        "condition_id": {
+          "minLength": 1,
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "predicate": {
+          "minLength": 1,
+          "title": "Predicate",
+          "type": "string"
+        },
+        "operator": {
+          "$ref": "#/$defs/ConditionOperator",
+          "default": "ALL"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "user_answerable": {
+          "default": true,
+          "title": "User Answerable",
+          "type": "boolean"
+        },
+        "evidence_types": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Types",
+          "type": "array"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Source Span Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "condition_id",
+        "label",
+        "predicate"
+      ],
+      "title": "RuleCondition",
+      "type": "object"
+    },
+    "RuleException": {
+      "additionalProperties": false,
+      "properties": {
+        "exception_id": {
+          "minLength": 1,
+          "title": "Exception Id",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "predicate": {
+          "minLength": 1,
+          "title": "Predicate",
+          "type": "string"
+        },
+        "effect": {
+          "minLength": 1,
+          "title": "Effect",
+          "type": "string"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Source Span Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "exception_id",
+        "label",
+        "predicate",
+        "effect"
+      ],
+      "title": "RuleException",
+      "type": "object"
+    },
+    "SourceSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "span_id": {
+          "minLength": 1,
+          "title": "Span Id",
+          "type": "string"
+        },
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "paragraph_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paragraph Id"
+        },
+        "start_offset": {
+          "minimum": 0,
+          "title": "Start Offset",
+          "type": "integer"
+        },
+        "end_offset": {
+          "minimum": 0,
+          "title": "End Offset",
+          "type": "integer"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        }
+      },
+      "required": [
+        "span_id",
+        "source_id",
+        "start_offset",
+        "end_offset",
+        "quote"
+      ],
+      "title": "SourceSpan",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "default": "1.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "rule_id": {
+      "minLength": 1,
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "claim_types": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Claim Types",
+      "type": "array"
+    },
+    "provisions": {
+      "items": {
+        "$ref": "#/$defs/ProvisionRef"
+      },
+      "minItems": 1,
+      "title": "Provisions",
+      "type": "array"
+    },
+    "conditions": {
+      "items": {
+        "$ref": "#/$defs/RuleCondition"
+      },
+      "title": "Conditions",
+      "type": "array"
+    },
+    "exceptions": {
+      "items": {
+        "$ref": "#/$defs/RuleException"
+      },
+      "title": "Exceptions",
+      "type": "array"
+    },
+    "consequences": {
+      "items": {
+        "$ref": "#/$defs/LegalConsequence"
+      },
+      "title": "Consequences",
+      "type": "array"
+    },
+    "maturity": {
+      "$ref": "#/$defs/MaturityLevel"
+    },
+    "source_spans": {
+      "items": {
+        "$ref": "#/$defs/SourceSpan"
+      },
+      "title": "Source Spans",
+      "type": "array"
+    }
+  },
+  "required": [
+    "rule_id",
+    "title",
+    "claim_types",
+    "provisions",
+    "maturity"
+  ],
+  "title": "RuleRecord",
+  "type": "object"
+}

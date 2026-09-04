@@ -1,0 +1,71 @@
+{
+  "contract_version": "1.0",
+  "case_id": "case.zeng-v-wuhan-fitness.2021",
+  "title": "曾某诉武汉某健身管理有限公司服务合同纠纷案",
+  "case_no": "（2021）鄂0104民初109号",
+  "court": "湖北省武汉市硚口区人民法院",
+  "judgment_date": "2021-12-15",
+  "cause": "服务合同纠纷",
+  "maturity": "L2",
+  "claims": [
+    {
+      "claim_id": "claim.termination_refund",
+      "claim_type": "服务合同解除与返还",
+      "claimant": "曾某",
+      "respondent": "武汉某健身管理有限公司",
+      "requested_remedy": "解除合同并处理剩余服务费用",
+      "amount": null,
+      "invoked_rule_ids": ["rule.service_contract.termination_refund.v1"]
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "finding.performance_place_changed",
+      "predicate": "约定履行地点发生变化并增加消费者履约成本",
+      "polarity": true,
+      "source_span_ids": ["span.case.zeng.reasoning"]
+    }
+  ],
+  "condition_findings": [
+    {
+      "condition_id": "cond.performance_impossible",
+      "status": "SATISFIED",
+      "finding_ids": ["finding.performance_place_changed"],
+      "confidence": 0.9,
+      "source_span_ids": ["span.case.zeng.reasoning"],
+      "human_verified": false
+    }
+  ],
+  "reasoning_steps": [
+    {
+      "reasoning_id": "reasoning.location_change",
+      "premise_finding_ids": ["finding.performance_place_changed"],
+      "applied_rule_ids": ["rule.service_contract.termination_refund.v1"],
+      "conclusion": "履行地点变化可能支持消费者拒绝变更并请求解除。",
+      "source_span_ids": ["span.case.zeng.reasoning"]
+    }
+  ],
+  "decisions": [
+    {
+      "decision_id": "decision.claim.termination_refund",
+      "claim_id": "claim.termination_refund",
+      "status": "UNKNOWN",
+      "description": "当前本地结构化数据未单独抽出判决主文，暂不填充结果。",
+      "amount": null,
+      "source_span_ids": ["span.case.zeng.reasoning"]
+    }
+  ],
+  "source_spans": [
+    {
+      "span_id": "span.case.zeng.reasoning",
+      "source_id": "local-legal-rag.case.zeng",
+      "section": "裁判理由",
+      "paragraph_id": "reasoning-1",
+      "start_offset": 0,
+      "end_offset": 1,
+      "quote": "演示摘要：正式导入时必须替换为原文跨度。",
+      "content_hash": null
+    }
+  ]
+}
+

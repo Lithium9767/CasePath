@@ -1,0 +1,495 @@
+{
+  "$defs": {
+    "ClaimRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_id": {
+          "minLength": 1,
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "claim_type": {
+          "minLength": 1,
+          "title": "Claim Type",
+          "type": "string"
+        },
+        "claimant": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Claimant"
+        },
+        "respondent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Respondent"
+        },
+        "requested_remedy": {
+          "minLength": 1,
+          "title": "Requested Remedy",
+          "type": "string"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Amount"
+        },
+        "invoked_rule_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Invoked Rule Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "claim_id",
+        "claim_type",
+        "requested_remedy"
+      ],
+      "title": "ClaimRecord",
+      "type": "object"
+    },
+    "ConditionFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "condition_id": {
+          "minLength": 1,
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ConditionStatus"
+        },
+        "finding_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Finding Ids",
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Source Span Ids",
+          "type": "array"
+        },
+        "human_verified": {
+          "default": false,
+          "title": "Human Verified",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "condition_id",
+        "status",
+        "confidence"
+      ],
+      "title": "ConditionFinding",
+      "type": "object"
+    },
+    "ConditionStatus": {
+      "enum": [
+        "SATISFIED",
+        "NOT_SATISFIED",
+        "UNKNOWN",
+        "CONFLICTING",
+        "NOT_APPLICABLE"
+      ],
+      "title": "ConditionStatus",
+      "type": "string"
+    },
+    "CourtFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "finding_id": {
+          "minLength": 1,
+          "title": "Finding Id",
+          "type": "string"
+        },
+        "predicate": {
+          "minLength": 1,
+          "title": "Predicate",
+          "type": "string"
+        },
+        "polarity": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Polarity"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Span Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "finding_id",
+        "predicate",
+        "source_span_ids"
+      ],
+      "title": "CourtFinding",
+      "type": "object"
+    },
+    "DecisionItem": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_id": {
+          "minLength": 1,
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "claim_id": {
+          "minLength": 1,
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/DecisionStatus"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Amount"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Span Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "decision_id",
+        "claim_id",
+        "status",
+        "description",
+        "source_span_ids"
+      ],
+      "title": "DecisionItem",
+      "type": "object"
+    },
+    "DecisionStatus": {
+      "enum": [
+        "GRANTED",
+        "PARTIALLY_GRANTED",
+        "REJECTED",
+        "WITHDRAWN",
+        "UNKNOWN"
+      ],
+      "title": "DecisionStatus",
+      "type": "string"
+    },
+    "MaturityLevel": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2",
+        "L3"
+      ],
+      "title": "MaturityLevel",
+      "type": "string"
+    },
+    "ReasoningStep": {
+      "additionalProperties": false,
+      "properties": {
+        "reasoning_id": {
+          "minLength": 1,
+          "title": "Reasoning Id",
+          "type": "string"
+        },
+        "premise_finding_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Premise Finding Ids",
+          "type": "array"
+        },
+        "applied_rule_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Applied Rule Ids",
+          "type": "array"
+        },
+        "conclusion": {
+          "minLength": 1,
+          "title": "Conclusion",
+          "type": "string"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Span Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "reasoning_id",
+        "conclusion",
+        "source_span_ids"
+      ],
+      "title": "ReasoningStep",
+      "type": "object"
+    },
+    "SourceSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "span_id": {
+          "minLength": 1,
+          "title": "Span Id",
+          "type": "string"
+        },
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "paragraph_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paragraph Id"
+        },
+        "start_offset": {
+          "minimum": 0,
+          "title": "Start Offset",
+          "type": "integer"
+        },
+        "end_offset": {
+          "minimum": 0,
+          "title": "End Offset",
+          "type": "integer"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        }
+      },
+      "required": [
+        "span_id",
+        "source_id",
+        "start_offset",
+        "end_offset",
+        "quote"
+      ],
+      "title": "SourceSpan",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "default": "1.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "case_id": {
+      "minLength": 1,
+      "title": "Case Id",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "case_no": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Case No"
+    },
+    "court": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Court"
+    },
+    "judgment_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Judgment Date"
+    },
+    "cause": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cause"
+    },
+    "maturity": {
+      "$ref": "#/$defs/MaturityLevel"
+    },
+    "claims": {
+      "items": {
+        "$ref": "#/$defs/ClaimRecord"
+      },
+      "minItems": 1,
+      "title": "Claims",
+      "type": "array"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/CourtFinding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "condition_findings": {
+      "items": {
+        "$ref": "#/$defs/ConditionFinding"
+      },
+      "title": "Condition Findings",
+      "type": "array"
+    },
+    "reasoning_steps": {
+      "items": {
+        "$ref": "#/$defs/ReasoningStep"
+      },
+      "title": "Reasoning Steps",
+      "type": "array"
+    },
+    "decisions": {
+      "items": {
+        "$ref": "#/$defs/DecisionItem"
+      },
+      "title": "Decisions",
+      "type": "array"
+    },
+    "source_spans": {
+      "items": {
+        "$ref": "#/$defs/SourceSpan"
+      },
+      "title": "Source Spans",
+      "type": "array"
+    }
+  },
+  "required": [
+    "case_id",
+    "title",
+    "maturity",
+    "claims"
+  ],
+  "title": "CaseRecord",
+  "type": "object"
+}

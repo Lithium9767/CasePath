@@ -1,0 +1,12 @@
+{
+  "contract_version": "1.0",
+  "session_id": "demo-session-001",
+  "initial_query": "我在健身房充了5000元，店关门了，还有3000元没消费。",
+  "status": "INITIAL",
+  "user_facts": [],
+  "candidate_claims": [],
+  "condition_states": [],
+  "dialogue_history": [],
+  "created_at": "2026-09-04T00:00:00Z"
+}
+
