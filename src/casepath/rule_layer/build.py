@@ -98,14 +98,14 @@ def _validate_generated_output_paths(data_root: Path) -> None:
     resolved_data_root = data_root.resolve(strict=False)
     for relative_path in GENERATED_PATHS:
         target_path = data_root / relative_path
-        resolved_target_path = target_path.resolve(strict=False)
-        if not resolved_target_path.is_relative_to(resolved_data_root):
-            raise ValueError(f"generated output escapes data_root: {target_path}")
         candidate = target_path
         while candidate != data_root.parent:
             if candidate.is_symlink():
                 raise ValueError(f"refusing symbolic-link output path: {candidate}")
             candidate = candidate.parent
+        resolved_target_path = target_path.resolve(strict=False)
+        if not resolved_target_path.is_relative_to(resolved_data_root):
+            raise ValueError(f"generated output escapes data_root: {target_path}")
         if target_path.exists() and not target_path.is_file():
             raise ValueError(f"generated output exists but is not a file: {target_path}")
 
