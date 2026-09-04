@@ -103,7 +103,7 @@ class CaseCleaner:
                         if self.markdown_dir:
                             p = self.markdown_dir / f"{c['title']}.md"
                             if p.exists(): md = p.read_text(encoding="utf-8")
-                        f.write(self.deep_fitness(c, md).model_dump_json(ensure_ascii=False) + "\n")
+                        f.write(json.dumps(self.deep_fitness(c, md).model_dump(), ensure_ascii=False, default=str) + "\n")
         return len(cases)
 
 
