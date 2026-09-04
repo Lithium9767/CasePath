@@ -3,13 +3,18 @@ from pydantic import BaseModel, Field
 
 from casepath.bootstrap import build_demo_workflow
 from casepath.contracts import (
+    AnswerRequest,
+    CapabilityStatus,
     CaseRecord,
+    ErrorResponse,
     ExplanationPlan,
+    LegalSourceRecord,
+    ProvisionRecord,
     QueryState,
     RetrievalBundle,
     RuleRecord,
+    WorkflowSnapshot,
 )
-from casepath.workflow import WorkflowSnapshot
 
 app = FastAPI(title="CasePath API", version="0.1.0")
 workflow = build_demo_workflow()
@@ -21,11 +26,17 @@ class AnalyzeRequest(BaseModel):
 
 
 CONTRACTS = {
+    "legal-source-record": LegalSourceRecord,
+    "provision-record": ProvisionRecord,
     "rule-record": RuleRecord,
     "case-record": CaseRecord,
     "query-state": QueryState,
     "retrieval-bundle": RetrievalBundle,
     "explanation-plan": ExplanationPlan,
+    "answer-request": AnswerRequest,
+    "error-response": ErrorResponse,
+    "capability-status": CapabilityStatus,
+    "workflow-snapshot": WorkflowSnapshot,
 }
 
 

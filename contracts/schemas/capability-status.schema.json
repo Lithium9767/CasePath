@@ -1,0 +1,59 @@
+{
+  "$defs": {
+    "CapabilityMode": {
+      "enum": [
+        "LIVE",
+        "DEMO",
+        "MEMORY",
+        "DISABLED"
+      ],
+      "title": "CapabilityMode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "1.1",
+      "default": "1.1",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "capability": {
+      "minLength": 1,
+      "title": "Capability",
+      "type": "string"
+    },
+    "available": {
+      "title": "Available",
+      "type": "boolean"
+    },
+    "mode": {
+      "$ref": "#/$defs/CapabilityMode"
+    },
+    "degraded": {
+      "default": false,
+      "title": "Degraded",
+      "type": "boolean"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reason"
+    }
+  },
+  "required": [
+    "capability",
+    "available",
+    "mode"
+  ],
+  "title": "CapabilityStatus",
+  "type": "object"
+}

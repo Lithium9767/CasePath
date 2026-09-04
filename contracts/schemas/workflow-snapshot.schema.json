@@ -1,0 +1,678 @@
+{
+  "$defs": {
+    "CandidateClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_type": {
+          "minLength": 1,
+          "title": "Claim Type",
+          "type": "string"
+        },
+        "requested_remedy": {
+          "minLength": 1,
+          "title": "Requested Remedy",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "claim_type",
+        "requested_remedy",
+        "confidence"
+      ],
+      "title": "CandidateClaim",
+      "type": "object"
+    },
+    "CitationRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "citation_id": {
+          "minLength": 1,
+          "title": "Citation Id",
+          "type": "string"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Span Ids",
+          "type": "array"
+        },
+        "supports": {
+          "minLength": 1,
+          "title": "Supports",
+          "type": "string"
+        },
+        "verified": {
+          "default": false,
+          "title": "Verified",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "citation_id",
+        "source_span_ids",
+        "supports"
+      ],
+      "title": "CitationRecord",
+      "type": "object"
+    },
+    "ConditionStatus": {
+      "enum": [
+        "SATISFIED",
+        "NOT_SATISFIED",
+        "UNKNOWN",
+        "CONFLICTING",
+        "NOT_APPLICABLE"
+      ],
+      "title": "ConditionStatus",
+      "type": "string"
+    },
+    "DialogueTurn": {
+      "additionalProperties": false,
+      "properties": {
+        "turn_id": {
+          "minimum": 1,
+          "title": "Turn Id",
+          "type": "integer"
+        },
+        "question_id": {
+          "minLength": 1,
+          "title": "Question Id",
+          "type": "string"
+        },
+        "condition_id": {
+          "minLength": 1,
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "question": {
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer"
+        }
+      },
+      "required": [
+        "turn_id",
+        "question_id",
+        "condition_id",
+        "question"
+      ],
+      "title": "DialogueTurn",
+      "type": "object"
+    },
+    "EvidenceAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "related_condition_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Related Condition Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "action_id",
+        "description"
+      ],
+      "title": "EvidenceAction",
+      "type": "object"
+    },
+    "ExplanationBranch": {
+      "additionalProperties": false,
+      "properties": {
+        "branch_id": {
+          "minLength": 1,
+          "title": "Branch Id",
+          "type": "string"
+        },
+        "condition": {
+          "minLength": 1,
+          "title": "Condition",
+          "type": "string"
+        },
+        "explanation": {
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "citation_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Citation Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "branch_id",
+        "condition",
+        "explanation"
+      ],
+      "title": "ExplanationBranch",
+      "type": "object"
+    },
+    "ExplanationPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "const": "1.1",
+          "default": "1.1",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "session_id": {
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "main_explanation": {
+          "minLength": 1,
+          "title": "Main Explanation",
+          "type": "string"
+        },
+        "candidate_claims": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Candidate Claims",
+          "type": "array"
+        },
+        "applicable_rule_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Applicable Rule Ids",
+          "type": "array"
+        },
+        "support_case_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Support Case Ids",
+          "type": "array"
+        },
+        "limiting_case_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Limiting Case Ids",
+          "type": "array"
+        },
+        "conditional_branches": {
+          "items": {
+            "$ref": "#/$defs/ExplanationBranch"
+          },
+          "title": "Conditional Branches",
+          "type": "array"
+        },
+        "unresolved_condition_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Unresolved Condition Ids",
+          "type": "array"
+        },
+        "evidence_actions": {
+          "items": {
+            "$ref": "#/$defs/EvidenceAction"
+          },
+          "title": "Evidence Actions",
+          "type": "array"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/CitationRecord"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "disclaimer": {
+          "default": "该解释基于当前提供的信息，不替代律师针对完整材料出具的法律意见。",
+          "title": "Disclaimer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "session_id",
+        "main_explanation"
+      ],
+      "title": "ExplanationPlan",
+      "type": "object"
+    },
+    "QueryConditionState": {
+      "additionalProperties": false,
+      "properties": {
+        "condition_id": {
+          "minLength": 1,
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ConditionStatus",
+          "default": "UNKNOWN"
+        },
+        "supporting_fact_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Supporting Fact Ids",
+          "type": "array"
+        },
+        "last_updated_turn": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Last Updated Turn",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "condition_id"
+      ],
+      "title": "QueryConditionState",
+      "type": "object"
+    },
+    "QueryState": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "const": "1.1",
+          "default": "1.1",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "session_id": {
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "initial_query": {
+          "minLength": 1,
+          "title": "Initial Query",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/SessionStatus",
+          "default": "INITIAL"
+        },
+        "user_facts": {
+          "items": {
+            "$ref": "#/$defs/UserFact"
+          },
+          "title": "User Facts",
+          "type": "array"
+        },
+        "candidate_claims": {
+          "items": {
+            "$ref": "#/$defs/CandidateClaim"
+          },
+          "title": "Candidate Claims",
+          "type": "array"
+        },
+        "condition_states": {
+          "items": {
+            "$ref": "#/$defs/QueryConditionState"
+          },
+          "title": "Condition States",
+          "type": "array"
+        },
+        "dialogue_history": {
+          "items": {
+            "$ref": "#/$defs/DialogueTurn"
+          },
+          "title": "Dialogue History",
+          "type": "array"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "session_id",
+        "initial_query"
+      ],
+      "title": "QueryState",
+      "type": "object"
+    },
+    "QuestionCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "question_id": {
+          "minLength": 1,
+          "title": "Question Id",
+          "type": "string"
+        },
+        "condition_id": {
+          "minLength": 1,
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "question": {
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "why_asked": {
+          "minLength": 1,
+          "title": "Why Asked",
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Options",
+          "type": "array"
+        },
+        "utility": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Utility",
+          "type": "number"
+        },
+        "score_components": {
+          "items": {
+            "$ref": "#/$defs/ScoreComponent"
+          },
+          "title": "Score Components",
+          "type": "array"
+        },
+        "supporting_case_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Supporting Case Ids",
+          "type": "array"
+        },
+        "limiting_case_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Limiting Case Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "question_id",
+        "condition_id",
+        "question",
+        "why_asked",
+        "options",
+        "utility"
+      ],
+      "title": "QuestionCandidate",
+      "type": "object"
+    },
+    "RetrievalBundle": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "const": "1.1",
+          "default": "1.1",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "rule_refs": {
+          "items": {
+            "$ref": "#/$defs/ScoredReference"
+          },
+          "title": "Rule Refs",
+          "type": "array"
+        },
+        "support_case_refs": {
+          "items": {
+            "$ref": "#/$defs/ScoredReference"
+          },
+          "title": "Support Case Refs",
+          "type": "array"
+        },
+        "limiting_case_refs": {
+          "items": {
+            "$ref": "#/$defs/ScoredReference"
+          },
+          "title": "Limiting Case Refs",
+          "type": "array"
+        },
+        "boundary_case_refs": {
+          "items": {
+            "$ref": "#/$defs/ScoredReference"
+          },
+          "title": "Boundary Case Refs",
+          "type": "array"
+        },
+        "cited_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Cited Span Ids",
+          "type": "array"
+        },
+        "degraded": {
+          "default": false,
+          "title": "Degraded",
+          "type": "boolean"
+        },
+        "degradation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Degradation Reason"
+        }
+      },
+      "title": "RetrievalBundle",
+      "type": "object"
+    },
+    "ScoreComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "explanation"
+      ],
+      "title": "ScoreComponent",
+      "type": "object"
+    },
+    "ScoredReference": {
+      "additionalProperties": false,
+      "properties": {
+        "object_id": {
+          "minLength": 1,
+          "title": "Object Id",
+          "type": "string"
+        },
+        "score": {
+          "title": "Score",
+          "type": "number"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_id",
+        "score"
+      ],
+      "title": "ScoredReference",
+      "type": "object"
+    },
+    "SessionStatus": {
+      "enum": [
+        "INITIAL",
+        "NEEDS_CLARIFICATION",
+        "READY_TO_EXPLAIN",
+        "COMPLETED",
+        "DEGRADED"
+      ],
+      "title": "SessionStatus",
+      "type": "string"
+    },
+    "UserFact": {
+      "additionalProperties": false,
+      "properties": {
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "predicate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Predicate"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "source_turn": {
+          "minimum": 0,
+          "title": "Source Turn",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fact_id",
+        "text",
+        "source_turn"
+      ],
+      "title": "UserFact",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "1.1",
+      "default": "1.1",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "query_state": {
+      "$ref": "#/$defs/QueryState"
+    },
+    "retrieval_bundle": {
+      "$ref": "#/$defs/RetrievalBundle"
+    },
+    "next_question": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/QuestionCandidate"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "explanation_plan": {
+      "$ref": "#/$defs/ExplanationPlan"
+    },
+    "trace": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Trace",
+      "type": "array"
+    }
+  },
+  "required": [
+    "query_state",
+    "retrieval_bundle",
+    "explanation_plan"
+  ],
+  "title": "WorkflowSnapshot",
+  "type": "object"
+}
