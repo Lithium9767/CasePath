@@ -6,10 +6,9 @@ import re
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from casepath.contracts import CaseRecord, ClaimRecord, CourtFinding, DecisionItem, SourceSpan
-
 
 SECTION_RE = re.compile(r"^##\s+(.+?)\s*$", re.MULTILINE)
 DATE_RE = re.compile(r"(\d{4})[.年/-](\d{1,2})[.月/-](\d{1,2})")
@@ -50,7 +49,7 @@ class CaseCleaner:
     def load(self) -> list[dict[str, Any]]:
         payload = json.loads(self.input_path.read_text(encoding="utf-8"))
         if not isinstance(payload, list):
-            raise ValueError("processed cases must be a JSON array")
+            raise TypeError("processed cases must be a JSON array")
         return payload
 
     def civil_cases(self) -> list[dict[str, Any]]:
