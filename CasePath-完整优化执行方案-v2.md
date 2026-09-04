@@ -620,12 +620,12 @@ Output:
 
 ### 7.1 本地 `legal-rag` 的准确定位
 
-用户新增的 [legal-rag 仓库](</C:/Users/37948/Desktop/CasePath/legal-rag/README.md:1>)确实以《民法典》和民事案例为主，但应区分于 ACL 论文的 LegalGraphRAG。
+用户新增的 [legal-rag 仓库](https://github.com/litunan/legal-rag)确实以《民法典》和民事案例为主，但应区分于 ACL 论文的 LegalGraphRAG。本地默认将其与 `CasePath/` 同级克隆，以下本地路径均从 `CasePath/` 仓库根目录起算。
 
 已核查数据：
 
-- [民法典统计](</C:/Users/37948/Desktop/CasePath/legal-rag/data/laws/民法典_统计.json:1>)包含 1,260 条法条；
-- [处理后案例](</C:/Users/37948/Desktop/CasePath/legal-rag/data/processed/processed_cases.json:1>)共 51 件；
+- `../legal-rag/data/laws/民法典_统计.json` 包含 1,260 条法条；
+- `../legal-rag/data/processed/processed_cases.json` 共 51 件；
 - 其中民事 45 件、刑事 3 件、行政 1 件、执行 1 件、执行实施 1 件；
 - 参考案例 48 件、指导性案例 3 件；
 - 只有 11 件单独抽取了 `judgment_result`；
