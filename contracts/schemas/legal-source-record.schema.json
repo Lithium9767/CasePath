@@ -1,0 +1,93 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "1.1",
+      "default": "1.1",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "source_id": {
+      "minLength": 1,
+      "title": "Source Id",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "authority": {
+      "minLength": 1,
+      "title": "Authority",
+      "type": "string"
+    },
+    "document_type": {
+      "minLength": 1,
+      "title": "Document Type",
+      "type": "string"
+    },
+    "promulgated_on": {
+      "format": "date",
+      "title": "Promulgated On",
+      "type": "string"
+    },
+    "valid_from": {
+      "format": "date",
+      "title": "Valid From",
+      "type": "string"
+    },
+    "valid_to": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Valid To"
+    },
+    "effective_status": {
+      "enum": [
+        "effective",
+        "repealed",
+        "not_yet_effective"
+      ],
+      "title": "Effective Status",
+      "type": "string"
+    },
+    "jurisdiction": {
+      "minLength": 1,
+      "title": "Jurisdiction",
+      "type": "string"
+    },
+    "official_source_url": {
+      "format": "uri",
+      "minLength": 1,
+      "title": "Official Source Url",
+      "type": "string"
+    },
+    "content_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Content Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_id",
+    "title",
+    "authority",
+    "document_type",
+    "promulgated_on",
+    "valid_from",
+    "effective_status",
+    "jurisdiction",
+    "official_source_url",
+    "content_hash"
+  ],
+  "title": "LegalSourceRecord",
+  "type": "object"
+}

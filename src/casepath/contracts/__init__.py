@@ -26,6 +26,7 @@ from .query import (
 )
 from .retrieval import RetrievalBundle, ScoredReference
 from .rule import LegalConsequence, ProvisionRef, RuleCondition, RuleException, RuleRecord
+from .source import LegalSourceRecord, ProvisionRecord
 
 __all__ = [
     "CandidateClaim",
@@ -45,7 +46,9 @@ __all__ = [
     "ExplanationBranch",
     "ExplanationPlan",
     "LegalConsequence",
+    "LegalSourceRecord",
     "MaturityLevel",
+    "ProvisionRecord",
     "ProvisionRef",
     "QueryConditionState",
     "QueryState",
