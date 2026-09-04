@@ -38,6 +38,29 @@ API 启动后：
 - `POST /v1/demo/analyze`
 - `GET /v1/contracts/{contract_name}/schema`
 
+## P2 法条与规则数据
+
+P2 数据源来自同级克隆的 [`litunan/legal-rag`](https://github.com/litunan/legal-rag)。从
+`CasePath/` 根目录执行：
+
+```powershell
+uv run python -m casepath.rule_layer.build --verified-on 2026-09-04
+uv run python -m casepath.rule_layer.build --validate-only
+```
+
+构建命令会完成以下工作：
+
+- 以 LF 规范化文本字节校验上游法条文件 SHA-256、1,260 个连续条号和非空正文；
+- 修复上游 DOCX 转换器造成的 109 条层级错位；
+- 生成 `legal_sources.jsonl`、`provisions.jsonl`、`rules.jsonl` 和
+  `source_spans.jsonl`；
+- 校验规则引用、原文右开区间偏移和文件清单哈希；
+- 对第 509、563、565、566 条保留权威来源核验记录。
+
+生成文件位于 `data/canonical/rules/`，来源、版本、哈希、规则复核状态及适用限制位于
+`data/manifests/civil_code.manifest.json`。其中 4 条基础规则为 L3；综合服务退款规则因尚未结构化
+接入 2025 年预付式消费司法解释，保守标为 L2，不能单独用于判断迁店等专项解除事由或退款金额。
+
 ## 团队规则
 
 1. `contracts/` 由集成负责人维护，修改必须同步版本；
