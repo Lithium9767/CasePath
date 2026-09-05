@@ -25,7 +25,7 @@ def _source_span(source_id: str, section: str, text: str, paragraph: int = 1) ->
     return SourceSpan(
         span_id=f"span.{source_id}.{paragraph}", source_id=source_id, section=section,
         paragraph_id=f"{section}-{paragraph}", start_offset=0, end_offset=len(text),
-        quote=text, content_hash=hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        quote=text,
     )
 
 
