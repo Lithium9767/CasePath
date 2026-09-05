@@ -6,7 +6,7 @@
 | 文件 | 记录数 | 用途 |
 |---|---:|---|
 | `legal_sources.jsonl` | 1 | 《中华人民共和国民法典》的版本与权威来源 |
-| `provisions.jsonl` | 1,260 | 第 1—1260 条完整正文与修正后的层级 |
+| `provisions.jsonl` | 1,260 | 第 1—1260 条完整正文、生效日期与全文来源跨度 |
 | `rules.jsonl` | 5 | 第 509、563、565、566 条形成的 4 条 L3 基础规则与 1 条 L2 综合规则 |
 | `source_spans.jsonl` | 1,268 | 每条法条全文跨度及规则使用的细粒度跨度 |
 
@@ -16,6 +16,8 @@
 ```python
 span.quote == provision.text[span.start_offset : span.end_offset]
 ```
+
+上游层级修复仅保留在摄取过程与 manifest 审计记录中；当前公共合同不输出编、章、节字段。
 
 `SourceSpan` v1.1 不携带逐片段哈希；引用真实性由上述回放关系、关键条文固定哈希和
 manifest 的固定发布文件 SHA-256 共同保证。文本文件计算 SHA-256 前把 CRLF/CR 规范化

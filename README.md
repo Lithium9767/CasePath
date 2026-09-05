@@ -49,6 +49,8 @@ API 启动后：
 
 ## P2 法条与规范规则层
 
+本轮已完成、待完成事项及合同精简说明见 [P2 阶段交接说明](docs/p2-handoff.md)。
+
 P2 以 P1 冻结的 `LegalSourceRecord`、`ProvisionRecord` 和 `RuleRecord` v1.1 为
 唯一公共合同。原始数据来自同级克隆的
 [`litunan/legal-rag`](https://github.com/litunan/legal-rag)，从 `CasePath/` 根目录执行：
