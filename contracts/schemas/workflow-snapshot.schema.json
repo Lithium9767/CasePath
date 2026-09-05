@@ -64,6 +64,192 @@
       "title": "CitationRecord",
       "type": "object"
     },
+    "ComparisonBundle": {
+      "additionalProperties": false,
+      "description": "P4案例分化检测的共享结果，避免追问和解释分别重复计算。",
+      "properties": {
+        "contract_version": {
+          "const": "1.3",
+          "default": "1.3",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "condition_comparisons": {
+          "items": {
+            "$ref": "#/$defs/ConditionComparison"
+          },
+          "title": "Condition Comparisons",
+          "type": "array"
+        },
+        "ranked_condition_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Ranked Condition Ids",
+          "type": "array"
+        },
+        "degraded": {
+          "default": false,
+          "title": "Degraded",
+          "type": "boolean"
+        },
+        "degradation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Degradation Reason"
+        }
+      },
+      "title": "ComparisonBundle",
+      "type": "object"
+    },
+    "ConditionComparison": {
+      "additionalProperties": false,
+      "description": "同一规则条件上的案例分化指标，供追问和解释共同消费。",
+      "properties": {
+        "condition_id": {
+          "minLength": 1,
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "status_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/ConditionStatus"
+          },
+          "title": "Status Counts",
+          "type": "object"
+        },
+        "condition_entropy": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Condition Entropy",
+          "type": "number"
+        },
+        "outcome_mutual_information": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Outcome Mutual Information",
+          "type": "number"
+        },
+        "expected_information_gain": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Expected Information Gain",
+          "type": "number"
+        },
+        "expected_rank_change": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Expected Rank Change",
+          "type": "number"
+        },
+        "expected_branch_reduction": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Expected Branch Reduction",
+          "type": "number"
+        },
+        "case_disagreement_score": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Case Disagreement Score",
+          "type": "number"
+        },
+        "rule_condition_discriminativeness": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Rule Condition Discriminativeness",
+          "type": "number"
+        },
+        "support_case_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Support Case Ids",
+          "type": "array"
+        },
+        "limiting_case_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Limiting Case Ids",
+          "type": "array"
+        },
+        "boundary_case_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Boundary Case Ids",
+          "type": "array"
+        },
+        "score_components": {
+          "items": {
+            "$ref": "#/$defs/ScoreComponent"
+          },
+          "title": "Score Components",
+          "type": "array"
+        }
+      },
+      "required": [
+        "condition_id"
+      ],
+      "title": "ConditionComparison",
+      "type": "object"
+    },
+    "ConditionEvidence": {
+      "additionalProperties": false,
+      "description": "一条用户事实对条件映射的作用，不表示最终法律结论。",
+      "properties": {
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "SUPPORTS",
+            "OPPOSES",
+            "QUALIFIES"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fact_id",
+        "relation",
+        "confidence",
+        "reason"
+      ],
+      "title": "ConditionEvidence",
+      "type": "object"
+    },
     "ConditionStatus": {
       "enum": [
         "SATISFIED",
@@ -188,8 +374,11 @@
       "additionalProperties": false,
       "properties": {
         "contract_version": {
-          "const": "1.1",
-          "default": "1.1",
+          "default": "1.3",
+          "enum": [
+            "1.1",
+            "1.3"
+          ],
           "title": "Contract Version",
           "type": "string"
         },
@@ -232,6 +421,14 @@
             "type": "string"
           },
           "title": "Limiting Case Ids",
+          "type": "array"
+        },
+        "boundary_case_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Boundary Case Ids",
           "type": "array"
         },
         "conditional_branches": {
@@ -296,6 +493,41 @@
           "title": "Supporting Fact Ids",
           "type": "array"
         },
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/ConditionEvidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "mapping_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Mapping Reasons",
+          "type": "array"
+        },
+        "score_components": {
+          "items": {
+            "$ref": "#/$defs/ScoreComponent"
+          },
+          "title": "Score Components",
+          "type": "array"
+        },
         "last_updated_turn": {
           "default": 0,
           "minimum": 0,
@@ -313,8 +545,11 @@
       "additionalProperties": false,
       "properties": {
         "contract_version": {
-          "const": "1.1",
-          "default": "1.1",
+          "default": "1.3",
+          "enum": [
+            "1.1",
+            "1.3"
+          ],
           "title": "Contract Version",
           "type": "string"
         },
@@ -432,6 +667,14 @@
           },
           "title": "Limiting Case Ids",
           "type": "array"
+        },
+        "boundary_case_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Boundary Case Ids",
+          "type": "array"
         }
       },
       "required": [
@@ -449,8 +692,11 @@
       "additionalProperties": false,
       "properties": {
         "contract_version": {
-          "const": "1.1",
-          "default": "1.1",
+          "default": "1.3",
+          "enum": [
+            "1.1",
+            "1.3"
+          ],
           "title": "Contract Version",
           "type": "string"
         },
@@ -511,6 +757,49 @@
       "title": "RetrievalBundle",
       "type": "object"
     },
+    "RetrievalPath": {
+      "additionalProperties": false,
+      "description": "一个可解释的图检索路径；节点和边只保存稳定ID或类型。",
+      "properties": {
+        "node_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Node Ids",
+          "type": "array"
+        },
+        "edge_types": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Edge Types",
+          "type": "array"
+        },
+        "score": {
+          "title": "Score",
+          "type": "number"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Source Span Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node_ids",
+        "edge_types",
+        "score"
+      ],
+      "title": "RetrievalPath",
+      "type": "object"
+    },
     "ScoreComponent": {
       "additionalProperties": false,
       "properties": {
@@ -553,6 +842,36 @@
             "type": "string"
           },
           "title": "Reasons",
+          "type": "array"
+        },
+        "score_components": {
+          "items": {
+            "$ref": "#/$defs/ScoreComponent"
+          },
+          "title": "Score Components",
+          "type": "array"
+        },
+        "retrieval_channels": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Retrieval Channels",
+          "type": "array"
+        },
+        "source_span_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Source Span Ids",
+          "type": "array"
+        },
+        "graph_paths": {
+          "items": {
+            "$ref": "#/$defs/RetrievalPath"
+          },
+          "title": "Graph Paths",
           "type": "array"
         }
       },
@@ -635,8 +954,11 @@
   "additionalProperties": false,
   "properties": {
     "contract_version": {
-      "const": "1.1",
-      "default": "1.1",
+      "default": "1.3",
+      "enum": [
+        "1.1",
+        "1.3"
+      ],
       "title": "Contract Version",
       "type": "string"
     },
@@ -645,6 +967,17 @@
     },
     "retrieval_bundle": {
       "$ref": "#/$defs/RetrievalBundle"
+    },
+    "comparison_bundle": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ComparisonBundle"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "next_question": {
       "anyOf": [

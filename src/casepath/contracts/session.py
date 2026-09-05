@@ -26,7 +26,8 @@ class CreateSessionRequest(ContractModel):
 class AnswerInterpretation(ContractModel):
     """P4 返回事实和条件更新，不得替换整个会话或生成最终法律判断。"""
 
-    contract_version: Literal["1.2"] = "1.2"
+    # v1.2旧结果仍可读取；新结果默认携带v1.3条件映射证据。
+    contract_version: Literal["1.2", "1.3"] = "1.3"
     new_facts: list[UserFact] = Field(default_factory=list)
     condition_updates: list[QueryConditionState] = Field(default_factory=list)
 

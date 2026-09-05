@@ -14,6 +14,7 @@ from casepath.contracts import (
     WorkflowSnapshot,
 )
 from casepath.ports import (
+    CaseComparator,
     CaseRetriever,
     ConditionProjector,
     ExplanationPlanner,
@@ -29,8 +30,9 @@ class WorkflowInvariantError(RuntimeError):
 @dataclass(frozen=True)
 class WorkflowDependencies:
     rule_retriever: RuleRetriever
-    case_retriever: CaseRetriever
     condition_projector: ConditionProjector
+    case_retriever: CaseRetriever
+    case_comparator: CaseComparator
     question_policy: QuestionPolicy
     explanation_planner: ExplanationPlanner
 
@@ -51,17 +53,20 @@ class CasePathWorkflow:
         rule_refs = self.dependencies.rule_retriever.retrieve(state)
         trace.append("RETRIEVE_RULES")
 
-        bundle = self.dependencies.case_retriever.retrieve(state, rule_refs)
+        projected = self.dependencies.condition_projector.project(state, rule_refs)
+        trace.append("PROJECT_QUERY")
+
+        bundle = self.dependencies.case_retriever.retrieve(projected, rule_refs)
         trace.append("RETRIEVE_CASES")
 
-        projected = self.dependencies.condition_projector.project(state, bundle)
-        trace.append("PROJECT_QUERY")
+        comparison = self.dependencies.case_comparator.compare(projected, bundle)
+        trace.append("COMPARE_CASES")
 
         if len(projected.dialogue_history) >= self.max_question_turns:
             question = None
             trace.append("QUESTION_BUDGET_REACHED")
         else:
-            question = self.dependencies.question_policy.select(projected, bundle)
+            question = self.dependencies.question_policy.select(projected, bundle, comparison)
             # 策略负责过滤历史；这里仅守住“不能重复发问”的系统不变量。
             if question is not None and any(
                 turn.question_id == question.question_id
@@ -76,11 +81,12 @@ class CasePathWorkflow:
             projected = projected.model_copy(update={"status": SessionStatus.NEEDS_CLARIFICATION})
             trace.append("SCORE_QUESTIONS")
 
-        plan = self.dependencies.explanation_planner.build(projected, bundle)
+        plan = self.dependencies.explanation_planner.build(projected, bundle, comparison)
         trace.append("BUILD_EXPLANATION_PLAN")
         return WorkflowSnapshot(
             query_state=projected,
             retrieval_bundle=bundle,
+            comparison_bundle=comparison,
             next_question=question,
             explanation_plan=plan,
             trace=trace,

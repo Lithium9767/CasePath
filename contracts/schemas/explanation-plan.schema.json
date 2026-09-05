@@ -104,8 +104,11 @@
   "additionalProperties": false,
   "properties": {
     "contract_version": {
-      "const": "1.1",
-      "default": "1.1",
+      "default": "1.3",
+      "enum": [
+        "1.1",
+        "1.3"
+      ],
       "title": "Contract Version",
       "type": "string"
     },
@@ -148,6 +151,14 @@
         "type": "string"
       },
       "title": "Limiting Case Ids",
+      "type": "array"
+    },
+    "boundary_case_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Boundary Case Ids",
       "type": "array"
     },
     "conditional_branches": {

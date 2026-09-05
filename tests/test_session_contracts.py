@@ -9,14 +9,24 @@ from casepath.contracts import AnswerInterpretation, CreateSessionRequest
 from casepath.contracts.registry import CONTRACTS
 
 
-@pytest.mark.parametrize("name", ["create-session-request", "answer-interpretation"])
-def test_new_examples_and_versions(name):
-    model = CONTRACTS[name]
-    payload = json.loads(Path(f"contracts/examples/{name}.json").read_text(encoding="utf-8"))
+def test_create_session_request_remains_v1_2():
+    model = CONTRACTS["create-session-request"]
+    payload = json.loads(
+        Path("contracts/examples/create-session-request.json").read_text(encoding="utf-8")
+    )
     assert model.model_validate(payload).contract_version == "1.2"
     payload["contract_version"] = "1.1"
     with pytest.raises(ValueError):
         model.model_validate(payload)
+
+
+def test_answer_interpretation_defaults_to_v1_3_and_accepts_v1_2():
+    payload = json.loads(
+        Path("contracts/examples/answer-interpretation.json").read_text(encoding="utf-8")
+    )
+    assert AnswerInterpretation.model_validate(payload).contract_version == "1.3"
+    legacy = {"contract_version": "1.2", "new_facts": [], "condition_updates": []}
+    assert AnswerInterpretation.model_validate(legacy).contract_version == "1.2"
 
 
 @pytest.mark.parametrize("name", list(CONTRACTS))

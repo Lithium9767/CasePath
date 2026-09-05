@@ -1,5 +1,44 @@
 {
   "$defs": {
+    "ConditionEvidence": {
+      "additionalProperties": false,
+      "description": "一条用户事实对条件映射的作用，不表示最终法律结论。",
+      "properties": {
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "relation": {
+          "enum": [
+            "SUPPORTS",
+            "OPPOSES",
+            "QUALIFIES"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fact_id",
+        "relation",
+        "confidence",
+        "reason"
+      ],
+      "title": "ConditionEvidence",
+      "type": "object"
+    },
     "ConditionStatus": {
       "enum": [
         "SATISFIED",
@@ -31,6 +70,41 @@
           "title": "Supporting Fact Ids",
           "type": "array"
         },
+        "confidence": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confidence"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/ConditionEvidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "mapping_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Mapping Reasons",
+          "type": "array"
+        },
+        "score_components": {
+          "items": {
+            "$ref": "#/$defs/ScoreComponent"
+          },
+          "title": "Score Components",
+          "type": "array"
+        },
         "last_updated_turn": {
           "default": 0,
           "minimum": 0,
@@ -42,6 +116,31 @@
         "condition_id"
       ],
       "title": "QueryConditionState",
+      "type": "object"
+    },
+    "ScoreComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "explanation"
+      ],
+      "title": "ScoreComponent",
       "type": "object"
     },
     "UserFact": {
@@ -106,8 +205,11 @@
   "description": "P4 返回事实和条件更新，不得替换整个会话或生成最终法律判断。",
   "properties": {
     "contract_version": {
-      "const": "1.2",
-      "default": "1.2",
+      "default": "1.3",
+      "enum": [
+        "1.2",
+        "1.3"
+      ],
       "title": "Contract Version",
       "type": "string"
     },

@@ -5,6 +5,7 @@ P1 在此选择演示或正式实现，并接入 Neo4j、LLM 等基础设施；P
 """
 
 from casepath.adapters import (
+    DemoCaseComparator,
     DemoCaseRetriever,
     DemoConditionProjector,
     DemoExplanationPlanner,
@@ -15,17 +16,44 @@ from casepath.adapters.demo_answer_interpreter import DemoAnswerInterpreter
 from casepath.adapters.memory_session_repository import InMemorySessionRepository
 from casepath.application.session_service import SessionService
 from casepath.contracts import CapabilityMode, CapabilityStatus
+from casepath.ports import AnswerInterpreter
+from casepath.ports.session_repository import SessionRepository
 
 # 工作流演示
 from casepath.workflow import CasePathWorkflow, WorkflowDependencies
 
 
+def build_workflow(
+    dependencies: WorkflowDependencies,
+    *,
+    max_question_turns: int = 3,
+) -> CasePathWorkflow:
+    """P1正式装配入口；P4只需提供符合ports的算法对象。"""
+    return CasePathWorkflow(dependencies, max_question_turns=max_question_turns)
+
+
+def build_session_service(
+    *,
+    dependencies: WorkflowDependencies,
+    repository: SessionRepository,
+    answer_interpreter: AnswerInterpreter | None,
+    max_question_turns: int = 3,
+) -> SessionService:
+    """注入正式或测试组件，不在此创建Neo4j/LLM凭据或偷偷回退Demo。"""
+    return SessionService(
+        repository=repository,
+        workflow=build_workflow(dependencies, max_question_turns=max_question_turns),
+        answer_interpreter=answer_interpreter,
+    )
+
+
 def build_demo_workflow() -> CasePathWorkflow:
-    return CasePathWorkflow(
+    return build_workflow(
         WorkflowDependencies(
             rule_retriever=DemoRuleRetriever(),
-            case_retriever=DemoCaseRetriever(),
             condition_projector=DemoConditionProjector(),
+            case_retriever=DemoCaseRetriever(),
+            case_comparator=DemoCaseComparator(),
             question_policy=DemoQuestionPolicy(),
             explanation_planner=DemoExplanationPlanner(),
         )
@@ -34,9 +62,9 @@ def build_demo_workflow() -> CasePathWorkflow:
 
 def build_demo_session_service() -> SessionService:
     """每个应用实例只调用一次；正式 P4 接入时替换解释器和工作流依赖。"""
-    return SessionService(
+    return build_session_service(
+        dependencies=build_demo_workflow().dependencies,
         repository=InMemorySessionRepository(),
-        workflow=build_demo_workflow(),
         answer_interpreter=DemoAnswerInterpreter(),
     )
 
@@ -49,13 +77,19 @@ def build_demo_capabilities() -> list[CapabilityStatus]:
             reason="单进程内存存储，重启后会话丢失；不支持多个 worker。",
         )
     ]
-    for name in (
-        "rule_retriever", "case_retriever", "condition_projector",
-        "question_policy", "explanation_planner", "answer_interpreter",
-    ):
+    demo_reasons = {
+        "rule_retriever": "返回固定候选规则，未连接正式索引。",
+        "condition_projector": "仅使用关键词投影，未执行正式语义桥接。",
+        "case_retriever": "包含占位限制案例，未连接正式案例库。",
+        "case_comparator": "分化指标为固定演示值，未执行统计计算。",
+        "question_policy": "仅包含一个固定追问模板。",
+        "explanation_planner": "仅生成固定条件化解释模板。",
+        "answer_interpreter": "只保留回答原文，不执行真实条件语义映射。",
+    }
+    for name, reason in demo_reasons.items():
         capabilities.append(CapabilityStatus(
             capability=name, available=True, mode=CapabilityMode.DEMO, degraded=True,
-            reason="仅演示联调；回答解释器只保留原文，不执行真实语义映射。",
+            reason=reason,
         ))
     for name in ("legal_graph", "llm", "citation_verification"):
         capabilities.append(CapabilityStatus(

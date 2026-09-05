@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
-from .base import ContractModel, Identifier, ScoreComponent
+from .base import Confidence, ContractModel, Identifier, ScoreComponent
 from .enums import ConditionStatus, SessionStatus
 
 
@@ -23,10 +23,23 @@ class CandidateClaim(ContractModel): # 系统根据用户问题识别出的候�
     confidence: float = Field(ge=0, le=1) # 请求权识别置信度，不代表胜诉概率
 
 
+class ConditionEvidence(ContractModel):
+    """一条用户事实对条件映射的作用，不表示最终法律结论。"""
+
+    fact_id: Identifier # 引用QueryState.user_facts中的原文事实片段
+    relation: Literal["SUPPORTS", "OPPOSES", "QUALIFIES"] # 支持、反对或限定条件状态
+    confidence: Confidence # 该事实与条件之间映射的可靠程度，不是胜诉概率
+    reason: str = Field(min_length=1) # 面向调试和解释的简短映射依据
+
+
 class QueryConditionState(ContractModel): # 当前用户事实在一个RuleCondition上的投影状态
     condition_id: Identifier # 引用P2定义的RuleCondition.condition_id
     status: ConditionStatus = ConditionStatus.UNKNOWN # 未提供的信息默认UNKNOWN，不能默认不满足
     supporting_fact_ids: list[Identifier] = Field(default_factory=list) # 支持该状态的UserFact编号
+    confidence: Confidence | None = None # 当前条件级映射置信度；未知或未计算时为空
+    evidence: list[ConditionEvidence] = Field(default_factory=list) # 多事实支持、反对和限定关系
+    mapping_reasons: list[str] = Field(default_factory=list) # 条件状态及聚合方式的可读说明
+    score_components: list[ScoreComponent] = Field(default_factory=list) # embedding、reranker、LLM等分项
     last_updated_turn: int = Field(default=0, ge=0) # 该条件状态最后在哪一轮被更新
 
 
@@ -39,7 +52,8 @@ class DialogueTurn(ContractModel): # 围绕一个规则条件进行的一轮追�
 
 
 class QueryState(ContractModel): # 一个用户咨询会话当前可保存和回放的完整状态
-    contract_version: Literal["1.1"] = "1.1" # 用户查询状态合同版本号，只接受1.1
+    # 兼容读取冻结的v1.1数据；新建状态默认使用包含映射证据的v1.3。
+    contract_version: Literal["1.1", "1.3"] = "1.3"
     session_id: Identifier # 用户会话稳定唯一编号
     initial_query: str = Field(min_length=1) # 用户第一次提交的完整问题
     status: SessionStatus = SessionStatus.INITIAL # 当前处于初始、追问、解释、完成或降级阶段
@@ -71,11 +85,18 @@ class QueryState(ContractModel): # 一个用户咨询会话当前可保存和回
         # 条件状态引用的事实必须已经保存在user_facts中。
         known_fact_ids = set(fact_ids)
         for condition in self.condition_states:
-            missing_fact_ids = set(condition.supporting_fact_ids) - known_fact_ids
+            evidence_fact_ids = {item.fact_id for item in condition.evidence}
+            missing_fact_ids = (
+                set(condition.supporting_fact_ids) | evidence_fact_ids
+            ) - known_fact_ids
             if missing_fact_ids:
                 raise ValueError(
                     f"condition {condition.condition_id} references unknown user facts: "
                     f"{sorted(missing_fact_ids)}"
+                )
+            if len(evidence_fact_ids) != len(condition.evidence):
+                raise ValueError(
+                    f"condition {condition.condition_id} contains duplicate fact evidence"
                 )
 
         # 历史追问必须引用当前条件矩阵中存在的条件。
@@ -105,3 +126,4 @@ class QuestionCandidate(ContractModel): # P4准备向用户提出的一条高价
     score_components: list[ScoreComponent] = Field(default_factory=list) # 追问价值的可解释分项
     supporting_case_ids: list[Identifier] = Field(default_factory=list) # 支持路径中的代表案例
     limiting_case_ids: list[Identifier] = Field(default_factory=list) # 限制路径中的代表案例
+    boundary_case_ids: list[Identifier] = Field(default_factory=list) # 规则适用边界的代表案例

@@ -1,5 +1,37 @@
 # CasePath公共合同变更记录
 
+## v1.3 P4工作流与可解释性合同（2026-09-05）
+
+### 版本边界
+
+- `QueryState`、`RetrievalBundle`、`ExplanationPlan` 和 `WorkflowSnapshot` 的新建对象
+  默认版本升级为 `"1.3"`，同时继续接受冻结的 `"1.1"` 历史数据。
+- `AnswerInterpretation`默认升级为`"1.3"`并继续接受`"1.2"`，用于承载新增的
+  条件映射证据字段；`CreateSessionRequest`仍为`"1.2"`。
+- v1.1 JSON 示例仍用于回归兼容；P5消费新增字段前必须支持 v1.3 Schema。
+- 新增 `ComparisonBundle`，版本为 `"1.3"`；API主路径仍为 `/v1/`。
+
+### P4调用链
+
+- 单轮顺序改为规则召回、用户条件投影、规则约束案例检索、案例分化、追问和解释。
+- 新增 `CaseComparator`，其 `ComparisonBundle` 同时交给 `QuestionPolicy` 和
+  `ExplanationPlanner`，避免两处重复计算并产生不一致的分化指标。
+- `WorkflowSnapshot.comparison_bundle` 对v1.3必填；v1.1历史快照允许为空。
+
+### 可解释性与证据
+
+- `QueryConditionState` 增加映射置信度、多事实证据关系、映射理由和评分分项。
+- `ScoredReference` 增加召回通道、评分分项、原文片段ID及可验证图路径。
+- `QuestionCandidate` 和 `ExplanationPlan` 增加边界案例ID。
+- 工作流快照验证条件、案例角色、规则和解释之间的跨对象引用。
+
+### 基础设施边界
+
+- 新增 `LegalGraphGateway` 和 `StructuredLanguageModel` 端口。P1管理连接、凭据、
+  超时和重试，P4管理Cypher路径模板、Prompt与算法计算。
+- 新增正式 `build_workflow()` 和 `build_session_service()` 装配入口，不自动回退Demo。
+- 增加图、检索器和语言模型不可用异常到稳定HTTP错误的映射。
+
 ## v1.2 增量会话合同（2026-09-05）
 
 ### 版本边界

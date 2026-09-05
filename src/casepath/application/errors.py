@@ -19,3 +19,15 @@ class AnswerInterpreterUnavailable(Exception):
 
 class InvalidComponentOutput(Exception):
     """组件输出违反公共合同或证据引用约束。"""
+
+
+class RetrieverUnavailable(Exception):
+    """P4规则、案例或比较检索能力暂时不可用。"""
+
+
+class GraphUnavailable(Exception):
+    """Neo4j或其他法律图存储连接、超时或只读查询失败。"""
+
+
+class LanguageModelUnavailable(Exception):
+    """结构化LLM调用超时、失败或没有配置。"""

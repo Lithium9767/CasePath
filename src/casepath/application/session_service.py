@@ -24,8 +24,11 @@ from casepath.workflow import CasePathWorkflow, WorkflowInvariantError
 
 from .errors import (
     AnswerInterpreterUnavailable,
+    GraphUnavailable,
     InvalidAnswer,
     InvalidComponentOutput,
+    LanguageModelUnavailable,
+    RetrieverUnavailable,
     SessionConflict,
     SessionNotFound,
 )
@@ -99,7 +102,12 @@ class SessionService:
                 pending.model_copy(deep=True),
                 request.model_copy(deep=True),
             )
-        except AnswerInterpreterUnavailable:
+        except (
+            AnswerInterpreterUnavailable,
+            GraphUnavailable,
+            LanguageModelUnavailable,
+            RetrieverUnavailable,
+        ):
             raise
         except Exception as exc:
             # 不把模型错误、内部 URL 或用户原文暴露给 HTTP 客户端。
@@ -149,7 +157,11 @@ class SessionService:
                     raise ValueError("回答解析不能引入未登记的条件 ID")
                 if update.last_updated_turn != turn_id:
                     raise ValueError("条件更新轮次与回答轮次不一致")
-                if update.status != ConditionStatus.UNKNOWN and not update.supporting_fact_ids:
+                referenced_fact_ids = {
+                    *update.supporting_fact_ids,
+                    *(item.fact_id for item in update.evidence),
+                }
+                if update.status != ConditionStatus.UNKNOWN and not referenced_fact_ids:
                     raise ValueError("非 UNKNOWN 的条件更新必须引用用户事实")
 
             conditions = {item.condition_id: item for item in state.condition_states}
@@ -193,6 +205,29 @@ class SessionService:
             facts = {item.fact_id: item for item in actual.user_facts}
             if any(facts.get(item.fact_id) != item for item in state.user_facts):
                 raise ValueError("工作流丢失或改写了既有用户证据")
+            answers_by_turn = {
+                turn.turn_id: turn.answer
+                for turn in actual.dialogue_history
+                if turn.answer is not None
+            }
+            existing_fact_ids = {item.fact_id for item in state.user_facts}
+            for fact in actual.user_facts:
+                if fact.fact_id in existing_fact_ids:
+                    continue
+                source_text = (
+                    actual.initial_query
+                    if fact.source_turn == 0
+                    else answers_by_turn.get(fact.source_turn)
+                )
+                if source_text is None or fact.text not in source_text:
+                    raise ValueError("工作流新增事实必须逐字来自初始问题或对应回答")
+            for condition in actual.condition_states:
+                referenced_fact_ids = {
+                    *condition.supporting_fact_ids,
+                    *(item.fact_id for item in condition.evidence),
+                }
+                if condition.status != ConditionStatus.UNKNOWN and not referenced_fact_ids:
+                    raise ValueError("非 UNKNOWN 条件状态必须引用用户事实")
             return snapshot
         except (
             ValidationError,

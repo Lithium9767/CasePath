@@ -20,6 +20,31 @@ def test_demo_workflow_asks_high_value_question():
     assert snapshot.next_question is not None
     assert snapshot.next_question.condition_id == "cond.performance_impossible"
     assert snapshot.retrieval_bundle.support_case_refs
+    assert snapshot.comparison_bundle is not None
+    assert snapshot.trace.index("PROJECT_QUERY") < snapshot.trace.index("RETRIEVE_CASES")
+    assert snapshot.trace.index("RETRIEVE_CASES") < snapshot.trace.index("COMPARE_CASES")
+
+
+def test_case_retriever_receives_projected_condition_state():
+    """P4案例检索必须看到同一轮已经完成的用户条件投影。"""
+    base = build_demo_workflow()
+    delegate = base.dependencies.case_retriever
+
+    class ObservingCaseRetriever:
+        def __init__(self):
+            self.saw_projected_state = False
+
+        def retrieve(self, state, rule_refs):
+            self.saw_projected_state = any(
+                item.condition_id == "cond.contract_exists"
+                for item in state.condition_states
+            )
+            return delegate.retrieve(state, rule_refs)
+
+    observer = ObservingCaseRetriever()
+    workflow = CasePathWorkflow(replace(base.dependencies, case_retriever=observer))
+    workflow.run(QueryState(session_id="ordered", initial_query="我在健身房办卡"))
+    assert observer.saw_projected_state
 
 
 def test_zero_question_budget_stops_without_resolving_unknown():
@@ -76,7 +101,7 @@ def test_workflow_rejects_a_policy_that_selects_answered_condition():
     )
 
     class RepeatingPolicy:
-        def select(self, state, bundle):
+        def select(self, state, bundle, comparison):
             return QuestionCandidate(
                 question_id=question.question_id,
                 condition_id=question.condition_id,

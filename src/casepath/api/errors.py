@@ -9,8 +9,11 @@ from starlette.exceptions import HTTPException
 
 from casepath.application.errors import (
     AnswerInterpreterUnavailable,
+    GraphUnavailable,
     InvalidAnswer,
     InvalidComponentOutput,
+    LanguageModelUnavailable,
+    RetrieverUnavailable,
     SessionConflict,
     SessionNotFound,
 )
@@ -51,6 +54,30 @@ def register_error_handlers(app: FastAPI) -> None:
                 "answer_interpreter_unavailable",
                 retryable=True,
             )
+        if isinstance(exc, GraphUnavailable):
+            return error_response(
+                503,
+                ErrorCode.GRAPH_UNAVAILABLE,
+                "法律图检索能力暂不可用",
+                "legal_graph_unavailable",
+                retryable=True,
+            )
+        if isinstance(exc, RetrieverUnavailable):
+            return error_response(
+                503,
+                ErrorCode.RETRIEVER_UNAVAILABLE,
+                "法律检索能力暂不可用",
+                "retriever_unavailable",
+                retryable=True,
+            )
+        if isinstance(exc, LanguageModelUnavailable):
+            return error_response(
+                503,
+                ErrorCode.INTERNAL_ERROR,
+                "结构化语言模型能力暂不可用",
+                "language_model_unavailable",
+                retryable=True,
+            )
         return error_response(
             500,
             ErrorCode.INTERNAL_ERROR,
@@ -64,6 +91,9 @@ def register_error_handlers(app: FastAPI) -> None:
         InvalidAnswer,
         AnswerInterpreterUnavailable,
         InvalidComponentOutput,
+        RetrieverUnavailable,
+        GraphUnavailable,
+        LanguageModelUnavailable,
     ):
         app.add_exception_handler(error_type, application_error)
 

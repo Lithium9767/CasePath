@@ -1,14 +1,15 @@
 # CasePath
 
 CasePath 是“规范规则层 + 案例适用层”的交互式民事法律信息检索与条件化解释框架。
-当前保留十一种 v1.1 公共合同，增加两种 v1.2 会话合同及可运行的多轮会话服务。
+当前兼容十一种 v1.1 公共合同，增加 v1.2 会话合同、v1.3 P4工作流合同及多轮会话服务。
 默认仍使用演示检索和保守回答记录器，不提供自动法律判断，引用尚未核验。
 
 ## 当前完成
 
 - 十一个v1.1公共合同：法源、法条、规则、案例、用户状态、检索、解释、回答、错误、能力状态和工作流快照；
 - `RuleCondition + ConditionGroup`规则逻辑结构，以及规则、案例、查询和解释的跨ID一致性校验；
-- 检索、条件投影、追问策略、解释规划的可替换端口；
+- 检索、条件投影、案例分化、追问策略、解释规划的可替换端口；
+- 规则召回→条件投影→案例检索→案例分化→追问→解释的确定性主工作流；
 - 不依赖 Neo4j、向量库或外部 LLM 的内存演示链路；
 - JSON Schema 导出脚本和契约测试；
 - FastAPI 可选入口。
@@ -88,6 +89,20 @@ Demo 会把“不清楚”的完整原文保存在 `DialogueTurn.answer`、重�
 
 ## P4 接入约定
 
+单轮P4端口顺序固定为：
+
+```text
+RuleRetriever
+→ ConditionProjector
+→ CaseRetriever
+→ CaseComparator
+→ QuestionPolicy
+→ ExplanationPlanner
+```
+
+`CaseComparator`只计算一次条件熵、结果互信息、预期信息增益、排序变化、分支缩减和
+案例分歧等指标，并通过`ComparisonBundle`同时交给追问与解释模块。
+
 实现 `AnswerInterpreter.interpret(state, pending_question, answer_request)`，
 返回 `AnswerInterpretation`，再注入 `SessionService`。P1 不解析法律关键词。
 
@@ -96,10 +111,19 @@ Demo 会把“不清楚”的完整原文保存在 `DialogueTurn.answer`、重�
 - 更新只能引用当前条件矩阵中已登记的 ID；新增候选条件应先由投影流程登记。
 - 非 UNKNOWN 更新必须引用事实；合并后统一验证所有事实引用和来源轮次。
 - 更新按 condition_id 替换整个条件记录。P4 负责历史证据聚合和冲突判断，P1 不擅自合并法律语义。
+- 条件映射可使用`confidence`、`evidence`、`mapping_reasons`和`score_components`保留
+  多事实支持、反对或限定关系；置信度不是胜诉概率。
+- 原子`RuleCondition`不使用`PARTIAL`：事实只能满足、不满足、未知、冲突或不适用；
+  “部分成立”应在`ConditionGroup`或条件化解释分支中表达，用户争议对应`CONFLICTING`。
+- 检索对象使用`score_components`、`retrieval_channels`、`source_span_ids`和
+  `graph_paths`解释总分来源，支持、限制和边界角色仍由三个候选列表明确区分。
 - 服务将完整回答保存在 `DialogueTurn.answer`，并保存含选项的回答回执；
   `UserFact` 只保存 P4 识别出的事实片段，避免把同一原文保存成两条事实。
 - 真实组件可通过 `create_app(service=..., capabilities=...)` 注入。
   `answer_interpreter=None` 时回答接口返回 503，不静默切换 Demo。
+- 正式装配使用`build_workflow()`和`build_session_service()`；P1通过
+  `LegalGraphGateway`与`StructuredLanguageModel`管理连接和结构化调用边界，
+  P4负责Cypher路径、Prompt、排序及条件判断算法。
 
 ## 一致性与运行限制
 
@@ -111,15 +135,17 @@ Demo 会把“不清楚”的完整原文保存在 `DialogueTurn.answer`、重�
   也不提供文档原文的字符偏移核验。
 - 当前最多追问 3 轮；P4 策略负责过滤已问条件。若策略仍选中已回答问题，
   Workflow 将其作为组件输出错误拒绝，不会把策略错误伪装成正常停止。
-- 仍保留旧的“案例检索后条件投影”端口顺序。回答状态先在服务层更新，
-  因而后续案例检索能看到新条件；P4-v1 初始查询的投影前置属于后续端口改造。
+- 条件投影在案例检索前执行；案例检索器必须使用同一轮投影后的状态。
 - 仅单进程、单 worker 联调；重启或热重载会清空会话。未提供磁盘持久化、
   会话过期清理、登录鉴权和用户隔离，请勿直接部署到公网或存放真实敏感案件材料。
 - `/health` 只表示进程可响应；`/v1/capabilities` 才说明 Demo、内存和未接入能力。
   未配置引用核验器，不能把引用 ID 或日志当作已核验的证据。
+- 检索和分化是否降级分别记录在`RetrievalBundle.degraded`与
+  `ComparisonBundle.degraded`；它们与“是否继续追问”的会话状态是两个维度。
 - 会话状态只有 `SessionService` 可以修改。`Workflow` 只对传入状态执行一轮分析；
   旧的 `Workflow.apply_answer()` 已删除。新前端不得使用已弃用的无状态 Demo HTTP 接口。
-- 十一种既有模型保持 v1.1；只有新增模型采用 v1.2。详细兼容说明见 `contracts/CHANGELOG.md`。
+- v1.1历史JSON仍可读取；新建查询、检索、解释和快照默认输出v1.3。
+  P5接收新增字段前应按`contracts/CHANGELOG.md`更新Schema。
 
 ## 验证
 

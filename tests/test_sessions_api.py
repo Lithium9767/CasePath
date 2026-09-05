@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from casepath.api.main import create_app
+from casepath.application.errors import GraphUnavailable, LanguageModelUnavailable
 from casepath.bootstrap import build_demo_session_service
 from casepath.contracts import ErrorResponse, WorkflowSnapshot
 
@@ -130,9 +131,11 @@ def test_capabilities_schema_and_legacy_demo(client):
     assert capabilities["session_repository"]["mode"] == "MEMORY"
     assert not capabilities["session_repository"]["degraded"]
     assert capabilities["answer_interpreter"]["mode"] == "DEMO"
+    assert capabilities["case_comparator"]["mode"] == "DEMO"
     assert not capabilities["citation_verification"]["available"]
     assert client.get("/v1/contracts/create-session-request/schema").status_code == 200
     assert client.get("/v1/contracts/answer-interpretation/schema").status_code == 200
+    assert client.get("/v1/contracts/comparison-bundle/schema").status_code == 200
     assert_error(client.get("/v1/contracts/missing/schema"), 404)
     assert_error(client.delete("/v1/sessions/missing"), 405)
     result = client.post("/v1/demo/analyze", json={"session_id": "legacy", "query": "健身房"})
@@ -141,3 +144,22 @@ def test_capabilities_schema_and_legacy_demo(client):
     openapi = client.get("/openapi.json")
     assert openapi.status_code == 200
     assert openapi.json()["paths"]["/v1/demo/analyze"]["post"]["deprecated"] is True
+
+
+@pytest.mark.parametrize(
+    ("error", "code", "reason"),
+    [
+        (GraphUnavailable(), "CASEPATH_GRAPH_UNAVAILABLE", "legal_graph_unavailable"),
+        (LanguageModelUnavailable(), "CASEPATH_INTERNAL_ERROR", "language_model_unavailable"),
+    ],
+)
+def test_infrastructure_failures_use_stable_503_errors(client, error, code, reason):
+    class BrokenWorkflow:
+        def run(self, state):
+            raise error
+
+    client.app.state.session_service.workflow = BrokenWorkflow()
+    response = client.post("/v1/sessions", json={"query": "问题"})
+    payload = assert_error(response, 503)
+    assert payload.code == code
+    assert payload.details["reason"] == reason

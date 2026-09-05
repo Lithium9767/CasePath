@@ -6,6 +6,7 @@ from casepath.bootstrap import build_demo_session_service
 from casepath.contracts import (
     AnswerInterpretation,
     AnswerRequest,
+    ConditionEvidence,
     ConditionStatus,
     CreateSessionRequest,
     QueryConditionState,
@@ -33,6 +34,16 @@ class FixedAnswerInterpreter:
                     condition_id=pending_question.condition_id,
                     status=self.status,
                     supporting_fact_ids=[fact.fact_id],
+                    confidence=0.99,
+                    evidence=[
+                        ConditionEvidence(
+                            fact_id=fact.fact_id,
+                            relation="SUPPORTS",
+                            confidence=0.99,
+                            reason="固定测试映射",
+                        )
+                    ],
+                    mapping_reasons=["固定测试解释器输出"],
                     last_updated_turn=turn_id,
                 )
             ],

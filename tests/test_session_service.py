@@ -51,12 +51,16 @@ def test_answer_updates_facts_conditions_and_retrieves_again(service, initial, a
     )
     assert condition.status == ConditionStatus.SATISFIED
     facts = {item.fact_id: item for item in state.user_facts}
-    # 完整回答只在 DialogueTurn 中保存一次；这里只有解释器提取的一条事实。
-    assert len(facts) == 1
+    # Demo初始投影可保留初始问题片段；本轮回答仍只产生一条source_turn=1事实。
+    assert sum(item.source_turn == 1 for item in facts.values()) == 1
     assert all(facts[key].text == answer.answer for key in condition.supporting_fact_ids)
+    assert condition.evidence[0].fact_id in facts
+    assert condition.confidence == 0.99
     assert state.dialogue_history[0].question == initial.next_question.question
     assert state.dialogue_history[0].answer == answer.answer
-    assert all(item.source_turn == 1 for item in state.user_facts)
+    assert all(
+        item.text == answer.answer for item in state.user_facts if item.source_turn == 1
+    )
     assert seen[0].dialogue_history == state.dialogue_history
     assert seen[0].condition_states == state.condition_states
     assert snapshot.next_question is None
@@ -171,7 +175,8 @@ def test_demo_unknown_answer_stays_unknown_and_is_not_reasked():
     assert snapshot.next_question is None
     assert question.condition_id in snapshot.explanation_plan.unresolved_condition_ids
     assert snapshot.query_state.dialogue_history[0].answer == "不记得了"
-    assert not snapshot.query_state.user_facts
+    # 保留初始问题中的可定位片段，但保守Demo解释器不从“不记得”中制造新事实。
+    assert all(item.source_turn == 0 for item in snapshot.query_state.user_facts)
     assert "VERIFY_CITATIONS" not in snapshot.trace
     assert "CITATION_VERIFICATION_NOT_CONFIGURED" not in snapshot.trace
     assert not any(item.verified for item in snapshot.explanation_plan.citations)
@@ -212,7 +217,7 @@ def test_three_turns_budget_and_old_replay_never_roll_back_latest(service):
     from casepath.contracts import QuestionCandidate
 
     class SequentialPolicy:
-        def select(self, state, bundle):
+        def select(self, state, bundle, comparison):
             asked = {turn.condition_id for turn in state.dialogue_history}
             condition = next(
                 item for item in state.condition_states if item.condition_id not in asked
