@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.0",
+  "contract_version": "1.1",
   "session_id": "demo-session-001",
   "main_explanation": "仍需确认经营者是否已经无法继续履行。",
   "candidate_claims": ["服务合同解除与返还"],
@@ -19,4 +19,3 @@
   ],
   "disclaimer": "该解释基于当前提供的信息，不替代律师针对完整材料出具的法律意见。"
 }
-

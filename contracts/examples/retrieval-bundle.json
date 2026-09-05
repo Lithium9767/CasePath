@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.0",
+  "contract_version": "1.1",
   "rule_refs": [
     {
       "object_id": "rule.service_contract.termination_refund.v1",
@@ -20,4 +20,3 @@
   "degraded": true,
   "degradation_reason": "第一天样例尚未接入真实限制性案例。"
 }
-

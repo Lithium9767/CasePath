@@ -2,18 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from pydantic import Field
-
 from casepath.contracts import (
     ConditionStatus,
-    ContractModel,
     DialogueTurn,
-    ExplanationPlan,
     QueryConditionState,
     QueryState,
-    QuestionCandidate,
-    RetrievalBundle,
     SessionStatus,
+    WorkflowSnapshot,
 )
 from casepath.ports import (
     CaseRetriever,
@@ -22,14 +17,6 @@ from casepath.ports import (
     QuestionPolicy,
     RuleRetriever,
 )
-
-
-class WorkflowSnapshot(ContractModel):
-    query_state: QueryState
-    retrieval_bundle: RetrievalBundle
-    next_question: QuestionCandidate | None = None
-    explanation_plan: ExplanationPlan
-    trace: list[str] = Field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -80,6 +67,8 @@ class CasePathWorkflow:
         self,
         state: QueryState,
         *,
+        question_id: str,
+        question: str,
         condition_id: str,
         answer: str,
         status: ConditionStatus,
@@ -91,8 +80,9 @@ class CasePathWorkflow:
             *state.dialogue_history,
             DialogueTurn(
                 turn_id=turn_id,
+                question_id=question_id,
                 condition_id=condition_id,
-                question=f"针对条件 {condition_id} 的追问",
+                question=question,
                 answer=answer,
             ),
         ]
@@ -102,8 +92,9 @@ class CasePathWorkflow:
             status=status,
             last_updated_turn=turn_id,
         )
-        updated = state.model_copy(
-            update={
+        updated = QueryState.model_validate(
+            {
+                **state.model_dump(),
                 "condition_states": list(existing.values()),
                 "dialogue_history": new_history,
             }

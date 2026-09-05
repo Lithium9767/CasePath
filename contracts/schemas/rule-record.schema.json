@@ -1,15 +1,47 @@
 {
   "$defs": {
-    "ConditionOperator": {
+    "ConditionGroup": {
+      "additionalProperties": false,
+      "description": "A non-empty AND/OR group over atomic rule conditions.",
+      "properties": {
+        "group_id": {
+          "minLength": 1,
+          "title": "Group Id",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "operator": {
+          "$ref": "#/$defs/ConditionGroupOperator"
+        },
+        "member_condition_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Member Condition Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "group_id",
+        "label",
+        "operator",
+        "member_condition_ids"
+      ],
+      "title": "ConditionGroup",
+      "type": "object"
+    },
+    "ConditionGroupOperator": {
       "enum": [
         "ALL",
-        "ANY",
-        "UNLESS",
-        "THRESHOLD",
-        "TEMPORAL",
-        "REFERENCE"
+        "ANY"
       ],
-      "title": "ConditionOperator",
+      "title": "ConditionGroupOperator",
       "type": "string"
     },
     "LegalConsequence": {
@@ -132,15 +164,6 @@
           "title": "Predicate",
           "type": "string"
         },
-        "operator": {
-          "$ref": "#/$defs/ConditionOperator",
-          "default": "ALL"
-        },
-        "required": {
-          "default": true,
-          "title": "Required",
-          "type": "boolean"
-        },
         "user_answerable": {
           "default": true,
           "title": "User Answerable",
@@ -262,18 +285,6 @@
           "minLength": 1,
           "title": "Quote",
           "type": "string"
-        },
-        "content_hash": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Content Hash"
         }
       },
       "required": [
@@ -290,7 +301,8 @@
   "additionalProperties": false,
   "properties": {
     "contract_version": {
-      "default": "1.0",
+      "const": "1.1",
+      "default": "1.1",
       "title": "Contract Version",
       "type": "string"
     },
@@ -325,6 +337,13 @@
         "$ref": "#/$defs/RuleCondition"
       },
       "title": "Conditions",
+      "type": "array"
+    },
+    "condition_groups": {
+      "items": {
+        "$ref": "#/$defs/ConditionGroup"
+      },
+      "title": "Condition Groups",
       "type": "array"
     },
     "exceptions": {

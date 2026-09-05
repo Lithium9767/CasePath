@@ -25,8 +25,11 @@ def test_answer_updates_condition_and_stops_reasking_it():
             initial_query="我在健身房充了5000元，店关门了，还有余额。",
         )
     )
+    assert initial.next_question is not None
     updated = workflow.apply_answer(
         initial.query_state,
+        question_id=initial.next_question.question_id,
+        question=initial.next_question.question,
         condition_id="cond.performance_impossible",
         answer="所有门店都永久关闭了",
         status=ConditionStatus.SATISFIED,

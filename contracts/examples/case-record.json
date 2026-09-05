@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.0",
+  "contract_version": "1.1",
   "case_id": "case.zeng-v-wuhan-fitness.2021",
   "title": "曾某诉武汉某健身管理有限公司服务合同纠纷案",
   "case_no": "（2021）鄂0104民初109号",
@@ -63,9 +63,7 @@
       "paragraph_id": "reasoning-1",
       "start_offset": 0,
       "end_offset": 1,
-      "quote": "演示摘要：正式导入时必须替换为原文跨度。",
-      "content_hash": null
+      "quote": "演示摘要：正式导入时必须替换为原文跨度。"
     }
   ]
 }
-

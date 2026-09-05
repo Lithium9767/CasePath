@@ -47,6 +47,11 @@
           "title": "Turn Id",
           "type": "integer"
         },
+        "question_id": {
+          "minLength": 1,
+          "title": "Question Id",
+          "type": "string"
+        },
         "condition_id": {
           "minLength": 1,
           "title": "Condition Id",
@@ -72,6 +77,7 @@
       },
       "required": [
         "turn_id",
+        "question_id",
         "condition_id",
         "question"
       ],
@@ -183,7 +189,8 @@
   "additionalProperties": false,
   "properties": {
     "contract_version": {
-      "default": "1.0",
+      "const": "1.1",
+      "default": "1.1",
       "title": "Contract Version",
       "type": "string"
     },

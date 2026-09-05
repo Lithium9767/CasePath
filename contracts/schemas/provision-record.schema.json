@@ -1,14 +1,67 @@
 {
   "$defs": {
-    "MaturityLevel": {
-      "enum": [
-        "L0",
-        "L1",
-        "L2",
-        "L3"
+    "SourceSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "span_id": {
+          "minLength": 1,
+          "title": "Span Id",
+          "type": "string"
+        },
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "paragraph_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Paragraph Id"
+        },
+        "start_offset": {
+          "minimum": 0,
+          "title": "Start Offset",
+          "type": "integer"
+        },
+        "end_offset": {
+          "minimum": 0,
+          "title": "End Offset",
+          "type": "integer"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "span_id",
+        "source_id",
+        "start_offset",
+        "end_offset",
+        "quote"
       ],
-      "title": "MaturityLevel",
-      "type": "string"
+      "title": "SourceSpan",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -30,7 +83,7 @@
       "type": "string"
     },
     "article_no": {
-      "pattern": "^[1-9][0-9]*$",
+      "minLength": 1,
       "title": "Article No",
       "type": "string"
     },
@@ -44,64 +97,7 @@
       "title": "Text",
       "type": "string"
     },
-    "book": {
-      "anyOf": [
-        {
-          "minLength": 1,
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Book"
-    },
-    "sub_book": {
-      "anyOf": [
-        {
-          "minLength": 1,
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Sub Book"
-    },
-    "chapter": {
-      "anyOf": [
-        {
-          "minLength": 1,
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Chapter"
-    },
-    "section": {
-      "anyOf": [
-        {
-          "minLength": 1,
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Section"
-    },
-    "valid_from": {
-      "format": "date",
-      "title": "Valid From",
-      "type": "string"
-    },
-    "valid_to": {
+    "effective_from": {
       "anyOf": [
         {
           "format": "date",
@@ -112,39 +108,28 @@
         }
       ],
       "default": null,
-      "title": "Valid To"
+      "title": "Effective From"
     },
-    "effective_status": {
-      "enum": [
-        "effective",
-        "repealed",
-        "not_yet_effective"
+    "effective_to": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ],
-      "title": "Effective Status",
-      "type": "string"
+      "default": null,
+      "title": "Effective To"
     },
-    "jurisdiction": {
-      "minLength": 1,
-      "title": "Jurisdiction",
-      "type": "string"
-    },
-    "maturity": {
-      "$ref": "#/$defs/MaturityLevel",
-      "default": "L0"
-    },
-    "source_span_ids": {
+    "source_spans": {
       "items": {
-        "minLength": 1,
-        "type": "string"
+        "$ref": "#/$defs/SourceSpan"
       },
       "minItems": 1,
-      "title": "Source Span Ids",
+      "title": "Source Spans",
       "type": "array"
-    },
-    "content_hash": {
-      "pattern": "^[0-9a-f]{64}$",
-      "title": "Content Hash",
-      "type": "string"
     }
   },
   "required": [
@@ -153,11 +138,7 @@
     "article_no",
     "title",
     "text",
-    "valid_from",
-    "effective_status",
-    "jurisdiction",
-    "source_span_ids",
-    "content_hash"
+    "source_spans"
   ],
   "title": "ProvisionRecord",
   "type": "object"

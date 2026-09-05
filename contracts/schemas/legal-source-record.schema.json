@@ -17,27 +17,36 @@
       "title": "Title",
       "type": "string"
     },
+    "source_type": {
+      "minLength": 1,
+      "title": "Source Type",
+      "type": "string"
+    },
     "authority": {
-      "minLength": 1,
-      "title": "Authority",
-      "type": "string"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Authority"
     },
-    "document_type": {
-      "minLength": 1,
-      "title": "Document Type",
-      "type": "string"
+    "jurisdiction": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Jurisdiction"
     },
-    "promulgated_on": {
-      "format": "date",
-      "title": "Promulgated On",
-      "type": "string"
-    },
-    "valid_from": {
-      "format": "date",
-      "title": "Valid From",
-      "type": "string"
-    },
-    "valid_to": {
+    "effective_from": {
       "anyOf": [
         {
           "format": "date",
@@ -48,45 +57,38 @@
         }
       ],
       "default": null,
-      "title": "Valid To"
+      "title": "Effective From"
     },
-    "effective_status": {
-      "enum": [
-        "effective",
-        "repealed",
-        "not_yet_effective"
+    "effective_to": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ],
-      "title": "Effective Status",
-      "type": "string"
+      "default": null,
+      "title": "Effective To"
     },
-    "jurisdiction": {
-      "minLength": 1,
-      "title": "Jurisdiction",
-      "type": "string"
-    },
-    "official_source_url": {
-      "format": "uri",
-      "minLength": 1,
-      "title": "Official Source Url",
-      "type": "string"
-    },
-    "content_hash": {
-      "pattern": "^[0-9a-f]{64}$",
-      "title": "Content Hash",
-      "type": "string"
+    "official_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Official Url"
     }
   },
   "required": [
     "source_id",
     "title",
-    "authority",
-    "document_type",
-    "promulgated_on",
-    "valid_from",
-    "effective_status",
-    "jurisdiction",
-    "official_source_url",
-    "content_hash"
+    "source_type"
   ],
   "title": "LegalSourceRecord",
   "type": "object"

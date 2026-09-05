@@ -1,3 +1,4 @@
+from .api import AnswerRequest, CapabilityStatus, ErrorResponse
 from .base import ContractModel, ScoreComponent, SourceSpan
 from .case import (
     CaseRecord,
@@ -8,10 +9,12 @@ from .case import (
     ReasoningStep,
 )
 from .enums import (
+    CapabilityMode,
     CaseRole,
-    ConditionOperator,
+    ConditionGroupOperator,
     ConditionStatus,
     DecisionStatus,
+    ErrorCode,
     MaturityLevel,
     SessionStatus,
 )
@@ -25,23 +28,37 @@ from .query import (
     UserFact,
 )
 from .retrieval import RetrievalBundle, ScoredReference
-from .rule import LegalConsequence, ProvisionRef, RuleCondition, RuleException, RuleRecord
+from .rule import (
+    ConditionGroup,
+    LegalConsequence,
+    ProvisionRef,
+    RuleCondition,
+    RuleException,
+    RuleRecord,
+)
 from .source import LegalSourceRecord, ProvisionRecord
+from .workflow import WorkflowSnapshot
 
 __all__ = [
+    "AnswerRequest",
     "CandidateClaim",
+    "CapabilityMode",
+    "CapabilityStatus",
     "CaseRecord",
     "CaseRole",
     "CitationRecord",
     "ClaimRecord",
     "ConditionFinding",
-    "ConditionOperator",
+    "ConditionGroup",
+    "ConditionGroupOperator",
     "ConditionStatus",
     "ContractModel",
     "CourtFinding",
     "DecisionItem",
     "DecisionStatus",
     "DialogueTurn",
+    "ErrorCode",
+    "ErrorResponse",
     "EvidenceAction",
     "ExplanationBranch",
     "ExplanationPlan",
@@ -63,4 +80,5 @@ __all__ = [
     "SessionStatus",
     "SourceSpan",
     "UserFact",
+    "WorkflowSnapshot",
 ]
