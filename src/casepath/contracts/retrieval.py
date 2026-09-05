@@ -26,8 +26,8 @@ class RetrievalPath(ContractModel):
 class ScoredReference(ContractModel): # 对一个规则、案例或其他对象的带分数引用
     object_id: Identifier # 被检索对象的稳定ID，不在结果中重复保存完整对象
     score: float # 检索或重排得分；是否归一化由具体检索器说明
-    reasons: list[str] = Field(default_factory=list) # 该对象进入结果及获得此分数的可解释原因
-    score_components: list[ScoreComponent] = Field(default_factory=list) # BM25、向量、图路径等分项
+    reasons: list[str] = Field(default_factory=list) # 面向检索解释的入选理由，不是分数分解
+    score_components: list[ScoreComponent] = Field(default_factory=list) # BM25、向量、图路径等数值分项
     retrieval_channels: list[Identifier] = Field(default_factory=list) # 命中的召回通道
     source_span_ids: list[Identifier] = Field(default_factory=list) # 支持入选理由的法条或案例原文
     graph_paths: list[RetrievalPath] = Field(default_factory=list) # 规则约束图路径证据

@@ -20,6 +20,21 @@ def test_create_session_request_remains_v1_2():
         model.model_validate(payload)
 
 
+def test_v1_3_interpretation_rejects_inconsistent_evidence_summary():
+    update = {
+        "condition_id": "cond.test",
+        "supporting_fact_ids": ["fact.a"],
+        "evidence": [],
+    }
+    with pytest.raises(ValueError, match="evidence must match"):
+        AnswerInterpretation(condition_updates=[update])
+    legacy = AnswerInterpretation(
+        contract_version="1.2",
+        condition_updates=[update],
+    )
+    assert legacy.contract_version == "1.2"
+
+
 def test_answer_interpretation_defaults_to_v1_3_and_accepts_v1_2():
     payload = json.loads(
         Path("contracts/examples/answer-interpretation.json").read_text(encoding="utf-8")

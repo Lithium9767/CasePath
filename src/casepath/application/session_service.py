@@ -73,9 +73,11 @@ class SessionService:
         return receipt.snapshot.model_copy(deep=True)
 
     def submit_answer(self, session_id: str, request: AnswerRequest) -> WorkflowSnapshot:
-        # 请求模型在 API 或调用者边界校验；这里处理与当前会话有关的业务约束。
-        if not request.answer.strip():
-            raise InvalidAnswer("回答不能只有空白字符")
+        # 重新执行合同校验，防止调用者通过 model_copy(update=...) 绕过字段验证。
+        try:
+            request = AnswerRequest.model_validate(request.model_dump())
+        except (ValidationError, ValueError, AttributeError, TypeError) as exc:
+            raise InvalidAnswer("回答请求不符合合同") from exc
         record = self._get_record(session_id)
         replay = self._replay(record, request)
         if replay is not None:

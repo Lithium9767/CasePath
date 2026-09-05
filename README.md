@@ -45,7 +45,6 @@ API 启动后：
 - `GET /v1/sessions/{session_id}`
 - `POST /v1/sessions/{session_id}/answers`
 - `GET /v1/capabilities`
-- `POST /v1/demo/analyze`（遗留无状态接口，已在 OpenAPI 标记弃用）
 - `GET /v1/contracts/{contract_name}/schema`
 
 ## P1 会话模块怎么阅读
@@ -113,6 +112,9 @@ RuleRetriever
 - 更新按 condition_id 替换整个条件记录。P4 负责历史证据聚合和冲突判断，P1 不擅自合并法律语义。
 - 条件映射可使用`confidence`、`evidence`、`mapping_reasons`和`score_components`保留
   多事实支持、反对或限定关系；置信度不是胜诉概率。
+- v1.3以`evidence`为权威细粒度证据；`supporting_fact_ids`只是兼容摘要，必须等于
+  `evidence.fact_id`的去重集合。P4不要维护两套互相矛盾的列表。
+- `ScoredReference.reasons`说明对象为何入选；`score_components`只分解总分来源。
 - 原子`RuleCondition`不使用`PARTIAL`：事实只能满足、不满足、未知、冲突或不适用；
   “部分成立”应在`ConditionGroup`或条件化解释分支中表达，用户争议对应`CONFLICTING`。
 - 检索对象使用`score_components`、`retrieval_channels`、`source_span_ids`和
@@ -121,7 +123,7 @@ RuleRetriever
   `UserFact` 只保存 P4 识别出的事实片段，避免把同一原文保存成两条事实。
 - 真实组件可通过 `create_app(service=..., capabilities=...)` 注入。
   `answer_interpreter=None` 时回答接口返回 503，不静默切换 Demo。
-- 正式装配使用`build_workflow()`和`build_session_service()`；P1通过
+- 正式装配直接构造`CasePathWorkflow`并通过`build_session_service()`注入；P1通过
   `LegalGraphGateway`与`StructuredLanguageModel`管理连接和结构化调用边界，
   P4负责Cypher路径、Prompt、排序及条件判断算法。
 
@@ -143,7 +145,7 @@ RuleRetriever
 - 检索和分化是否降级分别记录在`RetrievalBundle.degraded`与
   `ComparisonBundle.degraded`；它们与“是否继续追问”的会话状态是两个维度。
 - 会话状态只有 `SessionService` 可以修改。`Workflow` 只对传入状态执行一轮分析；
-  旧的 `Workflow.apply_answer()` 已删除。新前端不得使用已弃用的无状态 Demo HTTP 接口。
+  旧的 `Workflow.apply_answer()` 和无状态 Demo HTTP 接口均已删除。
 - v1.1历史JSON仍可读取；新建查询、检索、解释和快照默认输出v1.3。
   P5接收新增字段前应按`contracts/CHANGELOG.md`更新Schema。
 

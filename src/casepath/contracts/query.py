@@ -35,12 +35,28 @@ class ConditionEvidence(ContractModel):
 class QueryConditionState(ContractModel): # 当前用户事实在一个RuleCondition上的投影状态
     condition_id: Identifier # 引用P2定义的RuleCondition.condition_id
     status: ConditionStatus = ConditionStatus.UNKNOWN # 未提供的信息默认UNKNOWN，不能默认不满足
-    supporting_fact_ids: list[Identifier] = Field(default_factory=list) # 支持该状态的UserFact编号
+    supporting_fact_ids: list[Identifier] = Field(default_factory=list) # v1.1兼容摘要；v1.3必须等于evidence中fact_id的去重集合
     confidence: Confidence | None = None # 当前条件级映射置信度；未知或未计算时为空
-    evidence: list[ConditionEvidence] = Field(default_factory=list) # 多事实支持、反对和限定关系
+    evidence: list[ConditionEvidence] = Field(default_factory=list) # v1.3权威的细粒度事实—条件关系
     mapping_reasons: list[str] = Field(default_factory=list) # 条件状态及聚合方式的可读说明
     score_components: list[ScoreComponent] = Field(default_factory=list) # embedding、reranker、LLM等分项
     last_updated_turn: int = Field(default=0, ge=0) # 该条件状态最后在哪一轮被更新
+
+    @model_validator(mode="after")
+    def validate_local_evidence(self) -> QueryConditionState:
+        if len(self.supporting_fact_ids) != len(set(self.supporting_fact_ids)):
+            raise ValueError("supporting fact IDs must be unique")
+        evidence_fact_ids = [item.fact_id for item in self.evidence]
+        if len(evidence_fact_ids) != len(set(evidence_fact_ids)):
+            raise ValueError("condition evidence fact IDs must be unique")
+        component_names = [item.name for item in self.score_components]
+        if len(component_names) != len(set(component_names)):
+            raise ValueError("condition score component names must be unique")
+        return self
+
+    def has_consistent_evidence_summary(self) -> bool:
+        """v1.3中旧摘要必须等于细粒度证据所引用事实的去重集合。"""
+        return set(self.supporting_fact_ids) == {item.fact_id for item in self.evidence}
 
 
 class DialogueTurn(ContractModel): # 围绕一个规则条件进行的一轮追问和回答
@@ -94,9 +110,9 @@ class QueryState(ContractModel): # 一个用户咨询会话当前可保存和回
                     f"condition {condition.condition_id} references unknown user facts: "
                     f"{sorted(missing_fact_ids)}"
                 )
-            if len(evidence_fact_ids) != len(condition.evidence):
+            if self.contract_version == "1.3" and not condition.has_consistent_evidence_summary():
                 raise ValueError(
-                    f"condition {condition.condition_id} contains duplicate fact evidence"
+                    f"condition {condition.condition_id} has inconsistent evidence summary"
                 )
 
         # 历史追问必须引用当前条件矩阵中存在的条件。

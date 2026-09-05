@@ -125,7 +125,7 @@ def test_app_instances_do_not_share_sessions(client):
         assert_error(other.get(f"/v1/sessions/{session_id}"), 404)
 
 
-def test_capabilities_schema_and_legacy_demo(client):
+def test_capabilities_schema_and_removed_legacy_demo(client):
     assert client.get("/health").status_code == 200
     capabilities = {item["capability"]: item for item in client.get("/v1/capabilities").json()}
     assert capabilities["session_repository"]["mode"] == "MEMORY"
@@ -138,12 +138,13 @@ def test_capabilities_schema_and_legacy_demo(client):
     assert client.get("/v1/contracts/comparison-bundle/schema").status_code == 200
     assert_error(client.get("/v1/contracts/missing/schema"), 404)
     assert_error(client.delete("/v1/sessions/missing"), 405)
-    result = client.post("/v1/demo/analyze", json={"session_id": "legacy", "query": "健身房"})
-    assert result.status_code == 200
-    assert_error(client.get("/v1/sessions/legacy"), 404)
+    assert_error(
+        client.post("/v1/demo/analyze", json={"session_id": "legacy", "query": "健身房"}),
+        404,
+    )
     openapi = client.get("/openapi.json")
     assert openapi.status_code == 200
-    assert openapi.json()["paths"]["/v1/demo/analyze"]["post"]["deprecated"] is True
+    assert "/v1/demo/analyze" not in openapi.json()["paths"]
 
 
 @pytest.mark.parametrize(

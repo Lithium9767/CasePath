@@ -6,14 +6,11 @@ from pathlib import Path
 # import 名字由[project] name = "casepath" 决定
 from casepath.contracts.registry import CONTRACTS
 
-# 兼容原工具名称，实际来源统一到注册表。
-MODELS = CONTRACTS
-
 
 def main() -> None:
     output_dir = Path("contracts/schemas")
     output_dir.mkdir(parents=True, exist_ok=True)
-    for name, model in MODELS.items():
+    for name, model in CONTRACTS.items():
         path = output_dir / f"{name}.schema.json"
         path.write_text(
             json.dumps(model.model_json_schema(), ensure_ascii=False, indent=2),

@@ -17,6 +17,7 @@ from casepath.bootstrap import build_demo_session_service
 from casepath.contracts import (
     AnswerInterpretation,
     AnswerRequest,
+    ConditionEvidence,
     ConditionStatus,
     CreateSessionRequest,
     QueryConditionState,
@@ -135,6 +136,16 @@ def test_invalid_interpretation_is_not_saved(service, initial, answer, kind):
                 else question.condition_id,
                 status=ConditionStatus.SATISFIED,
                 supporting_fact_ids=[] if kind == "missing_evidence" else [fact.fact_id],
+                evidence=[]
+                if kind == "missing_evidence"
+                else [
+                    ConditionEvidence(
+                        fact_id=fact.fact_id,
+                        relation="SUPPORTS",
+                        confidence=0.9,
+                        reason="用于触发对应的服务校验",
+                    )
+                ],
                 last_updated_turn=1,
             )
             return AnswerInterpretation(new_facts=[fact], condition_updates=[update])

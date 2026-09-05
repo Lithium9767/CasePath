@@ -29,8 +29,19 @@
 
 - 新增 `LegalGraphGateway` 和 `StructuredLanguageModel` 端口。P1管理连接、凭据、
   超时和重试，P4管理Cypher路径模板、Prompt与算法计算。
-- 新增正式 `build_workflow()` 和 `build_session_service()` 装配入口，不自动回退Demo。
+- 正式装配入口为`build_session_service()`，直接注入已构造的`CasePathWorkflow`，
+  不自动回退Demo。
 - 增加图、检索器和语言模型不可用异常到稳定HTTP错误的映射。
+
+### 清理与一致性
+
+- 删除已弃用的`POST /v1/demo/analyze`和私有`AnalyzeRequest`；本地CLI Demo保留。
+- v1.3以`QueryConditionState.evidence`为权威细粒度证据，
+  `supporting_fact_ids`必须等于其中事实ID的去重摘要；v1.1历史数据继续兼容。
+- `AnswerRequest`在合同层拒绝纯空白回答；会话服务只负责重新执行合同校验并映射错误。
+- 删除Schema导出脚本中的`MODELS`别名，并避免Demo会话装配重复构造工作流。
+- `contracts/examples/workflow-snapshot.json`仍为v1.1兼容样例；
+  `comparison-bundle.json`为v1.3当前样例。
 
 ## v1.2 增量会话合同（2026-09-05）
 
@@ -71,7 +82,7 @@
   停止追问不意味着未知条件已经解决。
 - 会话状态统一通过 `SessionService.submit_answer()` 修改，删除允许调用方直接提交
   `ConditionStatus` 的旧 `Workflow.apply_answer()`。
-- `POST /v1/demo/analyze` 保留兼容但标记为弃用，P5 只使用正式会话接口。
+- 当时`POST /v1/demo/analyze`仍保留兼容并标记弃用；该入口已在上方v1.3清理中删除。
 - 未接入引用核验器，移除虚假的 `VERIFY_CITATIONS` 以及“未配置”占位日志；
   未核验状态由 `CitationRecord.verified=false` 和 `/v1/capabilities` 表达。
 

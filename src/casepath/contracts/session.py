@@ -40,4 +40,8 @@ class AnswerInterpretation(ContractModel):
         ):
             if len(identifiers) != len(set(identifiers)):
                 raise ValueError("interpretation IDs must be unique")
+        if self.contract_version == "1.3" and any(
+            not item.has_consistent_evidence_summary() for item in self.condition_updates
+        ):
+            raise ValueError("v1.3 condition evidence must match supporting_fact_ids")
         return self

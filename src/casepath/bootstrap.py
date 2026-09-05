@@ -18,37 +18,25 @@ from casepath.application.session_service import SessionService
 from casepath.contracts import CapabilityMode, CapabilityStatus
 from casepath.ports import AnswerInterpreter
 from casepath.ports.session_repository import SessionRepository
-
-# 工作流演示
 from casepath.workflow import CasePathWorkflow, WorkflowDependencies
-
-
-def build_workflow(
-    dependencies: WorkflowDependencies,
-    *,
-    max_question_turns: int = 3,
-) -> CasePathWorkflow:
-    """P1正式装配入口；P4只需提供符合ports的算法对象。"""
-    return CasePathWorkflow(dependencies, max_question_turns=max_question_turns)
 
 
 def build_session_service(
     *,
-    dependencies: WorkflowDependencies,
+    workflow: CasePathWorkflow,
     repository: SessionRepository,
     answer_interpreter: AnswerInterpreter | None,
-    max_question_turns: int = 3,
 ) -> SessionService:
     """注入正式或测试组件，不在此创建Neo4j/LLM凭据或偷偷回退Demo。"""
     return SessionService(
         repository=repository,
-        workflow=build_workflow(dependencies, max_question_turns=max_question_turns),
+        workflow=workflow,
         answer_interpreter=answer_interpreter,
     )
 
 
 def build_demo_workflow() -> CasePathWorkflow:
-    return build_workflow(
+    return CasePathWorkflow(
         WorkflowDependencies(
             rule_retriever=DemoRuleRetriever(),
             condition_projector=DemoConditionProjector(),
@@ -63,7 +51,7 @@ def build_demo_workflow() -> CasePathWorkflow:
 def build_demo_session_service() -> SessionService:
     """每个应用实例只调用一次；正式 P4 接入时替换解释器和工作流依赖。"""
     return build_session_service(
-        dependencies=build_demo_workflow().dependencies,
+        workflow=build_demo_workflow(),
         repository=InMemorySessionRepository(),
         answer_interpreter=DemoAnswerInterpreter(),
     )

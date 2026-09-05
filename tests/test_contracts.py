@@ -158,3 +158,49 @@ def test_answer_request_rejects_frontend_condition_status():
     payload["status"] = "SATISFIED"
     with pytest.raises(ValueError):
         AnswerRequest.model_validate(payload)
+
+
+def test_answer_request_rejects_blank_without_rewriting_raw_text():
+    with pytest.raises(ValueError, match="answer must not be blank"):
+        AnswerRequest(
+            question_id="question.test",
+            condition_id="condition.test",
+            answer=" \n ",
+        )
+    request = AnswerRequest(
+        question_id="question.test",
+        condition_id="condition.test",
+        answer=" 原始回答 ",
+    )
+    assert request.answer == " 原始回答 "
+
+
+def test_v1_3_query_requires_evidence_to_match_legacy_summary():
+    payload = json.loads((EXAMPLES / "query-state.json").read_text(encoding="utf-8"))
+    payload["contract_version"] = "1.3"
+    payload["user_facts"] = [
+        {"fact_id": "fact.a", "text": "事实A", "source_turn": 0},
+        {"fact_id": "fact.b", "text": "事实B", "source_turn": 0},
+    ]
+    payload["condition_states"] = [
+        {
+            "condition_id": "cond.test",
+            "status": "SATISFIED",
+            "supporting_fact_ids": ["fact.a"],
+            "evidence": [
+                {
+                    "fact_id": "fact.b",
+                    "relation": "SUPPORTS",
+                    "confidence": 0.8,
+                    "reason": "测试不一致摘要",
+                }
+            ],
+        }
+    ]
+    with pytest.raises(ValueError, match="inconsistent evidence summary"):
+        QueryState.model_validate(payload)
+
+    # 冻结的v1.1数据没有细粒度evidence，仍允许只携带旧摘要字段。
+    payload["contract_version"] = "1.1"
+    payload["condition_states"][0]["evidence"] = []
+    assert QueryState.model_validate(payload).contract_version == "1.1"

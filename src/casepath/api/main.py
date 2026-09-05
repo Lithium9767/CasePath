@@ -1,21 +1,14 @@
-"""应用工厂和旧演示入口；应用状态在不同实例之间互相隔离。"""
+"""正式应用工厂；应用状态在不同实例之间互相隔离。"""
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
 
 from casepath.application.session_service import SessionService
 from casepath.bootstrap import build_demo_capabilities, build_demo_session_service
-from casepath.contracts import CapabilityStatus, QueryState, WorkflowSnapshot
+from casepath.contracts import CapabilityStatus
 from casepath.contracts.registry import CONTRACTS
 
 from .errors import register_error_handlers
 from .sessions import router
-
-
-class AnalyzeRequest(BaseModel):
-    # 保留旧演示格式；正式创建接口不接受客户端提供的 session_id。
-    session_id: str = Field(min_length=1)
-    query: str = Field(min_length=1)
 
 
 def create_app(
@@ -41,17 +34,6 @@ def create_app(
     @application.get("/v1/capabilities", response_model=list[CapabilityStatus])
     def get_capabilities() -> list[CapabilityStatus]:
         return application.state.capabilities
-
-    @application.post(
-        "/v1/demo/analyze",
-        response_model=WorkflowSnapshot,
-        deprecated=True,
-    )
-    def analyze(request: AnalyzeRequest) -> WorkflowSnapshot:
-        # 遗留无状态接口，仅兼容旧调用；新前端必须使用 /v1/sessions。
-        return service.workflow.run(
-            QueryState(session_id=request.session_id, initial_query=request.query)
-        )
 
     @application.get("/v1/contracts/{contract_name}/schema")
     def contract_schema(contract_name: str) -> dict:
