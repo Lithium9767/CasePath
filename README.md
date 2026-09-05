@@ -49,33 +49,117 @@ API 启动后：
 
 ## P2 法条与规范规则层
 
-本轮已完成、待完成事项及合同精简说明见 [P2 阶段交接说明](docs/p2-handoff.md)。
+交付分支为 `P2`，由组长统一合并。本节集中记录 P2 的完成情况与交接说明；
+生产代码和数据以 `b196bfc` 为基础，补充验收测试的提交为 `503d07e`。
 
-P2 以 P1 冻结的 `LegalSourceRecord`、`ProvisionRecord` 和 `RuleRecord` v1.1 为
-唯一公共合同。原始数据来自同级克隆的
-[`litunan/legal-rag`](https://github.com/litunan/legal-rag)，从 `CasePath/` 根目录执行：
+### 已完成
+
+- 法条导入与数据生成：1 个法源、1,260 条连续且唯一的法条、5 条规则、1,268 个来源跨度。
+  当前发布数据标注 4 条基础规则为 L3、1 条综合规则为 L2。
+- 对齐公共 v1.1 合同：法源、法条和规则分别使用 `LegalSourceRecord`、`ProvisionRecord`
+  和 `RuleRecord`；普通条件通过 `ConditionGroup` 表达 ALL/ANY，替代履行例外使用
+  `RuleException`，法条内嵌全文 `SourceSpan`。
+- 固定上游 revision、输入和输出 SHA-256；校验条号、非空正文、跨文件引用、原文字符
+  区间和关键条文固定哈希。摄取阶段修复上游 109 条层级错位，并在 manifest 中记录。
+- 构建先在 staging 目录生成并校验，发布失败可回滚 P2 拥有的五个生成文件；
+  上游输入相对路径已修正为 `../legal-rag/data/laws/`。
+- 提供摄取、规则、数据集和发布回滚测试，验证演示约定的 5 个事实标识均可解析。
+  新增的 5 项独立验收测试使用导出 JSON Schema 校验全部 2,534 条发布记录；只复制
+  `rules.jsonl` 到隔离目录，即可建立 5 条规则、9 个事实标识（含例外）和 8 个细粒度
+  来源跨度的索引，验证引用闭包并构建可检索文本。对应 `jsonschema` 开发依赖已锁定。
+
+代码入口：[摄取器](src/casepath/ingestion/laws/civil_code.py)、
+[规则生成器](src/casepath/rule_layer/civil_code.py)、
+[构建入口](src/casepath/rule_layer/build.py)、
+[数据校验器](src/casepath/rule_layer/validation.py)、
+[独立验收测试](tests/rule_layer/test_p2_acceptance.py)。
+
+生成数据位于 `data/canonical/rules/`，请通过构建器更新，不手工修改 JSONL：
+
+| 文件 | 记录数 | 用途 |
+| --- | ---: | --- |
+| [legal_sources.jsonl](data/canonical/rules/legal_sources.jsonl) | 1 | 法律版本与权威来源 |
+| [provisions.jsonl](data/canonical/rules/provisions.jsonl) | 1,260 | 完整正文、生效日期与全文跨度 |
+| [rules.jsonl](data/canonical/rules/rules.jsonl) | 5 | 4 条 L3 基础规则与 1 条 L2 综合规则 |
+| [source_spans.jsonl](data/canonical/rules/source_spans.jsonl) | 1,268 | 法条全文及细粒度原文跨度 |
+
+来源、版本、哈希、修复审计和复核状态统一记录在
+[civil_code.manifest.json](data/manifests/civil_code.manifest.json)。
+
+### 未完成与待确认
+
+- 计划要求的 P2 代码与数据生成功能已实现，但人工复核验收仍待确认。manifest 中的
+  `human_verified` 标记由构建器生成，仓库尚未记录复核人及独立复核记录；自动测试
+  只能证明数据与固定定义一致。需实际复核者确认第 509、563、565、566 条正文、版本
+  及 4 条 L3 规则的条件、例外、后果与原文依据，并补齐复核人、日期和可追溯记录。
+- Windows 符号链接测试因当前环境无创建权限而跳过，不能写成“全部测试无跳过通过”。
+- 真实数据端到端联调由组长统一组织，当前结果只证明 P2 数据与接口约定通过验证。
+  综合规则保留 L2 符合“3—5 条规则且至少 3 条 L3”的数量要求；预付式消费专项司法
+  解释、专项解除事由与退款金额计算尚未实现，属于已声明的演示范围限制。
+
+人工复核材料：[规则与原文依据](data/canonical/rules/rules.jsonl)、
+[条文及来源记录](data/manifests/civil_code.manifest.json)。
+
+### 合同冗余检查及处理
+
+| 内容 | 处理与原因 |
+| --- | --- |
+| 法源、法条、规则三类合同 | 保留，分别表达整部法律、单条原文和结构化规则，职责不同。 |
+| 内嵌 `SourceSpan` 与独立 `source_spans.jsonl` | 保留。前者支持规则独立读取，后者用于按 ID 回查；由同一构建流程生成并逐项校验。 |
+| `ProvisionRef` 中的条号、标题和日期 | 属于可派生的重复信息，但当前公共合同和规则独立读取依赖它们；由法条统一生成并校验，暂不删除。 |
+| 普通条件、条件组和例外 | 保留，分别表达事实、ALL/ANY 组合和阻却语义，不能互相替代。 |
+| 旧 `content_hash`、原子条件 `operator`/`required` | 适配时已移除，改用 manifest 哈希、条件组和例外。 |
+
+当前 `LegalSourceRecord` 使用 `source_type`、`effective_from`、`effective_to` 和
+`official_url`；`ProvisionRecord` 内嵌来源跨度，不再输出层级、成熟度、单条哈希或
+`source_span_ids`。层级修复只在摄取过程与 manifest 审计记录中保留。
+正式合同以 `src/casepath/contracts/`、导出 Schema 和 `contracts/CHANGELOG.md` 为准。
+
+### 数据接入要点
+
+- 优先读取 `data/canonical/rules/rules.jsonl` 建规则索引；来源回查使用同目录的
+  `provisions.jsonl`、`legal_sources.jsonl` 与 `source_spans.jsonl`。
+- 直接复用发布数据里的 ID：条号为 `"563"`，法条 ID 为
+  `law.prc.civil_code.2021.article_0563`，全文跨度 ID 为 `span.civil-code.563`。
+- 事实标识需同时覆盖 `conditions` 和 `exceptions`。`cond.alternative_performance`
+  保留原字符串，但现在位于 `exceptions[].exception_id`，不能作为普通 ALL 条件处理。
+  例外成立时阻却对应路径；状态为 `UNKNOWN` 时不得输出确定结论。
+- 片段偏移采用规范化法条正文的零基、右开字符区间，满足
+  `text[start_offset:end_offset] == quote`，不表示 PDF 页码或字节位置。
+- manifest 的文件 SHA-256 在计算前将 CRLF/CR 统一为 LF，以便跨平台复现；输入路径
+  以 `CasePath/` 根目录为基准，输出路径以 `data/` 的父目录为基准。
+
+规则文本区分取得解除权、依法解除生效和解除后的费用补救，不将其视为自动解除或
+固定全额退款公式；适用限制以 `rules.jsonl` 与 manifest 为准。
+
+### 验证方式与结果
+
+在 `CasePath/` 根目录、已安装 `uv` 的环境中运行：
+
+```powershell
+uv sync --extra api --group dev --locked
+uv run python -m casepath.rule_layer.build --data-root data --validate-only
+uv run pytest -o "addopts=" -q -rs
+```
+
+验收提交 `503d07e` 使用锁定依赖的独立 `.venv` 验证结果：数据校验 `passed`；
+全仓测试 `138 passed, 1 skipped, 2 warnings`。跳过项是 Windows 创建符号链接时报
+`WinError 1314`；两条警告来自 API 测试依赖的弃用提示。全仓 Ruff 静态检查与 P2 自有
+Python 文件格式检查通过。新增的 5 项独立验收测试全部通过，可单独运行：
+
+```powershell
+uv run pytest tests/rule_layer/test_p2_acceptance.py
+```
+
+只校验已提交数据无需克隆上游仓库。从原始数据重建时，需要同级克隆的
+[`litunan/legal-rag`](https://github.com/litunan/legal-rag)，且 revision 为
+`ce7872c7ae343e5ff860d627195ec4e72c7ef7ce`。复现当前数据及既有核验日期：
 
 ```powershell
 uv run python -m casepath.rule_layer.build --verified-on 2026-09-04
-uv run python -m casepath.rule_layer.build --validate-only
 ```
 
-构建器固定上游 Git revision 与输入 SHA-256，校验 1,260 个连续条号和非空正文，修复
-上游转换器造成的 109 条层级错位，并确定性生成：
-
-- 1 个法源记录；
-- 1,260 个内嵌全文 `SourceSpan` 的法条记录；
-- 5 条规则，其中 4 条基础规则为 L3、1 条综合服务退款框架为 L2；
-- 1,268 个独立可回放跨度，以及包含来源、版本、哈希和复核状态的 manifest。
-
-规则使用 v1.1 `ConditionGroup` 表达普通条件的 `ALL`/`ANY` 组合；替代履行的阻却
-语义依 P1 合同迁入 `RuleException`。完整跨度沿用 `span.civil-code.563` 等冻结 ID，
-条件与例外沿用 P1/P3/P4 实际使用的下划线 ID。综合退款规则尚未结构化接入 2025 年
-预付式消费司法解释，因此不能单独判断专项解除事由或计算退款金额。
-
-生成文件位于 `data/canonical/rules/`，校验器还会验证 Schema、跨文件引用、原文右开
-区间、官方核验条文、固定发布哈希及 manifest。构建先在 staging 目录完成并验证，发布
-失败时只回滚 P2 拥有的五个文件，不改动 P3/P5 数据。
+上述自动化结果不包含其他分支合并后的联调验证，也不替代人工法律复核。
 
 ## P1 会话模块怎么阅读
 
