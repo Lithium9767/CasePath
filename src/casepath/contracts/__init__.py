@@ -11,8 +11,8 @@ from .case import (
 from .enums import (
     CapabilityMode,
     CaseRole,
-    ConditionOperator,
     ConditionGroupOperator,
+    ConditionOperator,
     ConditionStatus,
     DecisionStatus,
     ErrorCode,
