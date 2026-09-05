@@ -1,0 +1,8 @@
+{
+  "contract_version": "1.1",
+  "capability": "legal_graph",
+  "available": true,
+  "mode": "MEMORY",
+  "degraded": true,
+  "reason": "Neo4j未连接，当前使用内存Repository。"
+}

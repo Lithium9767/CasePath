@@ -1,0 +1,10 @@
+{
+  "contract_version": "1.1",
+  "code": "CASEPATH_SESSION_NOT_FOUND",
+  "message": "未找到指定会话",
+  "details": {
+    "session_id": "session.not-found"
+  },
+  "retryable": false,
+  "request_id": "request.demo.001"
+}

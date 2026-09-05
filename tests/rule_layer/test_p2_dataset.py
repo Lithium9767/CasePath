@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from casepath.adapters.demo import DemoConditionProjector
 from casepath.contracts import LegalSourceRecord, ProvisionRecord, RuleRecord, SourceSpan
 from casepath.ingestion.laws.civil_code import EXPECTED_SOURCE_SHA256, provision_id
 from casepath.ingestion.laws.jsonl import (
@@ -18,12 +19,15 @@ from casepath.ingestion.laws.jsonl import (
 from casepath.ingestion.laws.manifest import CivilCodeManifest
 from casepath.rule_layer.build import build_dataset
 from casepath.rule_layer.ids import (
+    COND_ALTERNATIVE_PERFORMANCE,
     COND_PERFORMANCE_IMPOSSIBLE,
     HUMAN_VERIFIED_L3_RULE_IDS,
+    RULE_NONPERFORMANCE_TERMINATION,
     RULE_SERVICE_TERMINATION_REFUND,
 )
 from casepath.rule_layer.validation import (
     EXPECTED_ARTICLE_CONTENT_HASHES,
+    EXPECTED_CANONICAL_OUTPUT_HASHES,
     validate_canonical_dataset,
     validate_records,
 )
@@ -101,24 +105,34 @@ def test_static_jsonl_records_and_cross_references_are_complete(
     provision_by_id = {record.provision_id: record for record in provisions}
     span_by_id = {span.span_id: span for span in spans}
 
+    assert {record.contract_version for record in legal_sources} == {"1.1"}
     assert len(source_ids) == 1
     assert len(provision_by_id) == 1260
     assert len(span_by_id) == 1268
     assert [int(record.article_no) for record in provisions] == list(range(1, 1261))
 
     for provision in provisions:
+        assert provision.contract_version == "1.1"
         assert provision.source_id in source_ids
         assert provision.provision_id == provision_id(int(provision.article_no))
         assert provision.text
-        assert provision.content_hash == sha256_text(provision.text)
-        assert len(provision.source_span_ids) == 1
-        full_span = span_by_id[provision.source_span_ids[0]]
+        assert provision.effective_from == date(2021, 1, 1)
+        assert provision.effective_to is None
+        assert len(provision.source_spans) == 1
+        full_span = provision.source_spans[0]
+        assert span_by_id[full_span.span_id] == full_span
+        assert full_span.start_offset == 0
+        assert full_span.end_offset == len(provision.text)
         assert full_span.quote == provision.text
 
     for rule in rules:
+        assert rule.contract_version == "1.1"
         embedded_span_ids = {span.span_id for span in rule.source_spans}
         assert rule.source_spans
-        assert all(reference.provision_id in provision_by_id for reference in rule.provisions)
+        for reference in rule.provisions:
+            target = provision_by_id[reference.provision_id]
+            assert reference.valid_from == target.effective_from
+            assert reference.valid_to == target.effective_to
         referenced_span_ids = {
             span_id
             for item in [*rule.conditions, *rule.exceptions, *rule.consequences]
@@ -140,14 +154,57 @@ def test_target_articles_have_padded_ids_and_fixed_verified_hashes(
         assert sha256_text(provision.text) == expected_hash
 
 
+def test_rule_groups_cover_conditions_and_alternative_performance_is_an_exception(
+    canonical_data_root: Path,
+) -> None:
+    _, _, rules, _ = _read_dataset(canonical_data_root)
+    alternative_rule_ids = set()
+    alternative_definitions = []
+
+    for rule in rules:
+        condition_ids = [condition.condition_id for condition in rule.conditions]
+        grouped_ids = [
+            condition_id
+            for group in rule.condition_groups
+            for condition_id in group.member_condition_ids
+        ]
+        assert len(rule.condition_groups) == 1
+        assert rule.condition_groups[0].operator == "ALL"
+        assert grouped_ids == condition_ids
+        assert COND_ALTERNATIVE_PERFORMANCE not in condition_ids
+
+        alternative_exceptions = [
+            exception
+            for exception in rule.exceptions
+            if exception.exception_id == COND_ALTERNATIVE_PERFORMANCE
+        ]
+        if alternative_exceptions:
+            alternative_rule_ids.add(rule.rule_id)
+            alternative_definitions.extend(alternative_exceptions)
+
+    assert alternative_rule_ids == {
+        RULE_NONPERFORMANCE_TERMINATION,
+        RULE_SERVICE_TERMINATION_REFUND,
+    }
+    assert len(alternative_definitions) == 2
+    assert alternative_definitions[0] == alternative_definitions[1]
+
+
 def test_demo_rule_and_condition_ids_remain_compatible(canonical_data_root: Path) -> None:
     _, _, rules, _ = _read_dataset(canonical_data_root)
     demo_rule = next(rule for rule in rules if rule.rule_id == RULE_SERVICE_TERMINATION_REFUND)
     condition_ids = {condition.condition_id for condition in demo_rule.conditions}
+    exception_ids = {exception.exception_id for exception in demo_rule.exceptions}
+    resolvable_ids = condition_ids | exception_ids
 
     assert COND_PERFORMANCE_IMPOSSIBLE == "cond.performance_impossible"
     assert COND_PERFORMANCE_IMPOSSIBLE in condition_ids
     assert "cond.performance.impossible" not in condition_ids
+    assert set(DemoConditionProjector.CONDITION_IDS) <= resolvable_ids
+    assert set(DemoConditionProjector.CONDITION_IDS[:-1]) <= condition_ids
+    assert DemoConditionProjector.CONDITION_IDS[-1] == COND_ALTERNATIVE_PERFORMANCE
+    assert COND_ALTERNATIVE_PERFORMANCE not in condition_ids
+    assert COND_ALTERNATIVE_PERFORMANCE in exception_ids
 
 
 def test_every_source_span_uses_right_open_offsets(canonical_data_root: Path) -> None:
@@ -159,7 +216,6 @@ def test_every_source_span_uses_right_open_offsets(canonical_data_root: Path) ->
         text = provision_by_number[article_number].text
         assert 0 <= span.start_offset < span.end_offset <= len(text)
         assert text[span.start_offset : span.end_offset] == span.quote
-        assert span.content_hash == sha256_text(span.quote)
 
 
 def test_validator_rejects_drifted_rule_references_and_condition_definitions(
@@ -182,6 +238,21 @@ def test_validator_rejects_drifted_rule_references_and_condition_definitions(
     repeated_condition.label = "冲突定义"
 
     with pytest.raises(ValueError, match="conflicting definitions"):
+        validate_records(legal_sources, provisions, rules, spans)
+
+
+def test_validator_rechecks_group_coverage_and_alternative_exception(
+    canonical_data_root: Path,
+) -> None:
+    legal_sources, provisions, rules, spans = _read_dataset(canonical_data_root)
+    rules[0].condition_groups[0].member_condition_ids.pop()
+    with pytest.raises(ValueError, match="not assigned to a group"):
+        validate_records(legal_sources, provisions, rules, spans)
+
+    legal_sources, provisions, rules, spans = _read_dataset(canonical_data_root)
+    target_rule = next(rule for rule in rules if rule.rule_id == RULE_NONPERFORMANCE_TERMINATION)
+    target_rule.exceptions.clear()
+    with pytest.raises(ValueError, match="alternative-performance exception"):
         validate_records(legal_sources, provisions, rules, spans)
 
 
@@ -237,15 +308,16 @@ def test_validator_rejects_self_consistent_changes_to_the_pinned_corpus(
     shutil.copytree(canonical_data_root, copied_data_root)
     legal_sources, provisions, rules, spans = _read_dataset(copied_data_root)
 
-    provisions[0].text += "篡改"
-    provisions[0].content_hash = sha256_text(provisions[0].text)
-    full_span = next(span for span in spans if span.span_id == provisions[0].source_span_ids[0])
-    full_span.quote = provisions[0].text
-    full_span.end_offset = len(provisions[0].text)
-    full_span.content_hash = sha256_text(full_span.quote)
-    legal_sources[0].content_hash = sha256_text(
-        "\n".join(f"{record.article_no}\t{record.text}" for record in provisions)
+    provision = provisions[0]
+    provision.text += "篡改"
+    embedded_full_span = provision.source_spans[0]
+    embedded_full_span.quote = provision.text
+    embedded_full_span.end_offset = len(provision.text)
+    standalone_full_span = next(
+        span for span in spans if span.span_id == embedded_full_span.span_id
     )
+    standalone_full_span.quote = provision.text
+    standalone_full_span.end_offset = len(provision.text)
 
     canonical_root = copied_data_root / "canonical" / "rules"
     write_jsonl(canonical_root / "legal_sources.jsonl", legal_sources)
@@ -298,6 +370,7 @@ def test_manifest_pins_inputs_repairs_reviews_and_output_hashes(
         output_path = manifest_root / output.path
         assert output_path.is_file()
         assert sha256_file(output_path) == output.sha256
+        assert output.sha256 == EXPECTED_CANONICAL_OUTPUT_HASHES[output_path.name]
 
 
 @pytest.mark.skipif(

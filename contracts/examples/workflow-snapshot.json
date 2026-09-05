@@ -1,0 +1,82 @@
+{
+  "contract_version": "1.1",
+  "query_state": {
+    "contract_version": "1.1",
+    "session_id": "demo-session-001",
+    "initial_query": "我在健身房充了5000元，店关门了，还有3000元没消费。",
+    "status": "NEEDS_CLARIFICATION",
+    "user_facts": [],
+    "candidate_claims": [
+      {
+        "claim_type": "服务合同解除与返还",
+        "requested_remedy": "解除合同并返还未消费余额",
+        "confidence": 0.82
+      }
+    ],
+    "condition_states": [
+      {
+        "condition_id": "cond.performance_impossible",
+        "status": "UNKNOWN",
+        "supporting_fact_ids": [],
+        "last_updated_turn": 0
+      }
+    ],
+    "dialogue_history": [],
+    "created_at": "2026-09-04T00:00:00Z"
+  },
+  "retrieval_bundle": {
+    "contract_version": "1.1",
+    "rule_refs": [
+      {
+        "object_id": "rule.service_contract.termination_refund.v1",
+        "score": 0.91,
+        "reasons": ["服务合同", "返还未消费余额"]
+      }
+    ],
+    "support_case_refs": [
+      {
+        "object_id": "case.zeng-v-wuhan-fitness.2021",
+        "score": 0.88,
+        "reasons": ["履行地点变化", "合同解除"]
+      }
+    ],
+    "limiting_case_refs": [],
+    "boundary_case_refs": [],
+    "cited_span_ids": ["span.civil-code.563", "span.case.zeng.reasoning"],
+    "degraded": true,
+    "degradation_reason": "第一天样例尚未接入真实限制性案例。"
+  },
+  "next_question": {
+    "question_id": "question.performance_impossible.1",
+    "condition_id": "cond.performance_impossible",
+    "question": "健身房是永久停止经营，还是暂时关闭？",
+    "why_asked": "是否已经无法继续履行，会改变解除和返还规则的解释分支。",
+    "options": ["永久停止经营", "暂时关闭", "仍可在其他门店使用", "不清楚"],
+    "utility": 0.87,
+    "score_components": [],
+    "supporting_case_ids": ["case.zeng-v-wuhan-fitness.2021"],
+    "limiting_case_ids": []
+  },
+  "explanation_plan": {
+    "contract_version": "1.1",
+    "session_id": "demo-session-001",
+    "main_explanation": "仍需确认经营者是否已经无法继续履行。",
+    "candidate_claims": ["服务合同解除与返还"],
+    "applicable_rule_ids": ["rule.service_contract.termination_refund.v1"],
+    "support_case_ids": ["case.zeng-v-wuhan-fitness.2021"],
+    "limiting_case_ids": [],
+    "conditional_branches": [],
+    "unresolved_condition_ids": ["cond.performance_impossible"],
+    "evidence_actions": [],
+    "citations": [
+      {
+        "citation_id": "citation.civil-code.563",
+        "source_span_ids": ["span.civil-code.563"],
+        "supports": "合同解除规则候选依据",
+        "verified": false
+      }
+    ],
+    "disclaimer": "该解释基于当前提供的信息，不替代律师针对完整材料出具的法律意见。"
+  },
+  "trace": ["PARSE_QUERY", "RETRIEVE_RULES", "RETRIEVE_CASES", "PROJECT_QUERY"]
+}

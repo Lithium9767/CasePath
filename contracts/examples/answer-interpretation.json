@@ -1,0 +1,37 @@
+{
+  "contract_version": "1.3",
+  "new_facts": [
+    {
+      "fact_id": "fact.answer.example.1",
+      "text": "不清楚是暂时关闭还是永久停业",
+      "predicate": null,
+      "value": null,
+      "source_turn": 1
+    }
+  ],
+  "condition_updates": [
+    {
+      "condition_id": "cond.performance_impossible",
+      "status": "UNKNOWN",
+      "supporting_fact_ids": ["fact.answer.example.1"],
+      "confidence": 0.91,
+      "evidence": [
+        {
+          "fact_id": "fact.answer.example.1",
+          "relation": "QUALIFIES",
+          "confidence": 0.91,
+          "reason": "回答说明用户无法确认停业状态，因此只能限定为未知"
+        }
+      ],
+      "mapping_reasons": ["用户明确表示不清楚暂时关闭还是永久停业"],
+      "score_components": [
+        {
+          "name": "structured_llm",
+          "value": 0.91,
+          "explanation": "结构化回答解释置信度"
+        }
+      ],
+      "last_updated_turn": 1
+    }
+  ]
+}

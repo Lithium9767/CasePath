@@ -1,3 +1,4 @@
+from .api import AnswerRequest, CapabilityStatus, ErrorResponse
 from .base import ContractModel, ScoreComponent, SourceSpan
 from .case import (
     CaseRecord,
@@ -8,40 +9,69 @@ from .case import (
     ReasoningStep,
 )
 from .enums import (
+    CapabilityMode,
     CaseRole,
-    ConditionOperator,
+    ConditionGroupOperator,
     ConditionStatus,
     DecisionStatus,
+    ErrorCode,
     MaturityLevel,
     SessionStatus,
 )
 from .explanation import CitationRecord, EvidenceAction, ExplanationBranch, ExplanationPlan
 from .query import (
     CandidateClaim,
+    ConditionEvidence,
     DialogueTurn,
     QueryConditionState,
     QueryState,
     QuestionCandidate,
     UserFact,
 )
-from .retrieval import RetrievalBundle, ScoredReference
-from .rule import LegalConsequence, ProvisionRef, RuleCondition, RuleException, RuleRecord
+from .retrieval import (
+    ComparisonBundle,
+    ConditionComparison,
+    RetrievalBundle,
+    RetrievalPath,
+    ScoredReference,
+)
+from .rule import (
+    ConditionGroup,
+    LegalConsequence,
+    ProvisionRef,
+    RuleCondition,
+    RuleException,
+    RuleRecord,
+)
+from .session import AnswerInterpretation, CreateSessionRequest
 from .source import LegalSourceRecord, ProvisionRecord
+from .workflow import WorkflowSnapshot
 
 __all__ = [
+    "AnswerInterpretation",
+    "AnswerRequest",
     "CandidateClaim",
+    "CapabilityMode",
+    "CapabilityStatus",
     "CaseRecord",
     "CaseRole",
     "CitationRecord",
     "ClaimRecord",
+    "ComparisonBundle",
+    "ConditionComparison",
+    "ConditionEvidence",
     "ConditionFinding",
-    "ConditionOperator",
+    "ConditionGroup",
+    "ConditionGroupOperator",
     "ConditionStatus",
     "ContractModel",
     "CourtFinding",
+    "CreateSessionRequest",
     "DecisionItem",
     "DecisionStatus",
     "DialogueTurn",
+    "ErrorCode",
+    "ErrorResponse",
     "EvidenceAction",
     "ExplanationBranch",
     "ExplanationPlan",
@@ -55,6 +85,7 @@ __all__ = [
     "QuestionCandidate",
     "ReasoningStep",
     "RetrievalBundle",
+    "RetrievalPath",
     "RuleCondition",
     "RuleException",
     "RuleRecord",
@@ -63,4 +94,5 @@ __all__ = [
     "SessionStatus",
     "SourceSpan",
     "UserFact",
+    "WorkflowSnapshot",
 ]

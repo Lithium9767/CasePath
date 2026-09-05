@@ -4,7 +4,12 @@ from datetime import date
 
 import pytest
 
-from casepath.contracts import ConditionOperator, MaturityLevel, ProvisionRecord
+from casepath.contracts import (
+    ConditionGroupOperator,
+    MaturityLevel,
+    ProvisionRecord,
+    SourceSpan,
+)
 from casepath.ingestion.laws.civil_code import (
     CIVIL_CODE_SOURCE_ID,
     full_span_id,
@@ -80,15 +85,18 @@ def _provision(article_number: int) -> ProvisionRecord:
         article_no=str(article_number),
         title=f"中华人民共和国民法典第{article_number}条",
         text=text,
-        book="第三编 合同",
-        sub_book="第一分编 通则",
-        chapter="第四章 合同的履行" if article_number == 509 else "第七章 合同的权利义务终止",
-        valid_from=date(2021, 1, 1),
-        effective_status="effective",
-        jurisdiction="中华人民共和国",
-        maturity=MaturityLevel.L0,
-        source_span_ids=[full_span_id(article_number)],
-        content_hash=sha256_text(text),
+        effective_from=date(2021, 1, 1),
+        source_spans=[
+            SourceSpan(
+                span_id=full_span_id(article_number),
+                source_id=CIVIL_CODE_SOURCE_ID,
+                section=f"第{article_number}条",
+                paragraph_id=f"article-{article_number:04d}-full",
+                start_offset=0,
+                end_offset=len(text),
+                quote=text,
+            )
+        ],
     )
 
 
@@ -107,6 +115,7 @@ def test_rule_builder_publishes_four_reviewed_l3_rules_and_one_bounded_l2_rule()
 
     assert len(result.rules) == 5
     assert {rule.rule_id for rule in result.rules} == EXPECTED_RULE_IDS
+    assert {rule.contract_version for rule in result.rules} == {"1.1"}
     assert sum(rule.maturity == MaturityLevel.L3 for rule in result.rules) == 4
     demo_rule = next(
         rule for rule in result.rules if rule.rule_id == RULE_SERVICE_TERMINATION_REFUND
@@ -115,6 +124,18 @@ def test_rule_builder_publishes_four_reviewed_l3_rules_and_one_bounded_l2_rule()
     assert all(rule.conditions for rule in result.rules)
     assert all(rule.consequences for rule in result.rules)
     assert all(condition.evidence_types for rule in result.rules for condition in rule.conditions)
+
+
+def test_every_condition_is_covered_by_an_all_group() -> None:
+    result = build_civil_code_rules(_required_provisions())
+
+    for rule in result.rules:
+        assert len(rule.condition_groups) == 1
+        group = rule.condition_groups[0]
+        assert group.operator == ConditionGroupOperator.ALL
+        assert group.member_condition_ids == [
+            condition.condition_id for condition in rule.conditions
+        ]
 
 
 def test_demo_rule_preserves_frozen_cross_team_ids_and_padded_provision_ids() -> None:
@@ -129,22 +150,22 @@ def test_demo_rule_preserves_frozen_cross_team_ids_and_padded_provision_ids() ->
         COND_PAYMENT_MADE,
         COND_UNPERFORMED_BALANCE,
         COND_PERFORMANCE_IMPOSSIBLE,
-        COND_ALTERNATIVE_PERFORMANCE,
     } <= condition_ids
+    assert COND_ALTERNATIVE_PERFORMANCE not in condition_ids
     assert "cond.performance.impossible" not in condition_ids
-    alternative = next(
-        condition
-        for condition in demo_rule.conditions
-        if condition.condition_id == COND_ALTERNATIVE_PERFORMANCE
-    )
-    assert alternative.operator == ConditionOperator.UNLESS
-    assert alternative.required is False
+    assert len(demo_rule.exceptions) == 1
+    alternative = demo_rule.exceptions[0]
+    assert alternative.exception_id == COND_ALTERNATIVE_PERFORMANCE
+    assert alternative.predicate == "替代服务是否符合约定并仍足以实现原合同目的"
+    assert alternative.effect == "例外成立时，不能仅以原履行方案变化认定合同目的不能实现。"
     assert {reference.provision_id for reference in demo_rule.provisions} == {
         f"{CIVIL_CODE_SOURCE_ID}.article_0509",
         f"{CIVIL_CODE_SOURCE_ID}.article_0563",
         f"{CIVIL_CODE_SOURCE_ID}.article_0565",
         f"{CIVIL_CODE_SOURCE_ID}.article_0566",
     }
+    assert {reference.valid_from for reference in demo_rule.provisions} == {date(2021, 1, 1)}
+    assert all(reference.valid_to is None for reference in demo_rule.provisions)
 
 
 def test_every_rule_span_replays_against_the_referenced_article() -> None:
@@ -158,7 +179,6 @@ def test_every_rule_span_replays_against_the_referenced_article() -> None:
         article_text = text_by_article[article_number]
         assert 0 <= span.start_offset < span.end_offset <= len(article_text)
         assert article_text[span.start_offset : span.end_offset] == span.quote
-        assert span.content_hash == sha256_text(span.quote)
 
     for rule in result.rules:
         embedded = {span.span_id: span for span in rule.source_spans}
@@ -173,12 +193,22 @@ def test_every_rule_span_replays_against_the_referenced_article() -> None:
 
 def test_reused_condition_ids_have_one_canonical_definition() -> None:
     result = build_civil_code_rules(_required_provisions())
-    by_id = {}
+    conditions_by_id = {}
+    exceptions_by_id = {}
 
     for rule in result.rules:
         for condition in rule.conditions:
-            assert condition.condition_id not in by_id or by_id[condition.condition_id] == condition
-            by_id.setdefault(condition.condition_id, condition)
+            assert (
+                condition.condition_id not in conditions_by_id
+                or conditions_by_id[condition.condition_id] == condition
+            )
+            conditions_by_id.setdefault(condition.condition_id, condition)
+        for exception in rule.exceptions:
+            assert (
+                exception.exception_id not in exceptions_by_id
+                or exceptions_by_id[exception.exception_id] == exception
+            )
+            exceptions_by_id.setdefault(exception.exception_id, exception)
 
 
 def test_rule_builder_requires_articles_509_563_565_and_566() -> None:

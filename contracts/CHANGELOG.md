@@ -1,0 +1,126 @@
+# CasePath公共合同变更记录
+
+## v1.3 P4工作流与可解释性合同（2026-09-05）
+
+### 版本边界
+
+- `QueryState`、`RetrievalBundle`、`ExplanationPlan` 和 `WorkflowSnapshot` 的新建对象
+  默认版本升级为 `"1.3"`，同时继续接受冻结的 `"1.1"` 历史数据。
+- `AnswerInterpretation`默认升级为`"1.3"`并继续接受`"1.2"`，用于承载新增的
+  条件映射证据字段；`CreateSessionRequest`仍为`"1.2"`。
+- v1.1 JSON 示例仍用于回归兼容；P5消费新增字段前必须支持 v1.3 Schema。
+- 新增 `ComparisonBundle`，版本为 `"1.3"`；API主路径仍为 `/v1/`。
+
+### P4调用链
+
+- 单轮顺序改为规则召回、用户条件投影、规则约束案例检索、案例分化、追问和解释。
+- 新增 `CaseComparator`，其 `ComparisonBundle` 同时交给 `QuestionPolicy` 和
+  `ExplanationPlanner`，避免两处重复计算并产生不一致的分化指标。
+- `WorkflowSnapshot.comparison_bundle` 对v1.3必填；v1.1历史快照允许为空。
+
+### 可解释性与证据
+
+- `QueryConditionState` 增加映射置信度、多事实证据关系、映射理由和评分分项。
+- `ScoredReference` 增加召回通道、评分分项、原文片段ID及可验证图路径。
+- `QuestionCandidate` 和 `ExplanationPlan` 增加边界案例ID。
+- 工作流快照验证条件、案例角色、规则和解释之间的跨对象引用。
+
+### 基础设施边界
+
+- 新增 `LegalGraphGateway` 和 `StructuredLanguageModel` 端口。P1管理连接、凭据、
+  超时和重试，P4管理Cypher路径模板、Prompt与算法计算。
+- 正式装配入口为`build_session_service()`，直接注入已构造的`CasePathWorkflow`，
+  不自动回退Demo。
+- 增加图、检索器和语言模型不可用异常到稳定HTTP错误的映射。
+
+### 清理与一致性
+
+- 删除已弃用的`POST /v1/demo/analyze`和私有`AnalyzeRequest`；本地CLI Demo保留。
+- v1.3以`QueryConditionState.evidence`为权威细粒度证据，
+  `supporting_fact_ids`必须等于其中事实ID的去重摘要；v1.1历史数据继续兼容。
+- `AnswerRequest`在合同层拒绝纯空白回答；会话服务只负责重新执行合同校验并映射错误。
+- 删除Schema导出脚本中的`MODELS`别名，并避免Demo会话装配重复构造工作流。
+- `contracts/examples/workflow-snapshot.json`仍为v1.1兼容样例；
+  `comparison-bundle.json`为v1.3当前样例。
+
+## v1.2 增量会话合同（2026-09-05）
+
+### 版本边界
+
+- 仅新增 `CreateSessionRequest` 和 `AnswerInterpretation`，两者版本为 `"1.2"`。
+- 原有十一种 v1.1 合同及其字段、枚举、版本约束不变，原示例无需迁移。
+- 因此创建请求为 v1.2，回答请求仍为 v1.1，返回 `WorkflowSnapshot` 仍为 v1.1。
+- 未传 `contract_version` 时使用对应模型默认值；显式传错版本返回 422。
+- API 路径中的 `/v1/` 是路由主版本，不等同于每个数据模型的修订版本。
+
+### 新增对象
+
+- `CreateSessionRequest(query)`：由服务端分配会话 ID，拒绝空白问题和额外字段。
+- `AnswerInterpretation(new_facts, condition_updates)`：P4 返回本次事实和条件更新。
+  `new_facts` 逐字摘自本次回答，来源轮次等于当前最大 `turn_id + 1`；
+  `condition_updates` 是对应条件记录的完整替换，P4 负责综合历史支持和冲突证据；
+  每个非 UNKNOWN 更新必须引用已有或本批新建的用户事实。
+- `SessionRecord` / `AnswerReceipt` 是后端私有存储模型，不属于公共合同注册表。
+
+### HTTP 行为
+
+- 增加创建、读取、回答三个会话接口及 `/v1/capabilities`。
+- 成功返回已有 `WorkflowSnapshot`，会话 ID 位于 `query_state.session_id`，不额外复制顶层字段。
+- 相同会话、相同 `question_id` 和相同回答内容重放当时成功结果；不同内容返回 409。
+  重放旧答案不会使最新会话回退，读取最新结果必须使用 GET 会话接口。
+- 统一使用已有 `ErrorResponse`：409 使用 `INVALID_REQUEST` 和
+  `details.reason=session_conflict`；解析能力不可用返回 503、`INTERNAL_ERROR` 和
+  `details.reason=answer_interpreter_unavailable`。未偷偷扩展已冻结错误枚举。
+- 未知 Schema 名称原先返回 200 的非标准错误字典，现修正为 404 的 `ErrorResponse`。
+
+### 行为限制
+
+- 默认 Demo 会话链路只保存回答原文，不改变条件状态，不包含真实 P4 自然语言分析。
+- 完整回答保存在 `DialogueTurn.answer`；`UserFact` 只保存 P4 提取的事实片段，
+  不再由会话服务额外生成一条内容相同的原始事实。
+- 默认最多追问 3 轮，QuestionPolicy 负责过滤已问条件；Workflow 只验证不变量。
+  停止追问不意味着未知条件已经解决。
+- 会话状态统一通过 `SessionService.submit_answer()` 修改，删除允许调用方直接提交
+  `ConditionStatus` 的旧 `Workflow.apply_answer()`。
+- 当时`POST /v1/demo/analyze`仍保留兼容并标记弃用；该入口已在上方v1.3清理中删除。
+- 未接入引用核验器，移除虚假的 `VERIFY_CITATIONS` 以及“未配置”占位日志；
+  未核验状态由 `CitationRecord.verified=false` 和 `/v1/capabilities` 表达。
+
+## v1.1（2026-09-04）
+
+### 新增合同
+
+- `LegalSourceRecord`：整部法律或其他规范性法律来源；
+- `ProvisionRecord`：可检索、可引用的完整法条；
+- `AnswerRequest`：用户对高价值追问的原始回答；
+- `ErrorResponse`：正式API统一错误结构；
+- `CapabilityStatus`：组件真实、演示、内存降级或关闭状态；
+- `WorkflowSnapshot`：P1返回给P5的完整工作流快照。
+
+### 破坏性变化
+
+- 所有顶层公共合同的`contract_version`严格限制为`"1.1"`；
+- `RuleCondition`删除`operator`和`required`；
+- 新增`ConditionGroup`，由`ALL`或`ANY`表达原子条件组合；
+- `DialogueTurn`新增必填`question_id`；
+- `QuestionCandidate.utility`限制在0至1；
+- `SourceSpan`删除`content_hash`，来源版本校验延期放入数据Manifest；
+- `WorkflowSnapshot`从工作流实现模块移动到公共合同模块。
+
+### 新增一致性校验
+
+- `RuleRecord`：检查条件、条件组以及组内成员引用；
+- `CaseRecord`：检查请求、法院认定、推理、裁判结果和原文引用；
+- `QueryState`：检查事实、条件状态、对话轮次和问题引用；
+- `ExplanationPlan`：检查解释分支与引用关系；
+- `WorkflowSnapshot`：检查会话ID和下一追问条件引用；
+- `ProvisionRecord`：检查来源ID和法条有效日期。
+
+### v1.0数据迁移
+
+1. 将顶层`contract_version`改为`"1.1"`；
+2. 从每个`RuleCondition`删除`operator`和`required`；
+3. 为规则增加`condition_groups`并覆盖全部`condition_id`；
+4. 为每个`DialogueTurn`增加对应的`question_id`；
+5. 从`SourceSpan`删除`content_hash`；
+6. 重新通过v1.1 JSON Schema和Pydantic模型验证。

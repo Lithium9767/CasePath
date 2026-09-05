@@ -1,33 +1,40 @@
-# P2 法源合同 v1.1 变更请求
+# P2 法源合同 v1.1 适配记录
 
-## 原因
+## 状态
 
-P2 需要分别表达整部法律与单条法条。现有 v1.0 只有 `RuleRecord` 中的轻量
-`ProvisionRef`，无法验证 1,260 条法条的正文、版本、效力状态与来源跨度。
+P1 已在提交 `f674c49` 中接受“区分整部法律与单条法条”的需求，并以调整后的字段
+冻结 `LegalSourceRecord`、`ProvisionRecord` 和 `RuleRecord` v1.1。本文件记录原 P2
+提案如何迁移到 P1 的正式合同；正式定义以 `src/casepath/contracts/`、导出的 JSON
+Schema 和 `contracts/CHANGELOG.md` 为准。
 
-## 请求 P1 审核的新增合同
+## P1 最终合同与原提案的差异
 
-- `LegalSourceRecord`：法律标题、制定机关、文件类型、公布/施行日期、效力状态、管辖域、
-  官方来源与内容哈希；
-- `ProvisionRecord`：稳定四位 `provision_id`、不补零 `article_no`、完整正文、层级、版本、
-  L0 成熟度、完整原文跨度 ID 与内容哈希。
+- `LegalSourceRecord` 使用 `source_type`、`effective_from`、`effective_to` 和
+  `official_url`，内容哈希与效力核验记录放入数据 manifest；
+- `ProvisionRecord` 直接内嵌至少一个 `SourceSpan`，不再保存 `source_span_ids`、
+  单条内容哈希、层级和成熟度字段；
+- `SourceSpan` 不保存内容哈希，引用正确性由字符区间回放和发布文件哈希共同校验；
+- `RuleRecord` 升级为 v1.1，原子条件不再携带 `operator`/`required`，全部普通条件必须
+  进入 `ConditionGroup`；`UNLESS` 语义改由 `RuleException` 表达。
 
-两类合同固定 `contract_version = "1.1"`，继续继承 `ContractModel` 的
-`extra="forbid"` 约束。对应示例与 JSON Schema 已随本分支提交。
-`ProvisionRecord.source_span_ids` 至少包含一项；两类记录均拒绝早于 `valid_from` 的
-`valid_to`。
+## P2 迁移决定
 
-## 兼容决定
-
-- `provision_id` 遵循计划书，使用 `article_0001` 至 `article_1260`；
-- `article_no` 与现有 `ProvisionRef` 对齐，使用不补零字符串，如 `"509"`；
-- 条件 ID 延续已冻结示例和工作流的下划线形式，如
+- `provision_id` 继续使用 `article_0001` 至 `article_1260`；
+- `ProvisionRecord.article_no` 与 `ProvisionRef.article_no` 均使用不补零数字字符串，
+  如 `"509"`，避免同一法条出现两个机器节点；
+- 条件 ID 继续使用 P1/P3/P4 实际采用的下划线形式，如
   `cond.performance_impossible`；
-- 完整法条跨度延续 `span.civil-code.563` 形式，避免破坏现有演示引用；
-- 不修改既有 `RuleRecord` v1.0，规则人工复核状态记录在 manifest 中。
+- 完整法条跨度继续使用 `span.civil-code.563`，兼容既有演示引用；
+- `cond.alternative_performance` 按 v1.1 规则合同迁入 `RuleException.exception_id`，
+  暂时保留原字符串以避免破坏跨团队 ID。P4 接入真实规则数据时需要同时投影规则条件
+  和可回答的规则例外；
+- 上游层级错位仍在 P2 摄取阶段修复并在 manifest 中审计，但 P1 冻结的
+  `ProvisionRecord` 不公开层级字段。
 
-## 审核门槛
+## 验收门槛
 
-- 两个示例必须通过 Pydantic 合同与导出的 JSON Schema；
-- 未知字段、补零 `article_no`、非法 SHA-256 和错误版本必须拒绝；
-- P1 批准后再合并到主分支；若 P1 调整字段，应同步重建 P2 数据并更新 manifest 哈希。
+- 1 个法源、1,260 条法条和 5 条规则必须通过 P1 运行时合同与导出 Schema；
+- 每条法条的内嵌全文跨度必须与独立 `source_spans.jsonl` 中的规范跨度一致；
+- 所有普通条件必须进入条件组，所有条件、例外与后果必须引用可回放的原文跨度；
+- 输入 revision、输入哈希、权威核验记录、输出数量与固定发布哈希必须一致；
+- P1、P2 与完整仓库测试必须同时通过。

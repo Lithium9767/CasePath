@@ -1,0 +1,81 @@
+{
+  "$defs": {
+    "ErrorCode": {
+      "enum": [
+        "CASEPATH_INVALID_REQUEST",
+        "CASEPATH_SESSION_NOT_FOUND",
+        "CASEPATH_CONTRACT_MISMATCH",
+        "CASEPATH_RETRIEVER_UNAVAILABLE",
+        "CASEPATH_GRAPH_UNAVAILABLE",
+        "CASEPATH_CITATION_NOT_VERIFIED",
+        "CASEPATH_INTERNAL_ERROR"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "1.1",
+      "default": "1.1",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "code": {
+      "$ref": "#/$defs/ErrorCode"
+    },
+    "message": {
+      "minLength": 1,
+      "title": "Message",
+      "type": "string"
+    },
+    "details": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "title": "Details",
+      "type": "object"
+    },
+    "retryable": {
+      "default": false,
+      "title": "Retryable",
+      "type": "boolean"
+    },
+    "request_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Request Id"
+    }
+  },
+  "required": [
+    "code",
+    "message"
+  ],
+  "title": "ErrorResponse",
+  "type": "object"
+}

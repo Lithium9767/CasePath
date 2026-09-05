@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -10,12 +9,11 @@ from pydantic import Field, model_validator
 from casepath.contracts import (
     ContractModel,
     LegalSourceRecord,
-    MaturityLevel,
     ProvisionRecord,
     SourceSpan,
 )
 
-from .jsonl import sha256_file, sha256_text
+from .jsonl import sha256_file
 
 CIVIL_CODE_SOURCE_ID = "law.prc.civil_code.2021"
 EXPECTED_ARTICLE_COUNT = 1260
@@ -117,16 +115,6 @@ def repair_shifted_hierarchy(
     return repaired, repair_count
 
 
-def _normalise_heading(value: str) -> str | None:
-    if not value:
-        return None
-    compact = re.sub(r"\s+", "", value)
-    match = re.match(r"^(第.+?(?:分编|编|章|节))(.*)$", compact)
-    if match and match.group(2):
-        return f"{match.group(1)} {match.group(2)}"
-    return compact
-
-
 def provision_id(article_number: int) -> str:
     return f"{CIVIL_CODE_SOURCE_ID}.article_{article_number:04d}"
 
@@ -134,11 +122,6 @@ def provision_id(article_number: int) -> str:
 def full_span_id(article_number: int) -> str:
     # This spelling is already frozen in the demo workflow and cross-team examples.
     return f"span.civil-code.{article_number}"
-
-
-def _canonical_content_hash(articles: list[RawCivilCodeArticle]) -> str:
-    content = "\n".join(f"{article.number}\t{article.content}" for article in articles)
-    return sha256_text(content)
 
 
 def convert_civil_code(loaded: LoadedCivilCode) -> ConversionResult:
@@ -155,33 +138,28 @@ def convert_civil_code(loaded: LoadedCivilCode) -> ConversionResult:
     legal_source = LegalSourceRecord(
         source_id=CIVIL_CODE_SOURCE_ID,
         title="中华人民共和国民法典",
+        source_type="LAW",
         authority="全国人民代表大会",
-        document_type="法律",
-        promulgated_on=date(2020, 5, 28),
-        valid_from=date(2021, 1, 1),
-        valid_to=None,
-        effective_status="effective",
         jurisdiction="中华人民共和国",
-        official_source_url=OFFICIAL_SOURCE_URL,
-        content_hash=_canonical_content_hash(articles),
+        effective_from=date(2021, 1, 1),
+        effective_to=None,
+        official_url=OFFICIAL_SOURCE_URL,
     )
 
     provisions: list[ProvisionRecord] = []
     spans: list[SourceSpan] = []
     for article in articles:
         span_id = full_span_id(article.number)
-        spans.append(
-            SourceSpan(
-                span_id=span_id,
-                source_id=CIVIL_CODE_SOURCE_ID,
-                section=f"第{article.number}条",
-                paragraph_id=f"article-{article.number:04d}",
-                start_offset=0,
-                end_offset=len(article.content),
-                quote=article.content,
-                content_hash=sha256_text(article.content),
-            )
+        full_span = SourceSpan(
+            span_id=span_id,
+            source_id=CIVIL_CODE_SOURCE_ID,
+            section=f"第{article.number}条",
+            paragraph_id=f"article-{article.number:04d}",
+            start_offset=0,
+            end_offset=len(article.content),
+            quote=article.content,
         )
+        spans.append(full_span)
         provisions.append(
             ProvisionRecord(
                 provision_id=provision_id(article.number),
@@ -189,17 +167,9 @@ def convert_civil_code(loaded: LoadedCivilCode) -> ConversionResult:
                 article_no=str(article.number),
                 title=f"中华人民共和国民法典第{article.number}条",
                 text=article.content,
-                book=_normalise_heading(article.book),
-                sub_book=_normalise_heading(article.sub_book),
-                chapter=_normalise_heading(article.chapter),
-                section=_normalise_heading(article.section),
-                valid_from=date(2021, 1, 1),
-                valid_to=None,
-                effective_status="effective",
-                jurisdiction="中华人民共和国",
-                maturity=MaturityLevel.L0,
-                source_span_ids=[span_id],
-                content_hash=sha256_text(article.content),
+                effective_from=date(2021, 1, 1),
+                effective_to=None,
+                source_spans=[full_span],
             )
         )
 

@@ -26,28 +26,28 @@
   "outputs": [
     {
       "path": "data/canonical/rules/legal_sources.jsonl",
-      "sha256": "20f6ad08e07b7c67b2f9a2ac35692de0d9912e7c39191226be9bf298258373c4",
+      "sha256": "77a26d565e3bc97524808e39fb5c275f7585d0d7886394735d06e8b63dbbd8b7",
       "record_count": 1,
       "repository_url": null,
       "revision": null
     },
     {
       "path": "data/canonical/rules/provisions.jsonl",
-      "sha256": "6a84ab569c5415f0fb595d90f615c9b2d5206ca3f96b93fa85a918d747094c93",
+      "sha256": "cb3918312aacedd6ee5393d494c2296339884e9fc6a3d46a99dfa30ccb3823e3",
       "record_count": 1260,
       "repository_url": null,
       "revision": null
     },
     {
       "path": "data/canonical/rules/rules.jsonl",
-      "sha256": "e2e32282d01564eaed710aeef731ded2011a1dd85c94cb7518204bc0f708a07d",
+      "sha256": "02f736dbac6250e4d4b81b6dc04a69a900746ee4795601b4b037b258792000a6",
       "record_count": 5,
       "repository_url": null,
       "revision": null
     },
     {
       "path": "data/canonical/rules/source_spans.jsonl",
-      "sha256": "4bd95c7ba5f8a6f4598c15511999939537e77314ac5830702ac4581f71ff05f2",
+      "sha256": "786c1dd600b6a06bd9d13bfec2270a16ec64b513a786fdfd78e60f6518a32158",
       "record_count": 1268,
       "repository_url": null,
       "revision": null
