@@ -44,6 +44,7 @@ class SourceSpan(ContractModel):
     end_offset: int = Field(ge=0)  # 证据原文结束位置
     quote: str = Field(min_length=1) # 证据原文内容
     content_hash: str | None = None
+    content_hash: str | None = None
 
     # 等所有字段完成类型检查以后，再检查这些字段之间的关系。
     # 检查结束位置是否大于起始位置
