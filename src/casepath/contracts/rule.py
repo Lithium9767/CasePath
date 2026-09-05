@@ -8,7 +8,7 @@ from typing import Literal
 from pydantic import Field, model_validator
 
 from .base import ContractModel, Identifier, SourceSpan
-from .enums import ConditionGroupOperator, MaturityLevel
+from .enums import ConditionGroupOperator, ConditionOperator, MaturityLevel
 
 
 class ProvisionRef(ContractModel): #规则引用了哪些法条
@@ -25,6 +25,8 @@ class RuleCondition(ContractModel): # 一个原子条件
     condition_id: Identifier # 条件的稳定唯一编号，它是规则层、案例层和用户状态的共同连接点
     label: str = Field(min_length=1) # 简短显示名称
     predicate: str = Field(min_length=1) # 可以被判断真假的完整命题
+    operator: ConditionOperator = ConditionOperator.ALL
+    required: bool = True
     user_answerable: bool = True # 用户是否有可能直接回答这个问题
     evidence_types: list[str] = Field(default_factory=list) # 哪些证据可能证明这个条件
     source_span_ids: list[Identifier] = Field(default_factory=list) # 这个条件来自哪些法律原文

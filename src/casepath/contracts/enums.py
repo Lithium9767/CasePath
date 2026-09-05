@@ -21,6 +21,17 @@ class ConditionGroupOperator(StrEnum): # 条件组怎样组合，这个枚举用
     ANY = "ANY" # 只要有一个条件满足，表示或
 
 
+class ConditionOperator(StrEnum):
+    """Legacy atom-level operator retained for P2 rule-builder compatibility."""
+
+    ALL = "ALL"
+    ANY = "ANY"
+    UNLESS = "UNLESS"
+    THRESHOLD = "THRESHOLD"
+    TEMPORAL = "TEMPORAL"
+    REFERENCE = "REFERENCE"
+
+
 # 以下操作符保留为后续设计备忘，本周MVP不开放为可执行枚举值：
 # UNLESS = "UNLESS" # 除非存在某个例外
 # THRESHOLD = "THRESHOLD" # 达到一定数量或程度

@@ -11,6 +11,7 @@ from .case import (
 from .enums import (
     CapabilityMode,
     CaseRole,
+    ConditionOperator,
     ConditionGroupOperator,
     ConditionStatus,
     DecisionStatus,
@@ -51,6 +52,7 @@ __all__ = [
     "ConditionFinding",
     "ConditionGroup",
     "ConditionGroupOperator",
+    "ConditionOperator",
     "ConditionStatus",
     "ContractModel",
     "CourtFinding",
