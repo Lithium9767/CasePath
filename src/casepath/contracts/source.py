@@ -12,19 +12,12 @@ class LegalSourceRecord(ContractModel): # 一整部法律、司法解释或其�
     contract_version: Literal["1.1"] = "1.1" # 法律来源合同版本号，只接受1.1
     source_id: Identifier # 法律来源稳定唯一编号，例如law.prc.civil_code.2021
     title: str = Field(min_length=1) # 法律来源正式名称
-    source_type: str | None = None # 来源类型，例如LAW或JUDICIAL_INTERPRETATION
-    document_type: str | None = None
+    source_type: str = Field(min_length=1) # 来源类型，例如LAW或JUDICIAL_INTERPRETATION
     authority: str | None = None # 制定或发布机关，例如全国人民代表大会
     jurisdiction: str | None = None # 适用法域，例如中华人民共和国
     effective_from: date | None = None # 开始生效日期
     effective_to: date | None = None # 失效日期；仍然有效时为空
     official_url: str | None = None # 官方公开来源地址
-    official_source_url: str | None = None
-    promulgated_on: date | None = None
-    valid_from: date | None = None
-    valid_to: date | None = None
-    effective_status: str | None = None
-    content_hash: str | None = None
 
     @model_validator(mode="after")
     def validate_effective_dates(self) -> LegalSourceRecord:
@@ -47,18 +40,7 @@ class ProvisionRecord(ContractModel): # 一条完整法条原文，是规则层�
     text: str = Field(min_length=1) # 经核验的完整法条正文
     effective_from: date | None = None # 该版本法条开始生效日期
     effective_to: date | None = None # 该版本法条失效日期；仍然有效时为空
-    source_spans: list[SourceSpan] = Field(default_factory=list) # 法条正文对应的原文片段
-    book: str | None = None
-    sub_book: str | None = None
-    chapter: str | None = None
-    section: str | None = None
-    source_span_ids: list[Identifier] = Field(default_factory=list)
-    valid_from: date | None = None
-    valid_to: date | None = None
-    effective_status: str | None = None
-    jurisdiction: str | None = None
-    maturity: str | None = None
-    content_hash: str | None = None
+    source_spans: list[SourceSpan] = Field(min_length=1) # 法条正文对应的原文片段，至少一处
 
     @model_validator(mode="after")
     def validate_source_and_dates(self) -> ProvisionRecord:

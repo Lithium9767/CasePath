@@ -25,7 +25,7 @@ def _source_span(source_id: str, section: str, text: str, paragraph: int = 1) ->
     return SourceSpan(
         span_id=f"span.{source_id}.{paragraph}", source_id=source_id, section=section,
         paragraph_id=f"{section}-{paragraph}", start_offset=0, end_offset=len(text),
-        quote=text,
+        quote=text, content_hash=hashlib.sha256(text.encode("utf-8")).hexdigest(),
     )
 
 
@@ -75,7 +75,7 @@ class CaseCleaner:
         facts = sections.get("基本案情", case.get("case_facts") or "")
         reasoning = sections.get("裁判理由", case.get("judgment_reasoning") or "")
         result = sections.get("裁判结果", "")
-        spans = [_source_span(source_id, "基本案情", facts, 1), _source_span(source_id, "裁判理由", reasoning, 2)]
+        spans = [_source_span(source_id, "基本案情", facts), _source_span(source_id, "裁判理由", reasoning)]
         claims = [ClaimRecord(claim_id="claim.primary", claim_type=case.get("case_cause") or "民事请求", requested_remedy="当事人请求依法裁判")]
         findings = [CourtFinding(finding_id="finding.facts", predicate=facts[:500] or "法院认定事实待补充", source_span_ids=[spans[0].span_id])]
         decisions = []
