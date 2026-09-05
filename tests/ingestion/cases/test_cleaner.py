@@ -26,4 +26,4 @@ def test_deep_record_uses_unknown_when_result_missing():
     cleaner = CaseCleaner(Path("/tmp/nonexistent"))
     record = cleaner.deep_fitness({"case_id": "x", "title": "健身案", "case_cause": "服务合同纠纷", "full_document": "## 基本案情\n事实\n## 裁判理由\n理由"})
     assert record.decisions[0].status == "UNKNOWN"
-    assert record.source_spans[0].content_hash
+    assert len({span.span_id for span in record.source_spans}) == len(record.source_spans)
