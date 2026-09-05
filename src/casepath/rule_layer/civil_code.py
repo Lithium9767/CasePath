@@ -370,7 +370,8 @@ def build_civil_code_rules(provisions: list[ProvisionRecord]) -> RuleBuildResult
                 consequence_id="consequence.service_termination_and_balance_remedy",
                 consequence_type="解除权与解除后的费用补救",
                 description=(
-                    "本规则仅覆盖第563条的一般解除路径：解除权成立不表示合同自动解除，应依"
+                    "本规则仅覆盖第563条第一款第四项的违约致使合同目的不能实现路径："
+                    "解除权成立不表示合同自动解除，应依"
                     "第565条主张并确定生效时点；未先通知而直接起诉或申请仲裁的，须经法院或"
                     "仲裁机构确认解除主张。存在足以实现合同目的的替代履行时本路径受阻，该"
                     "事实未知时不得输出确定解除结论。本规则不判断第564条所涉行使期限；有效"

@@ -25,17 +25,26 @@ class TransformationRecord(ContractModel):
 
 
 class AuthorityVerification(ContractModel):
-    review_status: Literal["human_verified"] = "human_verified"
+    review_id: Identifier
+    review_status: Literal["verified"] = "verified"
+    method: Literal["official_text_comparison_and_rule_review"]
     verified_on: date
     effective_status: Literal["effective"] = "effective"
+    compared_article_count: int = Field(ge=1)
+    normalized_corpus_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     checked_article_numbers: list[int] = Field(min_length=1)
     whitespace_normalized_sha256: dict[str, str]
     source_urls: list[str] = Field(min_length=1)
+    source_document_sha256: dict[str, str]
+    reviewed_upstream_revision: str = Field(min_length=1)
+    reviewed_input_sha256: dict[str, str]
+    reviewed_output_sha256: dict[str, str]
+    rule_findings: dict[str, str]
     note: str = Field(min_length=1)
 
 
 class CivilCodeManifest(ContractModel):
-    manifest_version: Literal["1.0"] = "1.0"
+    manifest_version: Literal["1.1"] = "1.1"
     dataset_id: Identifier
     source_id: Identifier
     generated_on: date
@@ -47,5 +56,5 @@ class CivilCodeManifest(ContractModel):
     outputs: list[ManifestFile] = Field(min_length=1)
     transformations: list[TransformationRecord] = Field(default_factory=list)
     authority_verification: AuthorityVerification
-    rule_review_status: dict[str, Literal["human_verified", "needs_additional_authority"]]
+    rule_review_status: dict[str, Literal["verified", "reviewed_with_limitations"]]
     limitations: list[str] = Field(default_factory=list)

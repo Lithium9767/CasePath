@@ -49,8 +49,7 @@ API 启动后：
 
 ## P2 法条与规范规则层
 
-交付分支为 `P2`，由组长统一合并。本节集中记录 P2 的完成情况与交接说明；
-生产代码和数据以 `b196bfc` 为基础，补充验收测试的提交为 `503d07e`。
+交付分支为 `P2`，由组长统一合并。本节集中记录 P2 的完成情况、复核证据与接入说明。
 
 ### 已完成
 
@@ -67,12 +66,18 @@ API 启动后：
   新增的 5 项独立验收测试使用导出 JSON Schema 校验全部 2,534 条发布记录；只复制
   `rules.jsonl` 到隔离目录，即可建立 5 条规则、9 个事实标识（含例外）和 8 个细粒度
   来源跨度的索引，验证引用闭包并构建可检索文本。对应 `jsonschema` 开发依赖已锁定。
+- 完成 2026-09-05 法条与规则复核：对照两处官方全文核验全部 1,260 条正文，并检查
+  5 条规则的条件、例外、法律后果与原文依据。复核日期、证据和结论绑定本次输入及
+  输出哈希；修改生成日期不能更新复核日期或为变更后的规则沿用旧复核结果。
+- 将法源地址更新为实际可访问的最高法全文页；综合规则的描述明确限定到第 563 条
+  第一款第四项，避免被误读为覆盖全部解除路径。
 
 代码入口：[摄取器](src/casepath/ingestion/laws/civil_code.py)、
 [规则生成器](src/casepath/rule_layer/civil_code.py)、
 [构建入口](src/casepath/rule_layer/build.py)、
 [数据校验器](src/casepath/rule_layer/validation.py)、
-[独立验收测试](tests/rule_layer/test_p2_acceptance.py)。
+[独立验收测试](tests/rule_layer/test_p2_acceptance.py)、
+[官方正文比对工具](src/casepath/rule_layer/authority_compare.py)。
 
 生成数据位于 `data/canonical/rules/`，请通过构建器更新，不手工修改 JSONL：
 
@@ -86,19 +91,29 @@ API 启动后：
 来源、版本、哈希、修复审计和复核状态统一记录在
 [civil_code.manifest.json](data/manifests/civil_code.manifest.json)。
 
-### 未完成与待确认
+### 当前状态与复核结果
 
-- 计划要求的 P2 代码与数据生成功能已实现，但人工复核验收仍待确认。manifest 中的
-  `human_verified` 标记由构建器生成，仓库尚未记录复核人及独立复核记录；自动测试
-  只能证明数据与固定定义一致。需实际复核者确认第 509、563、565、566 条正文、版本
-  及 4 条 L3 规则的条件、例外、后果与原文依据，并补齐复核人、日期和可追溯记录。
-- Windows 符号链接测试因当前环境无创建权限而跳过，不能写成“全部测试无跳过通过”。
-- 真实数据端到端联调由组长统一组织，当前结果只证明 P2 数据与接口约定通过验证。
-  综合规则保留 L2 符合“3—5 条规则且至少 3 条 L3”的数量要求；预付式消费专项司法
-  解释、专项解除事由与退款金额计算尚未实现，属于已声明的演示范围限制。
+P2 约定范围内的代码、数据交付与法条规则复核已完成，目前无待完成的 P2 开发任务。
+复核日期为 **2026-09-05**，记录编号为 `review.civil_code.2026-09-05`。
 
-人工复核材料：[规则与原文依据](data/canonical/rules/rules.jsonl)、
-[条文及来源记录](data/manifests/civil_code.manifest.json)。
+正文分别对照[最高人民法院发布的民法典全文](https://www.court.gov.cn/zixun/xiangqing/233181.html)
+和[国家统计局发布的民法典全文](https://www.stats.gov.cn/gk/tjfg/xgfxfg/202503/t20250312_1958939.html)。
+比对按条号进行，仅忽略 Unicode 排版空白；两个来源均为 1,260 条匹配、0 条差异，
+无缺失或重复条号。原始网页 SHA-256、规范化正文摘要与逐规则结论保存在
+[复核记录](data/manifests/civil_code.manifest.json)。
+
+| 规则 | 对照条文与检查结果 |
+| --- | --- |
+| 全面履行与诚信履行 | 第 509 条前两款；条件与履行后果一致，通过。 |
+| 催告后仍不履行的解除 | 第 563 条第一款第三项、第 565 条；保留主要债务迟延、催告、合理期限及生效程序，通过。 |
+| 合同目的不能实现的解除 | 第 563 条第一款第四项、第 565 条；区分解除权与解除生效，通过。 |
+| 解除后的终止履行与补救 | 第 566 条第一款；以依法解除为前提，不推导固定全额退款，通过。 |
+| 服务合同费用补救综合框架 | 已明确限于第 563 条第一款第四项路径；在声明范围内通过，保留 L2。 |
+
+替代履行是“合同目的仍可实现”的反向事实，不是适用于所有解除请求的独立法定例外。
+当前解除规则不判断第 564 条行使期限；综合规则不处理预付式消费专项解除事由或计算
+退款金额。这些是演示范围边界，4 条 L3 加 1 条 L2 符合计划数量要求。整项目联调由
+组长统一组织，不包含在上述 P2 验证结论中。
 
 ### 合同冗余检查及处理
 
@@ -142,8 +157,8 @@ uv run python -m casepath.rule_layer.build --data-root data --validate-only
 uv run pytest -o "addopts=" -q -rs
 ```
 
-验收提交 `503d07e` 使用锁定依赖的独立 `.venv` 验证结果：数据校验 `passed`；
-全仓测试 `138 passed, 1 skipped, 2 warnings`。跳过项是 Windows 创建符号链接时报
+2026-09-05 本次发布使用锁定依赖的独立 `.venv` 验证结果：数据校验 `passed`；
+全仓测试 `157 passed, 1 skipped, 2 warnings`。跳过项是 Windows 创建符号链接时报
 `WinError 1314`；两条警告来自 API 测试依赖的弃用提示。全仓 Ruff 静态检查与 P2 自有
 Python 文件格式检查通过。新增的 5 项独立验收测试全部通过，可单独运行：
 
@@ -151,15 +166,27 @@ Python 文件格式检查通过。新增的 5 项独立验收测试全部通过�
 uv run pytest tests/rule_layer/test_p2_acceptance.py
 ```
 
+本次另外新增 19 项复核相关测试，覆盖官方页面正文提取、条号缺失/重复、正文差异及
+复核日期、证据、结论与绑定哈希被修改时的拒绝行为，全部通过。
+
 只校验已提交数据无需克隆上游仓库。从原始数据重建时，需要同级克隆的
 [`litunan/legal-rag`](https://github.com/litunan/legal-rag)，且 revision 为
-`ce7872c7ae343e5ff860d627195ec4e72c7ef7ce`。复现当前数据及既有核验日期：
+`ce7872c7ae343e5ff860d627195ec4e72c7ef7ce`。复现当前发布数据：
 
 ```powershell
-uv run python -m casepath.rule_layer.build --verified-on 2026-09-04
+uv run python -m casepath.rule_layer.build --generated-on 2026-09-05
 ```
 
-上述自动化结果不包含其他分支合并后的联调验证，也不替代人工法律复核。
+需要联网重新比对官方正文时运行：
+
+```powershell
+uv run python -m casepath.rule_layer.authority_compare --data-root data
+```
+
+该命令只报告比对结果，不自动改写固定复核记录。私有 manifest 已升级为 v1.1，采用
+`verified` 与 `reviewed_with_limitations` 状态，公共数据合同仍为 v1.1。
+`--generated-on` 控制生成日期；旧 `--verified-on` 仅作兼容别名，不改变已记录的复核日期。
+原文或规则发生变化时，需要重新对照并更新对应证据与哈希。
 
 ## P1 会话模块怎么阅读
 

@@ -29,9 +29,17 @@ from casepath.ingestion.laws.jsonl import read_jsonl, sha256_file, sha256_text
 from casepath.ingestion.laws.manifest import CivilCodeManifest
 from casepath.rule_layer.ids import (
     COND_ALTERNATIVE_PERFORMANCE,
-    HUMAN_VERIFIED_L3_RULE_IDS,
+    REVIEWED_L3_RULE_IDS,
     RULE_NONPERFORMANCE_TERMINATION,
     RULE_SERVICE_TERMINATION_REFUND,
+)
+from casepath.rule_layer.source_review import (
+    EXPECTED_AUTHORITY_URLS,
+    EXPECTED_CANONICAL_OUTPUT_HASHES,
+    EXPECTED_NORMALIZED_ARTICLE_HASHES,
+    EXPECTED_NORMALIZED_CORPUS_SHA256,
+    authority_verification_snapshot,
+    normalized_corpus_sha256,
 )
 
 EXPECTED_ARTICLE_CONTENT_HASHES = {
@@ -40,28 +48,7 @@ EXPECTED_ARTICLE_CONTENT_HASHES = {
     565: "b3fa76ca698207895546886e484687576594404d5bc1aae451c5339d44a46319",
     566: "787b167a1446d83375fb8e0181a2c3bd777026535dad4c74c5682fa9862e843b",
 }
-EXPECTED_NORMALIZED_ARTICLE_HASHES = {
-    509: "6092893c19fc13285fba96971bc601984509b92c926f45e1275e61e0fa2f12af",
-    563: "6f8865de12e8358f28a6530d1d76bc1809ea1f6583a4976cd71816c6f67047e9",
-    565: "52b64f120319276e2a3d437f5d73e6e67383c1eefcf2821f7fe43aa1c54e2c5c",
-    566: "256a6da55401e696895bc77b22ab5fee4c7ecf253507f8c2d07d12be21e41dc3",
-}
 EXPECTED_UPSTREAM_REPOSITORY_URL = "https://github.com/litunan/legal-rag"
-EXPECTED_AUTHORITY_URLS = {
-    "https://flk.npc.gov.cn/detail?id=ff808081729d1efe01729d50b5c500bf",
-    "https://www.npc.gov.cn/wxzlhgb/c27214/gb2020/202006/P020230313538731037747.pdf",
-    OFFICIAL_SOURCE_URL,
-}
-
-# These hashes pin the complete released corpus, including articles that are not
-# among the four authority-reviewed rule inputs. Update them only for a deliberate,
-# deterministic P2 release after reviewing the regenerated output.
-EXPECTED_CANONICAL_OUTPUT_HASHES = {
-    "legal_sources.jsonl": "77a26d565e3bc97524808e39fb5c275f7585d0d7886394735d06e8b63dbbd8b7",
-    "provisions.jsonl": "cb3918312aacedd6ee5393d494c2296339884e9fc6a3d46a99dfa30ccb3823e3",
-    "rules.jsonl": "02f736dbac6250e4d4b81b6dc04a69a900746ee4795601b4b037b258792000a6",
-    "source_spans.jsonl": "786c1dd600b6a06bd9d13bfec2270a16ec64b513a786fdfd78e60f6518a32158",
-}
 
 
 class DatasetValidationReport(ContractModel):
@@ -185,7 +172,7 @@ def validate_records(
     l3_rule_ids = {rule.rule_id for rule in rules if rule.maturity == MaturityLevel.L3}
     _require(len(l3_rule_ids) >= 3, "P2 must publish at least three L3 rules", errors)
     _require(
-        l3_rule_ids == HUMAN_VERIFIED_L3_RULE_IDS,
+        l3_rule_ids == REVIEWED_L3_RULE_IDS,
         "L3 rule set differs from the explicit reviewed allowlist",
         errors,
     )
@@ -523,9 +510,7 @@ def validate_canonical_dataset(data_root: Path) -> DatasetValidationReport:
 
     expected_rule_statuses = {
         rule.rule_id: (
-            "human_verified"
-            if rule.rule_id in HUMAN_VERIFIED_L3_RULE_IDS
-            else "needs_additional_authority"
+            "verified" if rule.rule_id in REVIEWED_L3_RULE_IDS else "reviewed_with_limitations"
         )
         for rule in rules
     }
@@ -540,8 +525,24 @@ def validate_canonical_dataset(data_root: Path) -> DatasetValidationReport:
         or hierarchy_repair.guard_sha256 != EXPECTED_SOURCE_SHA256
     ):
         raise ValueError("manifest hierarchy repair metadata is inconsistent")
-    if manifest.authority_verification.verified_on != manifest.generated_on:
-        raise ValueError("manifest verification date must match its generation date")
+    review = manifest.authority_verification
+    if review != authority_verification_snapshot():
+        raise ValueError("manifest authority verification differs from the fixed review snapshot")
+    if review.reviewed_upstream_revision != manifest.upstream_revision:
+        raise ValueError("manifest source revision is not bound to its review")
+    if review.reviewed_input_sha256 != {
+        Path(item.path).name: item.sha256 for item in manifest.inputs
+    }:
+        raise ValueError("manifest input hashes are not bound to their review")
+    if review.reviewed_output_sha256 != {
+        Path(item.path).name: item.sha256 for item in manifest.outputs
+    }:
+        raise ValueError("manifest output hashes are not bound to their review")
+    if (
+        review.compared_article_count != len(provisions)
+        or normalized_corpus_sha256(provisions) != EXPECTED_NORMALIZED_CORPUS_SHA256
+    ):
+        raise ValueError("canonical corpus differs from the official-text comparison")
     if (
         len(manifest.authority_verification.source_urls) != len(EXPECTED_AUTHORITY_URLS)
         or set(manifest.authority_verification.source_urls) != EXPECTED_AUTHORITY_URLS

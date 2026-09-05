@@ -23,7 +23,7 @@ EXPECTED_SOURCE_SHA256 = "405e960cec922c11c466bebfd0ddc3baca11cd2678861ac11e7590
 EXPECTED_STATS_SHA256 = "8e0d6d501651d2e5a0cc23d45deeb8e7451671ef6831a2184662f66d7f40f3eb"
 EXPECTED_UPSTREAM_REVISION = "ce7872c7ae343e5ff860d627195ec4e72c7ef7ce"
 EXPECTED_HIERARCHY_REPAIR_COUNT = 109
-OFFICIAL_SOURCE_URL = "https://wb.flk.npc.gov.cn/flfg/PDF/bd53dd912c1048f2aecbaa229238334b.pdf"
+OFFICIAL_SOURCE_URL = "https://www.court.gov.cn/zixun/xiangqing/233181.html"
 
 HIERARCHY_FIELDS = ("book", "sub_book", "chapter", "section")
 
