@@ -1,4 +1,5 @@
 from .interfaces import (
+    AnswerInterpreter,
     CaseRetriever,
     ConditionProjector,
     ExplanationPlanner,
@@ -7,6 +8,7 @@ from .interfaces import (
 )
 
 __all__ = [
+    "AnswerInterpreter",
     "CaseRetriever",
     "ConditionProjector",
     "ExplanationPlanner",

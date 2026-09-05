@@ -1,5 +1,10 @@
+from dataclasses import replace
+
+import pytest
+
 from casepath.bootstrap import build_demo_workflow
-from casepath.contracts import ConditionStatus, QueryState, SessionStatus
+from casepath.contracts import DialogueTurn, QueryState, QuestionCandidate, SessionStatus
+from casepath.workflow import CasePathWorkflow, WorkflowInvariantError
 
 
 def test_demo_workflow_asks_high_value_question():
@@ -17,24 +22,70 @@ def test_demo_workflow_asks_high_value_question():
     assert snapshot.retrieval_bundle.support_case_refs
 
 
-def test_answer_updates_condition_and_stops_reasking_it():
+def test_zero_question_budget_stops_without_resolving_unknown():
+    """预算耗尽只是停止追问，不得把未知条件当成满足。"""
+    workflow = CasePathWorkflow(build_demo_workflow().dependencies, max_question_turns=0)
+    snapshot = workflow.run(QueryState(session_id="budget", initial_query="健身房关门"))
+    assert snapshot.next_question is None
+    assert "QUESTION_BUDGET_REACHED" in snapshot.trace
+    assert "cond.performance_impossible" in snapshot.explanation_plan.unresolved_condition_ids
+
+
+def test_demo_policy_filters_an_answered_unknown_condition():
+    """回答“不知道”后条件仍为 UNKNOWN，但 Demo 策略不能重复选择它。"""
     workflow = build_demo_workflow()
-    initial = workflow.run(
-        QueryState(
-            session_id="test-session",
-            initial_query="我在健身房充了5000元，店关门了，还有余额。",
-        )
+    initial = workflow.run(QueryState(session_id="unknown", initial_query="健身房关门"))
+    question = initial.next_question
+    state = QueryState.model_validate(
+        {
+            **initial.query_state.model_dump(),
+            "dialogue_history": [
+                DialogueTurn(
+                    turn_id=1,
+                    question_id=question.question_id,
+                    condition_id=question.condition_id,
+                    question=question.question,
+                    answer="不清楚",
+                )
+            ],
+        }
     )
-    assert initial.next_question is not None
-    updated = workflow.apply_answer(
-        initial.query_state,
-        question_id=initial.next_question.question_id,
-        question=initial.next_question.question,
-        condition_id="cond.performance_impossible",
-        answer="所有门店都永久关闭了",
-        status=ConditionStatus.SATISFIED,
+    result = workflow.run(state)
+    assert result.next_question is None
+    assert result.query_state.status == SessionStatus.READY_TO_EXPLAIN
+
+
+def test_workflow_rejects_a_policy_that_selects_answered_condition():
+    """防重是策略职责；工作流只校验不变量，不把策略错误伪装成正常停止。"""
+    base = build_demo_workflow()
+    initial = base.run(QueryState(session_id="bad-policy", initial_query="健身房关门"))
+    question = initial.next_question
+    state = QueryState.model_validate(
+        {
+            **initial.query_state.model_dump(),
+            "dialogue_history": [
+                DialogueTurn(
+                    turn_id=1,
+                    question_id=question.question_id,
+                    condition_id=question.condition_id,
+                    question=question.question,
+                    answer="不清楚",
+                )
+            ],
+        }
     )
 
-    assert updated.next_question is None
-    assert updated.query_state.status == SessionStatus.READY_TO_EXPLAIN
-    assert "支持进一步分析" in updated.explanation_plan.main_explanation
+    class RepeatingPolicy:
+        def select(self, state, bundle):
+            return QuestionCandidate(
+                question_id=question.question_id,
+                condition_id=question.condition_id,
+                question=question.question,
+                why_asked=question.why_asked,
+                options=question.options,
+                utility=question.utility,
+            )
+
+    workflow = CasePathWorkflow(replace(base.dependencies, question_policy=RepeatingPolicy()))
+    with pytest.raises(WorkflowInvariantError, match="answered question"):
+        workflow.run(state)

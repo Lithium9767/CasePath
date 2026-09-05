@@ -1,0 +1,20 @@
+{
+  "contract_version": "1.2",
+  "new_facts": [
+    {
+      "fact_id": "fact.answer.example.1",
+      "text": "不清楚是暂时关闭还是永久停业",
+      "predicate": null,
+      "value": null,
+      "source_turn": 1
+    }
+  ],
+  "condition_updates": [
+    {
+      "condition_id": "cond.performance_impossible",
+      "status": "UNKNOWN",
+      "supporting_fact_ids": ["fact.answer.example.1"],
+      "last_updated_turn": 1
+    }
+  ]
+}

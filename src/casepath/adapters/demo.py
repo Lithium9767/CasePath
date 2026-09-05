@@ -1,3 +1,11 @@
+"""P4 核心算法的演示基线。
+
+负责人：P4。P4 可在保持公共 contracts 与 ports 签名兼容的前提下，修改或替换
+规则检索、案例检索、条件投影、追问策略和解释规划实现。
+本文件不负责会话保存、HTTP API、Neo4j/LLM 连接配置或最终法律判断；当前实现
+仅用于联调，不能视为正式 P4-v1 算法。
+"""
+
 from __future__ import annotations
 
 from casepath.contracts import (
@@ -108,10 +116,19 @@ class DemoConditionProjector:
 class DemoQuestionPolicy:
     def select(self, state: QueryState, bundle: RetrievalBundle) -> QuestionCandidate | None:
         by_id = {item.condition_id: item.status for item in state.condition_states}
-        if by_id.get("cond.performance_impossible") == ConditionStatus.UNKNOWN:
+        asked_question_ids = {turn.question_id for turn in state.dialogue_history}
+        asked_condition_ids = {turn.condition_id for turn in state.dialogue_history}
+        question_id = "question.performance_impossible.1"
+        condition_id = "cond.performance_impossible"
+        # Demo 也遵守端口约定：已问条件由策略过滤，工作流只保留错误检测。
+        if (
+            by_id.get(condition_id) == ConditionStatus.UNKNOWN
+            and question_id not in asked_question_ids
+            and condition_id not in asked_condition_ids
+        ):
             return QuestionCandidate(
-                question_id="question.performance_impossible.1",
-                condition_id="cond.performance_impossible",
+                question_id=question_id,
+                condition_id=condition_id,
                 question="健身房是永久停止经营，还是暂时关闭？",
                 why_asked="是否已经无法继续履行，会改变解除和返还规则的解释分支。",
                 options=["永久停止经营", "暂时关闭", "仍可在其他门店使用", "不清楚"],

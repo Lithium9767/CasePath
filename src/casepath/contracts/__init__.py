@@ -36,10 +36,12 @@ from .rule import (
     RuleException,
     RuleRecord,
 )
+from .session import AnswerInterpretation, CreateSessionRequest
 from .source import LegalSourceRecord, ProvisionRecord
 from .workflow import WorkflowSnapshot
 
 __all__ = [
+    "AnswerInterpretation",
     "AnswerRequest",
     "CandidateClaim",
     "CapabilityMode",
@@ -54,6 +56,7 @@ __all__ = [
     "ConditionStatus",
     "ContractModel",
     "CourtFinding",
+    "CreateSessionRequest",
     "DecisionItem",
     "DecisionStatus",
     "DialogueTurn",

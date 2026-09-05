@@ -1,0 +1,131 @@
+{
+  "$defs": {
+    "ConditionStatus": {
+      "enum": [
+        "SATISFIED",
+        "NOT_SATISFIED",
+        "UNKNOWN",
+        "CONFLICTING",
+        "NOT_APPLICABLE"
+      ],
+      "title": "ConditionStatus",
+      "type": "string"
+    },
+    "QueryConditionState": {
+      "additionalProperties": false,
+      "properties": {
+        "condition_id": {
+          "minLength": 1,
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ConditionStatus",
+          "default": "UNKNOWN"
+        },
+        "supporting_fact_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Supporting Fact Ids",
+          "type": "array"
+        },
+        "last_updated_turn": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Last Updated Turn",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "condition_id"
+      ],
+      "title": "QueryConditionState",
+      "type": "object"
+    },
+    "UserFact": {
+      "additionalProperties": false,
+      "properties": {
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "predicate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Predicate"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "source_turn": {
+          "minimum": 0,
+          "title": "Source Turn",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fact_id",
+        "text",
+        "source_turn"
+      ],
+      "title": "UserFact",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "P4 返回事实和条件更新，不得替换整个会话或生成最终法律判断。",
+  "properties": {
+    "contract_version": {
+      "const": "1.2",
+      "default": "1.2",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "new_facts": {
+      "items": {
+        "$ref": "#/$defs/UserFact"
+      },
+      "title": "New Facts",
+      "type": "array"
+    },
+    "condition_updates": {
+      "items": {
+        "$ref": "#/$defs/QueryConditionState"
+      },
+      "title": "Condition Updates",
+      "type": "array"
+    }
+  },
+  "title": "AnswerInterpretation",
+  "type": "object"
+}
