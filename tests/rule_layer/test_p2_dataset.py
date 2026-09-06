@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 from datetime import date
 from pathlib import Path
@@ -16,11 +17,21 @@ from casepath.ingestion.laws.jsonl import (
     write_jsonl,
 )
 from casepath.ingestion.laws.manifest import CivilCodeManifest
-from casepath.rule_layer.build import build_dataset
+from casepath.rule_layer.build import _build_parser, build_dataset
 from casepath.rule_layer.ids import (
+    COND_ALTERNATIVE_PERFORMANCE,
     COND_PERFORMANCE_IMPOSSIBLE,
-    HUMAN_VERIFIED_L3_RULE_IDS,
+    REVIEWED_L3_RULE_IDS,
+    RULE_GOOD_FAITH,
+    RULE_NONPERFORMANCE_TERMINATION,
     RULE_SERVICE_TERMINATION_REFUND,
+)
+from casepath.rule_layer.source_review import (
+    EXPECTED_CANONICAL_OUTPUT_HASHES,
+    EXPECTED_NORMALIZED_CORPUS_SHA256,
+    REVIEWED_ON,
+    authority_verification_snapshot,
+    normalized_corpus_sha256,
 )
 from casepath.rule_layer.validation import (
     EXPECTED_ARTICLE_CONTENT_HASHES,
@@ -183,6 +194,26 @@ def test_validator_rejects_drifted_rule_references_and_condition_definitions(
         validate_records(legal_sources, provisions, rules, spans)
 
 
+def test_validator_rechecks_group_coverage_and_diagnostic_role(
+    canonical_data_root: Path,
+) -> None:
+    legal_sources, provisions, rules, spans = _read_dataset(canonical_data_root)
+    rules[0].condition_groups[0].member_condition_ids.pop()
+    with pytest.raises(ValueError, match="not assigned to a group"):
+        validate_records(legal_sources, provisions, rules, spans)
+
+    legal_sources, provisions, rules, spans = _read_dataset(canonical_data_root)
+    target_rule = next(rule for rule in rules if rule.rule_id == RULE_NONPERFORMANCE_TERMINATION)
+    diagnostic_group = next(
+        group
+        for group in target_rule.condition_groups
+        if COND_ALTERNATIVE_PERFORMANCE in group.member_condition_ids
+    )
+    diagnostic_group.role = "CORE"
+    with pytest.raises(ValueError, match="alternative-performance diagnostic"):
+        validate_records(legal_sources, provisions, rules, spans)
+
+
 def test_validator_rejects_source_metadata_span_source_and_empty_l3_evidence(
     canonical_data_root: Path,
 ) -> None:
@@ -236,7 +267,9 @@ def test_validator_rejects_self_consistent_changes_to_the_pinned_corpus(
     legal_sources, provisions, rules, spans = _read_dataset(copied_data_root)
 
     provisions[0].text += "篡改"
-    full_span = next(span for span in spans if span.span_id == provisions[0].source_spans[0].span_id)
+    full_span = next(
+        span for span in spans if span.span_id == provisions[0].source_spans[0].span_id
+    )
     full_span.quote = provisions[0].text
     full_span.end_offset = len(provisions[0].text)
     provisions[0].source_spans = [full_span.model_copy(deep=True)]
@@ -274,9 +307,7 @@ def test_manifest_pins_inputs_repairs_reviews_and_output_hashes(
     assert manifest.transformations[0].guard_sha256 == EXPECTED_SOURCE_SHA256
     assert manifest.rule_review_status == {
         rule.rule_id: (
-            "human_verified"
-            if rule.rule_id in HUMAN_VERIFIED_L3_RULE_IDS
-            else "needs_additional_authority"
+            "verified" if rule.rule_id in REVIEWED_L3_RULE_IDS else "reviewed_with_limitations"
         )
         for rule in rules
     }
@@ -286,12 +317,93 @@ def test_manifest_pins_inputs_repairs_reviews_and_output_hashes(
         565,
         566,
     }
+    assert manifest.manifest_version == "1.1"
+    assert manifest.authority_verification == authority_verification_snapshot()
+    assert manifest.authority_verification.compared_article_count == 1260
+    assert manifest.authority_verification.verified_on == REVIEWED_ON
+    _, provisions, _, _ = _read_dataset(canonical_data_root)
+    assert normalized_corpus_sha256(provisions) == EXPECTED_NORMALIZED_CORPUS_SHA256
 
     manifest_root = canonical_data_root.parent
     for output in manifest.outputs:
         output_path = manifest_root / output.path
         assert output_path.is_file()
         assert sha256_file(output_path) == output.sha256
+        assert output.sha256 == EXPECTED_CANONICAL_OUTPUT_HASHES[output_path.name]
+
+
+@pytest.mark.parametrize(
+    ("field", "replacement", "error_pattern"),
+    [
+        ("verified_on", "2026-09-07", "fixed review snapshot"),
+        ("method", "unchecked_copy", "official_text_comparison_and_rule_review"),
+        (
+            "source_document_sha256",
+            {"https://www.court.gov.cn/zixun/xiangqing/233181.html": "0" * 64},
+            "fixed review snapshot",
+        ),
+        ("reviewed_output_sha256", {"rules.jsonl": "0" * 64}, "fixed review snapshot"),
+        ("reviewed_input_sha256", {"民法典_法条.json": "0" * 64}, "fixed review snapshot"),
+        ("rule_findings", {RULE_GOOD_FAITH: "未经对照的替代结论"}, "fixed review snapshot"),
+    ],
+)
+def test_validator_rejects_changes_to_the_fixed_review(
+    canonical_data_root: Path,
+    tmp_path: Path,
+    field: str,
+    replacement: object,
+    error_pattern: str,
+) -> None:
+    copied_data_root = tmp_path / "data"
+    shutil.copytree(canonical_data_root, copied_data_root)
+    manifest_path = copied_data_root / "manifests" / "civil_code.manifest.json"
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    payload["authority_verification"][field] = replacement
+    if field == "verified_on":
+        # 即使同时伪造生成日期，也不能让篡改后的复核日期变为有效。
+        payload["generated_on"] = replacement
+    write_json(manifest_path, payload)
+
+    with pytest.raises(ValueError, match=error_pattern):
+        validate_canonical_dataset(copied_data_root)
+
+
+def test_normalized_corpus_digest_detects_changes_outside_rule_articles(
+    canonical_data_root: Path,
+) -> None:
+    _, provisions, _, _ = _read_dataset(canonical_data_root)
+    assert normalized_corpus_sha256(provisions) == EXPECTED_NORMALIZED_CORPUS_SHA256
+    provisions[0].text += "改动"
+    assert normalized_corpus_sha256(provisions) != EXPECTED_NORMALIZED_CORPUS_SHA256
+
+
+@pytest.mark.parametrize("option", ["--generated-on", "--verified-on"])
+def test_generation_date_cli_accepts_the_legacy_alias(option: str) -> None:
+    args = _build_parser().parse_args([option, "2026-09-07"])
+    assert args.generated_on == date(2026, 9, 7)
+
+
+@pytest.mark.skipif(
+    not UPSTREAM_SOURCE.is_file() or not UPSTREAM_STATS.is_file(),
+    reason="external legal-rag checkout is absent",
+)
+def test_build_generation_date_does_not_change_the_fixed_review(tmp_path: Path) -> None:
+    manifests = []
+    generation_dates = [date(2026, 9, 4), date(2026, 9, 7)]
+    for generated_on in generation_dates:
+        result = build_dataset(
+            source_path=UPSTREAM_SOURCE,
+            stats_path=UPSTREAM_STATS,
+            data_root=tmp_path / generated_on.isoformat() / "data",
+            verified_on=generated_on,
+            upstream_revision="ce7872c7ae343e5ff860d627195ec4e72c7ef7ce",
+        )
+        manifests.append(CivilCodeManifest.model_validate_json(result.manifest_path.read_bytes()))
+
+    assert [manifest.generated_on for manifest in manifests] == generation_dates
+    assert manifests[0].authority_verification == manifests[1].authority_verification
+    assert manifests[0].authority_verification == authority_verification_snapshot()
+    assert manifests[0].outputs == manifests[1].outputs
 
 
 @pytest.mark.skipif(

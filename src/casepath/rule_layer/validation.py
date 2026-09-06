@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections import Counter
 from pathlib import Path
 
 from pydantic import Field
@@ -30,8 +31,18 @@ from casepath.ingestion.laws.civil_code import (
 from casepath.ingestion.laws.jsonl import read_jsonl, sha256_file, sha256_text
 from casepath.ingestion.laws.manifest import CivilCodeManifest
 from casepath.rule_layer.ids import (
-    HUMAN_VERIFIED_L3_RULE_IDS,
+    COND_ALTERNATIVE_PERFORMANCE,
+    REVIEWED_L3_RULE_IDS,
+    RULE_NONPERFORMANCE_TERMINATION,
     RULE_SERVICE_TERMINATION_REFUND,
+)
+from casepath.rule_layer.source_review import (
+    EXPECTED_AUTHORITY_URLS,
+    EXPECTED_CANONICAL_OUTPUT_HASHES,
+    EXPECTED_NORMALIZED_ARTICLE_HASHES,
+    EXPECTED_NORMALIZED_CORPUS_SHA256,
+    authority_verification_snapshot,
+    normalized_corpus_sha256,
 )
 
 EXPECTED_ARTICLE_CONTENT_HASHES = {
@@ -40,23 +51,14 @@ EXPECTED_ARTICLE_CONTENT_HASHES = {
     565: "b3fa76ca698207895546886e484687576594404d5bc1aae451c5339d44a46319",
     566: "787b167a1446d83375fb8e0181a2c3bd777026535dad4c74c5682fa9862e843b",
 }
-EXPECTED_NORMALIZED_ARTICLE_HASHES = {
-    509: "6092893c19fc13285fba96971bc601984509b92c926f45e1275e61e0fa2f12af",
-    563: "6f8865de12e8358f28a6530d1d76bc1809ea1f6583a4976cd71816c6f67047e9",
-    565: "52b64f120319276e2a3d437f5d73e6e67383c1eefcf2821f7fe43aa1c54e2c5c",
-    566: "256a6da55401e696895bc77b22ab5fee4c7ecf253507f8c2d07d12be21e41dc3",
-}
 # 对1260条“条号+正文”的整体内容做固定校验。它不属于跨模块合同字段，
 # 因而合同序列化格式变化时无需重算，同时仍能发现任意法条被篡改。
 EXPECTED_CANONICAL_CONTENT_SHA256 = (
     "07153024221251ba09daef586afebf63553c11a44ea316161087b91ceac52382"
 )
 EXPECTED_UPSTREAM_REPOSITORY_URL = "https://github.com/litunan/legal-rag"
-EXPECTED_AUTHORITY_URLS = {
-    "https://flk.npc.gov.cn/detail?id=ff808081729d1efe01729d50b5c500bf",
-    "https://www.npc.gov.cn/wxzlhgb/c27214/gb2020/202006/P020230313538731037747.pdf",
-    OFFICIAL_SOURCE_URL,
-}
+
+
 class DatasetValidationReport(ContractModel):
     legal_source_count: int = Field(ge=0)
     provision_count: int = Field(ge=0)
@@ -98,6 +100,60 @@ def _validate_span(
     _require(actual_quote == span.quote, f"span {span.span_id} quote/offset mismatch", errors)
 
 
+def _validate_condition_groups(rule: RuleRecord, errors: list[str]) -> None:
+    """再次检查可变模型的条件分组，防止构造后修改绕过Pydantic校验。"""
+
+    condition_ids = [condition.condition_id for condition in rule.conditions]
+    group_ids = [group.group_id for group in rule.condition_groups]
+    _require(
+        len(condition_ids) == len(set(condition_ids)),
+        f"rule {rule.rule_id} has duplicate condition IDs",
+        errors,
+    )
+    _require(
+        len(group_ids) == len(set(group_ids)),
+        f"rule {rule.rule_id} has duplicate condition group IDs",
+        errors,
+    )
+
+    known_condition_ids = set(condition_ids)
+    memberships: Counter[str] = Counter()
+    core_group_count = 0
+    for group in rule.condition_groups:
+        if group.role == ConditionGroupRole.CORE:
+            core_group_count += 1
+        member_ids = group.member_condition_ids
+        _require(
+            len(member_ids) == len(set(member_ids)),
+            f"rule {rule.rule_id} group {group.group_id} repeats a condition",
+            errors,
+        )
+        _require(
+            not (set(member_ids) - known_condition_ids),
+            f"rule {rule.rule_id} group {group.group_id} references unknown conditions",
+            errors,
+        )
+        memberships.update(member_ids)
+
+    missing_ids = known_condition_ids - memberships.keys()
+    repeated_ids = {condition_id for condition_id, count in memberships.items() if count > 1}
+    _require(
+        not missing_ids,
+        f"rule {rule.rule_id} has conditions not assigned to a group",
+        errors,
+    )
+    _require(
+        not repeated_ids,
+        f"rule {rule.rule_id} assigns conditions to multiple groups",
+        errors,
+    )
+    _require(
+        not condition_ids or core_group_count > 0,
+        f"rule {rule.rule_id} has no CORE condition group",
+        errors,
+    )
+
+
 def validate_records(
     legal_sources: list[LegalSourceRecord],
     provisions: list[ProvisionRecord],
@@ -129,7 +185,7 @@ def validate_records(
     l3_rule_ids = {rule.rule_id for rule in rules if rule.maturity == MaturityLevel.L3}
     _require(len(l3_rule_ids) >= 3, "P2 must publish at least three L3 rules", errors)
     _require(
-        l3_rule_ids == HUMAN_VERIFIED_L3_RULE_IDS,
+        l3_rule_ids == REVIEWED_L3_RULE_IDS,
         "L3 rule set differs from the explicit reviewed allowlist",
         errors,
     )
@@ -137,9 +193,7 @@ def validate_records(
     provision_by_number = {int(record.article_no): record for record in provisions}
     provision_by_id = {record.provision_id: record for record in provisions}
     span_by_id = {span.span_id: span for span in source_spans}
-    canonical_content = "\n".join(
-        f"{record.article_no}\t{record.text}" for record in provisions
-    )
+    canonical_content = "\n".join(f"{record.article_no}\t{record.text}" for record in provisions)
     _require(
         sha256_text(canonical_content) == EXPECTED_CANONICAL_CONTENT_SHA256,
         "canonical Civil Code content hash mismatch",
@@ -266,7 +320,9 @@ def validate_records(
             )
 
     condition_by_id = {}
+    diagnostic_alternative_rule_ids: set[str] = set()
     for rule in rules:
+        _validate_condition_groups(rule, errors)
         _require(bool(rule.source_spans), f"rule {rule.rule_id} has no embedded spans", errors)
         if rule.maturity == MaturityLevel.L3:
             _require(bool(rule.conditions), f"L3 rule {rule.rule_id} has no conditions", errors)
@@ -305,6 +361,8 @@ def validate_records(
             if group.role == ConditionGroupRole.DIAGNOSTIC
             for condition_id in group.member_condition_ids
         }
+        if COND_ALTERNATIVE_PERFORMANCE in diagnostic_condition_ids:
+            diagnostic_alternative_rule_ids.add(rule.rule_id)
         for item in [*rule.exceptions, *rule.consequences]:
             _require(
                 bool(item.source_span_ids),
@@ -357,6 +415,13 @@ def validate_records(
                     f"rule {rule.rule_id} embeds a span without ProvisionRef {expected_provision_id}",
                     errors,
                 )
+
+    _require(
+        diagnostic_alternative_rule_ids
+        == {RULE_NONPERFORMANCE_TERMINATION, RULE_SERVICE_TERMINATION_REFUND},
+        "alternative-performance diagnostic is missing from or added outside its reviewed rules",
+        errors,
+    )
 
     if errors:
         raise ValueError("P2 dataset validation failed:\n- " + "\n- ".join(errors))
@@ -430,6 +495,9 @@ def validate_canonical_dataset(data_root: Path) -> DatasetValidationReport:
             raise ValueError(f"manifest output is missing: {output.path}")
         if sha256_file(output_path) != output.sha256:
             raise ValueError(f"manifest hash mismatch for {output.path}")
+        expected_release_hash = EXPECTED_CANONICAL_OUTPUT_HASHES[output_path.name]
+        if output.sha256 != expected_release_hash:
+            raise ValueError(f"pinned release hash mismatch for {output.path}")
         expected_record_count = expected_outputs[normalized_path]
         if output.record_count != expected_record_count:
             raise ValueError(f"manifest record count mismatch for {output.path}")
@@ -438,9 +506,7 @@ def validate_canonical_dataset(data_root: Path) -> DatasetValidationReport:
 
     expected_rule_statuses = {
         rule.rule_id: (
-            "human_verified"
-            if rule.rule_id in HUMAN_VERIFIED_L3_RULE_IDS
-            else "needs_additional_authority"
+            "verified" if rule.rule_id in REVIEWED_L3_RULE_IDS else "reviewed_with_limitations"
         )
         for rule in rules
     }
@@ -455,8 +521,24 @@ def validate_canonical_dataset(data_root: Path) -> DatasetValidationReport:
         or hierarchy_repair.guard_sha256 != EXPECTED_SOURCE_SHA256
     ):
         raise ValueError("manifest hierarchy repair metadata is inconsistent")
-    if manifest.authority_verification.verified_on != manifest.generated_on:
-        raise ValueError("manifest verification date must match its generation date")
+    review = manifest.authority_verification
+    if review != authority_verification_snapshot():
+        raise ValueError("manifest authority verification differs from the fixed review snapshot")
+    if review.reviewed_upstream_revision != manifest.upstream_revision:
+        raise ValueError("manifest source revision is not bound to its review")
+    if review.reviewed_input_sha256 != {
+        Path(item.path).name: item.sha256 for item in manifest.inputs
+    }:
+        raise ValueError("manifest input hashes are not bound to their review")
+    if review.reviewed_output_sha256 != {
+        Path(item.path).name: item.sha256 for item in manifest.outputs
+    }:
+        raise ValueError("manifest output hashes are not bound to their review")
+    if (
+        review.compared_article_count != len(provisions)
+        or normalized_corpus_sha256(provisions) != EXPECTED_NORMALIZED_CORPUS_SHA256
+    ):
+        raise ValueError("canonical corpus differs from the official-text comparison")
     if (
         len(manifest.authority_verification.source_urls) != len(EXPECTED_AUTHORITY_URLS)
         or set(manifest.authority_verification.source_urls) != EXPECTED_AUTHORITY_URLS
