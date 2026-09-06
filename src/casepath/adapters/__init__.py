@@ -1,4 +1,5 @@
 from .demo import (
+    DemoCaseComparator,
     DemoCaseRetriever,
     DemoConditionProjector,
     DemoExplanationPlanner,
@@ -7,6 +8,7 @@ from .demo import (
 )
 
 __all__ = [
+    "DemoCaseComparator",
     "DemoCaseRetriever",
     "DemoConditionProjector",
     "DemoExplanationPlanner",

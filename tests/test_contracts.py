@@ -7,12 +7,14 @@ from casepath.contracts import (
     AnswerRequest,
     CapabilityStatus,
     CaseRecord,
+    ComparisonBundle,
     ErrorResponse,
     ExplanationPlan,
     LegalSourceRecord,
     ProvisionRecord,
     QueryState,
     RetrievalBundle,
+    RetrievalPath,
     RuleRecord,
     WorkflowSnapshot,
 )
@@ -27,6 +29,7 @@ EXAMPLES = Path("contracts/examples")
         ("provision-record.json", ProvisionRecord),
         ("rule-record.json", RuleRecord),
         ("case-record.json", CaseRecord),
+        ("comparison-bundle.json", ComparisonBundle),
         ("query-state.json", QueryState),
         ("retrieval-bundle.json", RetrievalBundle),
         ("explanation-plan.json", ExplanationPlan),
@@ -36,7 +39,7 @@ EXAMPLES = Path("contracts/examples")
         ("workflow-snapshot.json", WorkflowSnapshot),
     ],
 )
-def test_examples_match_frozen_contracts(filename, model):
+def test_examples_match_contracts(filename, model):
     payload = json.loads((EXAMPLES / filename).read_text(encoding="utf-8"))
     parsed = model.model_validate(payload)
     assert parsed.contract_version == payload["contract_version"]
@@ -107,6 +110,26 @@ def test_query_contract_rejects_unknown_fact_reference():
         QueryState.model_validate(payload)
 
 
+def test_query_contract_rejects_unknown_mapping_evidence_fact():
+    payload = json.loads((EXAMPLES / "query-state.json").read_text(encoding="utf-8"))
+    payload["condition_states"] = [
+        {
+            "condition_id": "cond.test",
+            "status": "SATISFIED",
+            "evidence": [
+                {
+                    "fact_id": "fact.does_not_exist",
+                    "relation": "SUPPORTS",
+                    "confidence": 0.8,
+                    "reason": "测试未知引用",
+                }
+            ],
+        }
+    ]
+    with pytest.raises(ValueError, match="unknown user facts"):
+        QueryState.model_validate(payload)
+
+
 def test_workflow_snapshot_rejects_mismatched_session():
     payload = json.loads((EXAMPLES / "workflow-snapshot.json").read_text(encoding="utf-8"))
     payload["explanation_plan"]["session_id"] = "another-session"
@@ -114,8 +137,70 @@ def test_workflow_snapshot_rejects_mismatched_session():
         WorkflowSnapshot.model_validate(payload)
 
 
+def test_v1_3_workflow_snapshot_requires_comparison_bundle():
+    payload = json.loads((EXAMPLES / "workflow-snapshot.json").read_text(encoding="utf-8"))
+    payload["contract_version"] = "1.3"
+    with pytest.raises(ValueError, match="requires a comparison bundle"):
+        WorkflowSnapshot.model_validate(payload)
+
+
+def test_retrieval_path_requires_adjacent_edges():
+    with pytest.raises(ValueError, match="exactly one edge"):
+        RetrievalPath(
+            node_ids=["rule.1", "condition.1", "case.1"],
+            edge_types=["HAS_CONDITION"],
+            score=0.8,
+        )
+
+
 def test_answer_request_rejects_frontend_condition_status():
     payload = json.loads((EXAMPLES / "answer-request.json").read_text(encoding="utf-8"))
     payload["status"] = "SATISFIED"
     with pytest.raises(ValueError):
         AnswerRequest.model_validate(payload)
+
+
+def test_answer_request_rejects_blank_without_rewriting_raw_text():
+    with pytest.raises(ValueError, match="answer must not be blank"):
+        AnswerRequest(
+            question_id="question.test",
+            condition_id="condition.test",
+            answer=" \n ",
+        )
+    request = AnswerRequest(
+        question_id="question.test",
+        condition_id="condition.test",
+        answer=" 原始回答 ",
+    )
+    assert request.answer == " 原始回答 "
+
+
+def test_v1_3_query_requires_evidence_to_match_legacy_summary():
+    payload = json.loads((EXAMPLES / "query-state.json").read_text(encoding="utf-8"))
+    payload["contract_version"] = "1.3"
+    payload["user_facts"] = [
+        {"fact_id": "fact.a", "text": "事实A", "source_turn": 0},
+        {"fact_id": "fact.b", "text": "事实B", "source_turn": 0},
+    ]
+    payload["condition_states"] = [
+        {
+            "condition_id": "cond.test",
+            "status": "SATISFIED",
+            "supporting_fact_ids": ["fact.a"],
+            "evidence": [
+                {
+                    "fact_id": "fact.b",
+                    "relation": "SUPPORTS",
+                    "confidence": 0.8,
+                    "reason": "测试不一致摘要",
+                }
+            ],
+        }
+    ]
+    with pytest.raises(ValueError, match="inconsistent evidence summary"):
+        QueryState.model_validate(payload)
+
+    # 冻结的v1.1数据没有细粒度evidence，仍允许只携带旧摘要字段。
+    payload["contract_version"] = "1.1"
+    payload["condition_states"][0]["evidence"] = []
+    assert QueryState.model_validate(payload).contract_version == "1.1"

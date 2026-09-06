@@ -28,13 +28,14 @@ class EvidenceAction(ContractModel): # 根据未知或争议条件向用户提�
 
 
 class ExplanationPlan(ContractModel): # 交给LLM和P5的结构化最终解释计划
-    contract_version: Literal["1.1"] = "1.1" # 解释计划合同版本号，只接受1.1
+    contract_version: Literal["1.1", "1.3"] = "1.3" # 兼容读取v1.1，新结果默认v1.3
     session_id: Identifier # 该解释计划所属的用户会话
     main_explanation: str = Field(min_length=1) # 基于当前信息形成的主要法律解释
     candidate_claims: list[str] = Field(default_factory=list) # 当前识别出的候选请求权
     applicable_rule_ids: list[Identifier] = Field(default_factory=list) # 本次解释使用的规则ID
     support_case_ids: list[Identifier] = Field(default_factory=list) # 支持当前路径的代表案例
     limiting_case_ids: list[Identifier] = Field(default_factory=list) # 限制当前路径的代表案例
+    boundary_case_ids: list[Identifier] = Field(default_factory=list) # 规则适用边界的代表案例
     conditional_branches: list[ExplanationBranch] = Field(default_factory=list) # 事实变化时的解释分支
     unresolved_condition_ids: list[Identifier] = Field(default_factory=list) # 仍然未知或冲突的规则条件
     evidence_actions: list[EvidenceAction] = Field(default_factory=list) # 建议用户保存或补充的证据

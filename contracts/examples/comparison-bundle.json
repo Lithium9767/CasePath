@@ -1,0 +1,33 @@
+{
+  "contract_version": "1.3",
+  "condition_comparisons": [
+    {
+      "condition_id": "cond.performance_impossible",
+      "status_counts": {
+        "SATISFIED": 3,
+        "NOT_SATISFIED": 2,
+        "UNKNOWN": 1
+      },
+      "condition_entropy": 0.92,
+      "outcome_mutual_information": 0.61,
+      "expected_information_gain": 0.74,
+      "expected_rank_change": 0.55,
+      "expected_branch_reduction": 0.67,
+      "case_disagreement_score": 0.83,
+      "rule_condition_discriminativeness": 0.79,
+      "support_case_ids": ["case.support.1"],
+      "limiting_case_ids": ["case.limiting.1"],
+      "boundary_case_ids": ["case.boundary.1"],
+      "score_components": [
+        {
+          "name": "information_gain",
+          "value": 0.74,
+          "explanation": "回答该条件预计减少候选解释分支"
+        }
+      ]
+    }
+  ],
+  "ranked_condition_ids": ["cond.performance_impossible"],
+  "degraded": false,
+  "degradation_reason": null
+}

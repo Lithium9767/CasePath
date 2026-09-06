@@ -21,13 +21,20 @@ from .enums import (
 from .explanation import CitationRecord, EvidenceAction, ExplanationBranch, ExplanationPlan
 from .query import (
     CandidateClaim,
+    ConditionEvidence,
     DialogueTurn,
     QueryConditionState,
     QueryState,
     QuestionCandidate,
     UserFact,
 )
-from .retrieval import RetrievalBundle, ScoredReference
+from .retrieval import (
+    ComparisonBundle,
+    ConditionComparison,
+    RetrievalBundle,
+    RetrievalPath,
+    ScoredReference,
+)
 from .rule import (
     ConditionGroup,
     LegalConsequence,
@@ -36,10 +43,12 @@ from .rule import (
     RuleException,
     RuleRecord,
 )
+from .session import AnswerInterpretation, CreateSessionRequest
 from .source import LegalSourceRecord, ProvisionRecord
 from .workflow import WorkflowSnapshot
 
 __all__ = [
+    "AnswerInterpretation",
     "AnswerRequest",
     "CandidateClaim",
     "CapabilityMode",
@@ -48,12 +57,16 @@ __all__ = [
     "CaseRole",
     "CitationRecord",
     "ClaimRecord",
+    "ComparisonBundle",
+    "ConditionComparison",
+    "ConditionEvidence",
     "ConditionFinding",
     "ConditionGroup",
     "ConditionGroupOperator",
     "ConditionStatus",
     "ContractModel",
     "CourtFinding",
+    "CreateSessionRequest",
     "DecisionItem",
     "DecisionStatus",
     "DialogueTurn",
@@ -72,6 +85,7 @@ __all__ = [
     "QuestionCandidate",
     "ReasoningStep",
     "RetrievalBundle",
+    "RetrievalPath",
     "RuleCondition",
     "RuleException",
     "RuleRecord",

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from .base import ContractModel, Identifier
 from .enums import CapabilityMode, ErrorCode
@@ -14,6 +14,14 @@ class AnswerRequest(ContractModel): # P5向P1提交的一次用户追问回答
     condition_id: Identifier # 该问题对应的RuleCondition.condition_id
     answer: str = Field(min_length=1) # 用户回答原文，由P4进一步投影为ConditionStatus
     selected_option: str | None = None # 用户选择的预设选项；自由回答时允许为空
+
+    @field_validator("answer")
+    @classmethod
+    def reject_blank_answer(cls, value: str) -> str:
+        # 只拒绝纯空白，不改写用户原文，保证后续事实片段仍能定位。
+        if not value.strip():
+            raise ValueError("answer must not be blank")
+        return value
 
 
 class ErrorResponse(ContractModel): # 所有正式API共同使用的统一错误响应
