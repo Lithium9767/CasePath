@@ -6,6 +6,8 @@ from .demo import (
     DemoQuestionPolicy,
     DemoRuleRetriever,
 )
+from .neo4j_gateway import Neo4jGraphGateway
+from .structured_llm import OpenAICompatibleStructuredLanguageModel
 
 __all__ = [
     "DemoCaseComparator",
@@ -14,4 +16,6 @@ __all__ = [
     "DemoExplanationPlanner",
     "DemoQuestionPolicy",
     "DemoRuleRetriever",
+    "Neo4jGraphGateway",
+    "OpenAICompatibleStructuredLanguageModel",
 ]

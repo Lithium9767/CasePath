@@ -87,6 +87,14 @@ class LegalGraphGateway(Protocol):
     ) -> list[Mapping[str, object]]: ...
 
 
+class ManagedLegalGraphGateway(LegalGraphGateway, Protocol):
+    """P1运行时持有的图客户端；P4只依赖上面的查询端口。"""
+
+    def verify_connectivity(self) -> None: ...
+
+    def close(self) -> None: ...
+
+
 ContractT = TypeVar("ContractT", bound=ContractModel)
 
 
@@ -101,3 +109,9 @@ class StructuredLanguageModel(Protocol):
         response_model: type[ContractT],
         timeout_seconds: float | None = None,
     ) -> ContractT: ...
+
+
+class ManagedStructuredLanguageModel(StructuredLanguageModel, Protocol):
+    """P1运行时负责关闭的结构化模型客户端。"""
+
+    def close(self) -> None: ...
