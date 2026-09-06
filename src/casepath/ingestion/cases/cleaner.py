@@ -146,7 +146,7 @@ class CaseCleaner:
             deep_output_path.parent.mkdir(parents=True, exist_ok=True)
             with deep_output_path.open("w", encoding="utf-8") as f:
                 for c in cases:
-                    if "健身" in (c.get("title") or "") or "服务合同纠纷" == c.get("case_cause"):
+                    if "健身" in (c.get("title") or "") or "服务" in (c.get("case_cause") or ""):
                         md = None
                         if self.markdown_dir:
                             p = self.markdown_dir / f"{c['title']}.md"
