@@ -106,6 +106,33 @@ Demo 会把“不清楚”的完整原文保存在 `DialogueTurn.answer`、重�
 
 ## P4 接入约定
 
+### 配置化启动 P4＋LLM（P1）
+
+现有 `casepath.api.main:app` 始终是 Demo，不会因设置 Key 而变成正式算法。
+请在仓库根目录创建本地 `.env`（参考 `.env.example`，不要提交真实凭据），使用：
+
+```powershell
+uv sync --extra api --extra live --group dev --locked
+uv run --env-file .env uvicorn casepath.api.configured:create_configured_app --factory --host 127.0.0.1 --port 8000
+```
+
+关键配置：`CASEPATH_MODE=live`、`CASEPATH_DATA_ROOT=data`、
+`CASEPATH_LLM_API_KEY`（或兼容的 `DASHSCOPE_API_KEY`）、`CASEPATH_LLM_BASE_URL`、
+`CASEPATH_LLM_MODEL`。沿用项目已有的百炼兼容配置，地域和模型应按自己的账户填写。
+默认 `json_object`；只有确认所用模型支持目标 Schema 时才选择 `json_schema`。
+超时、重试、最大输出 token 沿用 `.env.example` 中的 `CASEPATH_LLM_*` 配置。
+
+`CASEPATH_LLM_REQUIRED=true` 时，缺 Key 或客户端初始化失败会拒绝启动；
+`false` 允许无 LLM 的词法降级。客户端初始化不验证 Key 的远端有效性，
+真正的超时/鉴权失败仍在请求时返回稳定错误，失败不会提交会话状态。
+启动及 `/v1/capabilities` 不调用 LLM，不会为健康检查发送用户事实或消耗模型额度。
+提交 `/v1/sessions` 才会将用户事实发给所配置的模型服务，请使用获准发送的测试材料。
+
+不填 Neo4j 密码时运行 BM25＋内存图；填入密码会使用真实图查询，必须先完成图导入。
+`/v1/capabilities` 中 `condition_projector` 为 Live 表示已注入 LLM，
+`vector_search` 仍为不可用。回答解释、追问和解释规划仍沿用当前 P4 实现，
+不会因为接入模型就自动全部变成 LLM 算法；本入口不是“完整 RAG 已验收”的声明。
+
 单轮P4端口顺序固定为：
 
 ```text

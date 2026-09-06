@@ -34,9 +34,9 @@ def main():
             parser.error("set CASEPATH_NEO4J_WRITE_USER and CASEPATH_NEO4J_WRITE_PASSWORD")
         uri = os.getenv("CASEPATH_NEO4J_URI", "bolt://localhost:7688")
         database = os.getenv("CASEPATH_NEO4J_DATABASE", "neo4j")
-        with GraphDatabase.driver(uri, auth=(user, password), connection_timeout=5) as driver:
+        with GraphDatabase.driver(uri, auth=(user, password), connection_timeout=20) as driver:
             driver.verify_connectivity()
-            publish(driver, database, bundle)
+            publish(driver, database, bundle, timeout=300)
     print(
         json.dumps(dict(report(bundle), published=args.import_neo4j), ensure_ascii=False, indent=2)
     )

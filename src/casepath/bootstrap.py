@@ -205,6 +205,8 @@ def build_live_runtime(
 
     if settings.mode != RuntimeMode.LIVE:
         raise ValueError("build_live_runtime requires CASEPATH_MODE=live")
+    if settings.llm_required and not settings.llm_configured:
+        raise LanguageModelUnavailable("已要求 LLM，但未配置 CASEPATH_LLM_API_KEY 或 DASHSCOPE_API_KEY")
     # ExitStack确保P4工厂或后续合同校验失败时，已经建立的外部连接不会泄漏。
     with ExitStack() as cleanup:
         graph_gateway = None
@@ -222,6 +224,9 @@ def build_live_runtime(
             try:
                 language_model = language_model_factory(settings)
             except LanguageModelUnavailable:
+                if settings.llm_required:
+                    # ExitStack 仍会关闭此前创建的图客户端，不静默退化为词法模式。
+                    raise
                 llm_failed = True
             else:
                 cleanup.callback(language_model.close)

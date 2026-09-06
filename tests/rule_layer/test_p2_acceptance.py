@@ -25,8 +25,8 @@ SCHEMA_ROOT = REPOSITORY_ROOT / "contracts" / "schemas"
     [
         ("legal_sources.jsonl", "legal-source-record", 1, None),
         ("provisions.jsonl", "provision-record", 1260, None),
-        ("rules.jsonl", "rule-record", 5, None),
-        ("source_spans.jsonl", "provision-record", 1268, "SourceSpan"),
+        ("rules.jsonl", "rule-record", 776, None),
+        ("source_spans.jsonl", "provision-record", 3269, "SourceSpan"),
     ],
 )
 def test_published_records_pass_exported_json_schema(
@@ -132,16 +132,17 @@ def test_rules_file_alone_supports_indexes_and_complete_references(
         assert all(isinstance(value, str) and value.strip() for value in text_fields)
         search_documents[rule.rule_id] = "\n".join(text_fields)
 
-    assert len(records) == len(rule_index) == 5
+    assert len(records) == len(rule_index) == 776
+    assert sum(rule.maturity == "L1" for rule in records) == 771
     assert sum(rule.maturity == "L3" for rule in records) == 4
-    assert set(rule_index) == {
+    assert set(rule_index) >= {
         "rule.contract.performance.good_faith.v1",
         "rule.contract.termination.delay_after_demand.v1",
         "rule.contract.termination.nonperformance.v1",
         "rule.contract.termination.restitution.v1",
         "rule.service_contract.termination_refund.v1",
     }
-    assert set(fact_index) == {
+    assert set(fact_index) >= {
         "cond.contract_exists",
         "cond.main_obligation_delayed",
         "cond.demand_delivered",
@@ -152,7 +153,7 @@ def test_rules_file_alone_supports_indexes_and_complete_references(
         "cond.payment_made",
         "cond.unperformed_balance",
     }
-    assert len(span_index) == 8
+    assert len(span_index) >= 8
     assert isinstance(fact_index["cond.alternative_performance"], RuleCondition)
     assert rules_by_fact["cond.alternative_performance"] == {
         "rule.contract.termination.nonperformance.v1",

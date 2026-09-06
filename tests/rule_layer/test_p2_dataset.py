@@ -60,6 +60,24 @@ def _has_complete_static_dataset() -> bool:
 @pytest.fixture(scope="module")
 def canonical_data_root(tmp_path_factory: pytest.TempPathFactory) -> Path:
     if _has_complete_static_dataset():
+        manifest = json.loads((STATIC_DATA_ROOT / "manifests/civil_code.manifest.json").read_text("utf-8"))
+        if "baseline_manifest" in manifest:
+            # 本文件保护旧审核快照的不变量；扩展发布另有独立验收，不放宽旧断言。
+            from casepath.rule_layer.civil_code import build_civil_code_rules
+
+            root = tmp_path_factory.mktemp("retained-baseline") / "data"
+            target = root / "canonical/rules"
+            target.mkdir(parents=True)
+            for name in ("legal_sources.jsonl", "provisions.jsonl"):
+                shutil.copyfile(STATIC_DATA_ROOT / "canonical/rules" / name, target / name)
+            provisions = read_jsonl(target / "provisions.jsonl", ProvisionRecord)
+            base = build_civil_code_rules(provisions)
+            write_jsonl(target / "rules.jsonl", base.rules)
+            write_jsonl(target / "source_spans.jsonl", [
+                *(s for p in provisions for s in p.source_spans), *base.source_spans,
+            ])
+            write_json(root / "manifests/civil_code.manifest.json", manifest["baseline_manifest"])
+            return root
         return STATIC_DATA_ROOT
     if not UPSTREAM_SOURCE.is_file() or not UPSTREAM_STATS.is_file():
         pytest.skip("neither static P2 data nor the external legal-rag inputs are available")

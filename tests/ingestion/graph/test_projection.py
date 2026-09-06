@@ -21,7 +21,8 @@ def test_canonical_two_layer_paths():
     assert first == load_projection(root)
     nodes = {n["key"]: n for n in first["nodes"]}
     assert sum(n["label"] == "Case" for n in nodes.values()) == 45
-    assert sum(n["label"] == "RuleCondition" for n in nodes.values()) == 9
+    assert sum(n["label"] == "RuleCondition" for n in nodes.values()) == 1929
+    assert sum(n["label"] == "LegalRule" for n in nodes.values()) == 776
     assert sum(n["label"] == "Provision" for n in nodes.values()) == 1260
     assert sum(e["type"] == "CITES_PROVISION" for e in first["edges"]) == 70
     condition = node_key("RuleCondition", "cond.alternative_performance")

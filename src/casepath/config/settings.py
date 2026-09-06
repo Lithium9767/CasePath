@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from enum import StrEnum
 from os import environ
+from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 
@@ -32,6 +33,8 @@ class RuntimeSettings(BaseModel):
 
     mode: RuntimeMode = RuntimeMode.DEMO
     max_question_turns: int = Field(default=3, ge=0, le=20)
+    # 由 P1 向 P4 工厂传入数据位置；P4 不自行读取环境变量。
+    data_root: Path = Path("data")
 
     # 沿用 legal-rag 的本地独立端口，但密码必须显式通过环境变量提供。
     neo4j_uri: str | None = "bolt://localhost:7688"
@@ -44,6 +47,8 @@ class RuntimeSettings(BaseModel):
 
     # legal-rag 当前使用百炼的 OpenAI 兼容接口；地域不同时应显式覆盖 base_url。
     llm_api_key: SecretStr | None = None
+    # 联调可选择词法降级；要求 LLM 的部署必须显式禁止无模型启动。
+    llm_required: bool = False
     llm_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     llm_model: str = "qwen-plus"
     llm_timeout_seconds: float = Field(default=30.0, gt=0)
@@ -87,6 +92,7 @@ class RuntimeSettings(BaseModel):
         names = {
             "mode": "CASEPATH_MODE",
             "max_question_turns": "CASEPATH_MAX_QUESTION_TURNS",
+            "data_root": "CASEPATH_DATA_ROOT",
             "neo4j_uri": "CASEPATH_NEO4J_URI",
             "neo4j_user": "CASEPATH_NEO4J_USER",
             "neo4j_password": "CASEPATH_NEO4J_PASSWORD",
@@ -95,6 +101,7 @@ class RuntimeSettings(BaseModel):
             "neo4j_query_timeout_seconds": "CASEPATH_NEO4J_QUERY_TIMEOUT_SECONDS",
             "neo4j_max_retry_seconds": "CASEPATH_NEO4J_MAX_RETRY_SECONDS",
             "llm_api_key": "CASEPATH_LLM_API_KEY",
+            "llm_required": "CASEPATH_LLM_REQUIRED",
             "llm_base_url": "CASEPATH_LLM_BASE_URL",
             "llm_model": "CASEPATH_LLM_MODEL",
             "llm_timeout_seconds": "CASEPATH_LLM_TIMEOUT_SECONDS",

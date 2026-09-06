@@ -35,3 +35,19 @@ def test_settings_reject_invalid_timeouts():
         RuntimeSettings(neo4j_query_timeout_seconds=0)
     with pytest.raises(ValidationError):
         RuntimeSettings(llm_api_key=" ")
+
+
+def test_llm_startup_policy_and_data_path_are_loaded():
+    from pathlib import Path
+
+    settings = RuntimeSettings.from_env(
+        {
+            "CASEPATH_LLM_REQUIRED": "true",
+            "CASEPATH_DATA_ROOT": "custom-data",
+            "CASEPATH_LLM_API_KEY": "preferred-key",
+            "DASHSCOPE_API_KEY": "fallback-key",
+        }
+    )
+    assert settings.llm_required
+    assert settings.data_root == Path("custom-data")
+    assert settings.llm_api_key.get_secret_value() == "preferred-key"

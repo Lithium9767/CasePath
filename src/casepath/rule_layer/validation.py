@@ -437,6 +437,13 @@ def validate_records(
 
 
 def validate_canonical_dataset(data_root: Path) -> DatasetValidationReport:
+    import json
+
+    manifest_path = data_root / "manifests" / "civil_code.manifest.json"
+    if json.loads(manifest_path.read_text("utf-8")).get("dataset_id") == "dataset.civil_code.rules.expanded.v1":
+        from casepath.rule_layer.expansion import validate_expanded
+
+        return validate_expanded(data_root)
     canonical_root = data_root / "canonical" / "rules"
     manifest_path = data_root / "manifests" / "civil_code.manifest.json"
     legal_sources = read_jsonl(canonical_root / "legal_sources.jsonl", LegalSourceRecord)
