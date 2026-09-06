@@ -111,7 +111,7 @@ class CaseCleaner:
         )]
         decisions = []
         if result:
-            spans.append(_source_span(source_id, "裁判结果", result))
+            spans.append(_source_span(source_id, "裁判结果", result, 3))
             decisions.append(DecisionItem(decision_id="decision.primary", claim_id=claims[0].claim_id, status="UNKNOWN", description=result[:500], source_span_ids=[spans[-1].span_id]))
         else:
             decisions.append(DecisionItem(decision_id="decision.primary", claim_id=claims[0].claim_id, status="UNKNOWN", description="原始文书未提供裁判结果，待人工核验。", source_span_ids=[spans[1].span_id]))
