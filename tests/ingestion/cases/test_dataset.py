@@ -6,7 +6,14 @@ from pathlib import Path
 
 import pytest
 
-from casepath.contracts import CaseIndexRecord, CaseRecord, DecisionStatus, MaturityLevel
+from casepath.contracts import (
+    CaseIndexRecord,
+    CaseRecord,
+    DecisionStatus,
+    MaturityLevel,
+    ProvisionRecord,
+    RuleRecord,
+)
 from casepath.ingestion.cases.build import PINNED_GENERATED_ON, build_dataset
 from casepath.ingestion.cases.ids import (
     EXPECTED_CANONICAL_OUTPUT_HASHES,
@@ -15,7 +22,7 @@ from casepath.ingestion.cases.ids import (
     PROPERTY_CASE_ID,
     REVIEWED_L2_CASE_IDS,
 )
-from casepath.ingestion.cases.validation import validate_canonical_cases
+from casepath.ingestion.cases.validation import validate_canonical_cases, validate_records
 from casepath.ingestion.laws.civil_code import provision_id
 from casepath.ingestion.laws.jsonl import read_jsonl, sha256_file, write_json
 from casepath.rule_layer.ids import RULE_SERVICE_TERMINATION_REFUND
@@ -67,8 +74,10 @@ def test_all_civil_code_provision_ids_resolve(canonical_data_root: Path) -> None
     lightweight, _ = _read_cases(canonical_data_root)
     cited = [pid for record in lightweight for pid in record.related_provision_ids]
     assert cited
+    assert report.resolved_civil_code_citation_count == 70
+    assert len(cited) == 70
+    assert len(set(cited)) == 59
     assert all(pid.startswith("law.prc.civil_code.2021.article_") for pid in cited)
-    assert report.resolved_civil_code_citation_count == len(cited)
     assert provision_id(509) in cited
     assert all("provision.civil_code." not in pid for pid in cited)
 
@@ -121,6 +130,28 @@ def test_child_entity_ids_are_unique_across_cases(canonical_data_root: Path) -> 
     assert "decision.primary" not in ids
 
 
+def test_rejects_unanchored_source_span(canonical_data_root: Path) -> None:
+    lightweight, deep = _read_cases(canonical_data_root)
+    provisions = read_jsonl(
+        canonical_data_root / "canonical" / "rules" / "provisions.jsonl",
+        ProvisionRecord,
+    )
+    rules = read_jsonl(canonical_data_root / "canonical" / "rules" / "rules.jsonl", RuleRecord)
+    record = deep[0].model_copy(deep=True)
+    forged_quote = "这段原文在判决书中根本不存在。"
+    forged = record.source_spans[0].model_copy(
+        update={
+            "quote": forged_quote,
+            "start_offset": 0,
+            "end_offset": len(forged_quote),
+            "section": "基本案情",
+        }
+    )
+    record.source_spans = [forged, *record.source_spans[1:]]
+    with pytest.raises(ValueError, match="cannot be located in the canonical case text"):
+        validate_records(lightweight, [record], provisions, rules)
+
+
 def test_manifest_tamper_of_input_or_output_fails(canonical_data_root: Path, tmp_path: Path) -> None:
     copied = tmp_path / "data"
     shutil.copytree(canonical_data_root, copied)
@@ -160,3 +191,8 @@ def test_public_validator_accepts_canonical_dataset(canonical_data_root: Path) -
     assert report.status == "passed"
     assert report.l1_case_count == EXPECTED_CIVIL_CASE_COUNT
     assert report.deep_case_count >= 1
+    manifest = json.loads(
+        (canonical_data_root / "manifests" / "cases.manifest.json").read_text(encoding="utf-8")
+    )
+    assert all("remain unresolved raw citations" not in item for item in manifest["limitations"])
+    assert any("are not retained as raw citations" in item for item in manifest["limitations"])

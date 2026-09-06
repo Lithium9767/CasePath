@@ -53,13 +53,14 @@ def _require(condition: bool, message: str, errors: list[str]) -> None:
 def _span_document(span: SourceSpan, index: CaseIndexRecord | None) -> str | None:
     if index is None:
         return None
-    if span.section == "裁判理由":
-        return index.reasoning_text
-    if span.section in {"基本案情", "裁判结果"}:
-        if span.quote in index.facts_text:
-            return index.facts_text
-        if span.quote in index.reasoning_text:
-            return index.reasoning_text
+    preferred = (
+        [index.reasoning_text, index.facts_text]
+        if span.section == "裁判理由"
+        else [index.facts_text, index.reasoning_text]
+    )
+    for document in preferred:
+        if span.quote and span.quote in document:
+            return document
     return None
 
 
@@ -71,11 +72,7 @@ def _validate_span(span: SourceSpan, index: CaseIndexRecord | None, errors: list
     )
     document = _span_document(span, index)
     if document is None:
-        _require(
-            span.start_offset == 0 and span.end_offset == len(span.quote),
-            f"span {span.span_id} has no locatable source document",
-            errors,
-        )
+        errors.append(f"span {span.span_id} cannot be located in the canonical case text")
         return
     actual = document[span.start_offset : span.end_offset]
     _require(actual == span.quote, f"span {span.span_id} quote/offset mismatch", errors)

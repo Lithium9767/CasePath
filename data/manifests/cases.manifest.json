@@ -41,7 +41,7 @@
   "reviews": [],
   "limitations": [
     "Machine-extracted L1 cases are not human-verified; L2 requires REVIEWED_L2_CASE_IDS.",
-    "related_provision_ids contain only Civil Code articles 1-1260. Judicial interpretations and other statutes remain unresolved raw citations and are not rewritten as civil-code IDs.",
+    "Citations that are not Civil Code articles 1-1260 are not written to related_provision_ids and are not retained as raw citations in this dataset.",
     "Only cases whose pleadings clearly seek service-contract termination and unperformed-fee refund enter the deep comparison set. Property-damage claims are excluded from that template.",
     "CourtFinding records are taken from 法院经审理查明/法院认定, never from 诉称 or 辩称.",
     "Condition mapping is conservative machine heuristics and always sets human_verified=false."
