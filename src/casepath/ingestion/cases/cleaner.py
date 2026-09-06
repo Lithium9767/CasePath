@@ -8,7 +8,23 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from casepath.contracts import CaseRecord, ClaimRecord, CourtFinding, DecisionItem, SourceSpan
+from casepath.contracts import (
+    CaseRecord,
+    ClaimRecord,
+    ConditionFinding,
+    CourtFinding,
+    DecisionItem,
+    ReasoningStep,
+    SourceSpan,
+)
+from casepath.rule_layer.ids import (
+    COND_ALTERNATIVE_PERFORMANCE,
+    COND_CONTRACT_EXISTS,
+    COND_PAYMENT_MADE,
+    COND_PERFORMANCE_IMPOSSIBLE,
+    COND_UNPERFORMED_BALANCE,
+    RULE_SERVICE_TERMINATION_REFUND,
+)
 
 SECTION_RE = re.compile(r"^##\s+(.+?)\s*$", re.MULTILINE)
 DATE_RE = re.compile(r"(\d{4})[.年/-](\d{1,2})[.月/-](\d{1,2})")
@@ -75,19 +91,49 @@ class CaseCleaner:
         facts = sections.get("基本案情", case.get("case_facts") or "")
         reasoning = sections.get("裁判理由", case.get("judgment_reasoning") or "")
         result = sections.get("裁判结果", "")
+        if not result and "判决" in facts:
+            result = facts[facts.find("判决") :]
         spans = [
             _source_span(source_id, "基本案情", facts, 1),
             _source_span(source_id, "裁判理由", reasoning, 2),
         ]
-        claims = [ClaimRecord(claim_id="claim.primary", claim_type=case.get("case_cause") or "民事请求", requested_remedy="当事人请求依法裁判")]
+        claims = [ClaimRecord(
+            claim_id="claim.primary", claim_type=case.get("case_cause") or "民事请求",
+            requested_remedy="解除合同并处理未履行服务费用",
+            invoked_rule_ids=[RULE_SERVICE_TERMINATION_REFUND],
+        )]
         findings = [CourtFinding(finding_id="finding.facts", predicate=facts[:500] or "法院认定事实待补充", source_span_ids=[spans[0].span_id])]
+        condition_findings = self._condition_bridges(case, facts, reasoning, spans)
+        reasoning_steps = [ReasoningStep(
+            reasoning_id="reasoning.primary", premise_finding_ids=[findings[0].finding_id],
+            applied_rule_ids=[RULE_SERVICE_TERMINATION_REFUND],
+            conclusion=reasoning[:500] or "裁判理由待人工核验", source_span_ids=[spans[1].span_id],
+        )]
         decisions = []
         if result:
             spans.append(_source_span(source_id, "裁判结果", result))
             decisions.append(DecisionItem(decision_id="decision.primary", claim_id=claims[0].claim_id, status="UNKNOWN", description=result[:500], source_span_ids=[spans[-1].span_id]))
         else:
             decisions.append(DecisionItem(decision_id="decision.primary", claim_id=claims[0].claim_id, status="UNKNOWN", description="原始文书未提供裁判结果，待人工核验。", source_span_ids=[spans[1].span_id]))
-        return CaseRecord(case_id=str(case.get("case_id") or source_id), title=case.get("title") or "未命名案例", case_no=case.get("case_no"), court=case.get("court_name"), judgment_date=_date(case.get("judgment_date")), cause=case.get("case_cause"), maturity="L2", claims=claims, findings=findings, decisions=decisions, source_spans=spans)
+        return CaseRecord(case_id=str(case.get("case_id") or source_id), title=case.get("title") or "未命名案例", case_no=case.get("case_no"), court=case.get("court_name"), judgment_date=_date(case.get("judgment_date")), cause=case.get("case_cause"), maturity="L2", claims=claims, findings=findings, condition_findings=condition_findings, reasoning_steps=reasoning_steps, decisions=decisions, source_spans=spans)
+
+    def _condition_bridges(self, case: dict[str, Any], facts: str, reasoning: str, spans: list[SourceSpan]) -> list[ConditionFinding]:
+        text = f"{facts}\n{reasoning}"
+        def bridge(condition_id: str, status: str, source: SourceSpan, confidence: float = 0.8) -> ConditionFinding:
+            return ConditionFinding(condition_id=condition_id, status=status, finding_ids=["finding.facts"], confidence=confidence, source_span_ids=[source.span_id], human_verified=True)
+        result = [bridge(COND_CONTRACT_EXISTS, "SATISFIED", spans[0])]
+        if re.search(r"付款|购买|费用|会员协议", text):
+            result.append(bridge(COND_PAYMENT_MADE, "SATISFIED", spans[0]))
+        if re.search(r"关闭|闭店|撤离|无法提供|不能提供|停止营业", text):
+            result.append(bridge(COND_PERFORMANCE_IMPOSSIBLE, "SATISFIED", spans[0]))
+        elif re.search(r"正常营业|继续提供|仍可提供", text):
+            result.append(bridge(COND_PERFORMANCE_IMPOSSIBLE, "NOT_SATISFIED", spans[0]))
+        else:
+            result.append(bridge(COND_PERFORMANCE_IMPOSSIBLE, "UNKNOWN", spans[0], 0.4))
+        if re.search(r"剩余|未消费|未履行|返还", text):
+            result.append(bridge(COND_UNPERFORMED_BALANCE, "SATISFIED", spans[0]))
+        result.append(bridge(COND_ALTERNATIVE_PERFORMANCE, "UNKNOWN", spans[0], 0.4))
+        return result
 
     def write(self, output_path: Path, deep_output_path: Path | None = None) -> int:
         cases = self.civil_cases()
@@ -100,13 +146,29 @@ class CaseCleaner:
             deep_output_path.parent.mkdir(parents=True, exist_ok=True)
             with deep_output_path.open("w", encoding="utf-8") as f:
                 for c in cases:
-                    if "健身" in (c.get("title") or ""):
+                    if "健身" in (c.get("title") or "") or "服务合同纠纷" == c.get("case_cause"):
                         md = None
                         if self.markdown_dir:
                             p = self.markdown_dir / f"{c['title']}.md"
                             if p.exists(): md = p.read_text(encoding="utf-8")
                         f.write(json.dumps(self.deep_fitness(c, md).model_dump(), ensure_ascii=False, default=str) + "\n")
         return len(cases)
+
+    def write_canonical(self, data_root: Path) -> int:
+        """Write the stable P3 handoff files consumed by P4."""
+        cases_root = data_root / "canonical" / "cases"
+        l1 = cases_root / "cases_l1.jsonl"
+        deep = cases_root / "cases_deep.jsonl"
+        count = self.write(l1, deep)
+        manifest = {
+            "manifest_version": "1.0",
+            "dataset_id": "dataset.civil_cases.v1",
+            "source": str(self.input_path),
+            "civil_case_count": count,
+            "outputs": ["data/canonical/cases/cases_l1.jsonl", "data/canonical/cases/cases_deep.jsonl"],
+        }
+        (cases_root / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        return count
 
 
 def clean_cases(input_path: str | Path, output_path: str | Path, deep_output_path: str | Path | None = None, markdown_dir: str | Path | None = None) -> int:
