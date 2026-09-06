@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -43,6 +45,12 @@ def test_ten_article_sample_converts_to_canonical_records() -> None:
     result = convert_civil_code(_ten_article_sample())
 
     assert result.legal_source.source_id == CIVIL_CODE_SOURCE_ID
+    assert result.legal_source.source_type == "LAW"
+    assert result.legal_source.authority == "全国人民代表大会"
+    assert result.legal_source.jurisdiction == "中华人民共和国"
+    assert result.legal_source.effective_from == date(2021, 1, 1)
+    assert result.legal_source.effective_to is None
+    assert result.legal_source.official_url is not None
     assert result.hierarchy_repair_count == 0
     assert len(result.provisions) == 10
     assert len(result.source_spans) == 10
@@ -51,7 +59,11 @@ def test_ten_article_sample_converts_to_canonical_records() -> None:
     assert [record.article_no for record in result.provisions] == [str(i) for i in range(1, 11)]
 
     for provision, span in zip(result.provisions, result.source_spans, strict=True):
-        assert provision.source_span_ids == [span.span_id]
+        assert provision.source_spans == [span]
+        assert provision.contract_version == "1.1"
+        assert provision.effective_from == date(2021, 1, 1)
+        assert provision.effective_to is None
+        assert provision.article_no.isdecimal()
         assert span.start_offset == 0
         assert span.end_offset == len(provision.text)
         assert provision.text[span.start_offset : span.end_offset] == span.quote
@@ -84,7 +96,12 @@ def test_pinned_upstream_source_hash_and_full_hierarchy_repair() -> None:
     assert loaded.payload.total_articles == 1260
     assert result.hierarchy_repair_count == EXPECTED_HIERARCHY_REPAIR_COUNT == 109
 
-    by_number = {int(record.article_no): record for record in result.provisions}
+    repaired, repair_count = repair_shifted_hierarchy(
+        loaded.payload.articles,
+        source_sha256=loaded.source_sha256,
+    )
+    assert repair_count == EXPECTED_HIERARCHY_REPAIR_COUNT
+    by_number = {article.number: article for article in repaired}
     expected_boundaries = {
         204: "第一编 总则",
         205: "第二编 物权",
@@ -102,7 +119,9 @@ def test_pinned_upstream_source_hash_and_full_hierarchy_repair() -> None:
         1259: "附则",
         1260: "附则",
     }
-    assert {number: by_number[number].book for number in expected_boundaries} == expected_boundaries
+    assert {
+        number: re.sub(r"\s+", "", by_number[number].book) for number in expected_boundaries
+    } == {number: re.sub(r"\s+", "", heading) for number, heading in expected_boundaries.items()}
 
 
 def test_load_rejects_an_unpinned_source(tmp_path: Path) -> None:

@@ -7,7 +7,7 @@ RULE_TERMINATION_RESTITUTION = "rule.contract.termination.restitution.v1"
 RULE_SERVICE_TERMINATION_REFUND = "rule.service_contract.termination_refund.v1"
 
 # This explicit allowlist prevents the build from upgrading every generated rule to L3/reviewed.
-HUMAN_VERIFIED_L3_RULE_IDS = frozenset(
+REVIEWED_L3_RULE_IDS = frozenset(
     {
         RULE_GOOD_FAITH,
         RULE_DELAY_AFTER_DEMAND,

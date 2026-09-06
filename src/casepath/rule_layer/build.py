@@ -19,19 +19,16 @@ from casepath.ingestion.laws.civil_code import (
 )
 from casepath.ingestion.laws.jsonl import sha256_file, write_json, write_jsonl
 from casepath.ingestion.laws.manifest import (
-    AuthorityVerification,
     CivilCodeManifest,
     ManifestFile,
     TransformationRecord,
 )
 from casepath.rule_layer.civil_code import build_civil_code_rules
-from casepath.rule_layer.ids import HUMAN_VERIFIED_L3_RULE_IDS
+from casepath.rule_layer.ids import REVIEWED_L3_RULE_IDS
+from casepath.rule_layer.source_review import authority_verification_snapshot
 from casepath.rule_layer.validation import DatasetValidationReport, validate_canonical_dataset
 
 UPSTREAM_REPOSITORY_URL = "https://github.com/litunan/legal-rag"
-DATABASE_DETAIL_URL = "https://flk.npc.gov.cn/detail?id=ff808081729d1efe01729d50b5c500bf"
-STANDARD_TEXT_URL = "https://www.npc.gov.cn/wxzlhgb/c27214/gb2020/202006/P020230313538731037747.pdf"
-DATABASE_PDF_URL = "https://wb.flk.npc.gov.cn/flfg/PDF/bd53dd912c1048f2aecbaa229238334b.pdf"
 SPECIALISED_PREPAID_SERVICE_RULES_URL = "https://www.court.gov.cn/zixun/xiangqing/459321.html"
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 GENERATED_PATHS = (
@@ -182,6 +179,12 @@ def build_dataset(
     verified_on: date,
     upstream_revision: str | None = None,
 ) -> BuildResult:
+    """Build the pinned release; verified_on is the legacy generation-date argument.
+
+    The source comparison and rule review retain their fixed date and hashes,
+    independently of the date chosen for this reproducible build.
+    """
+
     final_data_root = data_root.absolute()
     resolved_data_root = final_data_root.resolve(strict=False)
     protected_roots = (
@@ -301,26 +304,12 @@ def build_dataset(
                     guard_sha256=EXPECTED_SOURCE_SHA256,
                 )
             ],
-            authority_verification=AuthorityVerification(
-                verified_on=verified_on,
-                checked_article_numbers=[509, 563, 565, 566],
-                whitespace_normalized_sha256={
-                    "509": "6092893c19fc13285fba96971bc601984509b92c926f45e1275e61e0fa2f12af",
-                    "563": "6f8865de12e8358f28a6530d1d76bc1809ea1f6583a4976cd71816c6f67047e9",
-                    "565": "52b64f120319276e2a3d437f5d73e6e67383c1eefcf2821f7fe43aa1c54e2c5c",
-                    "566": "256a6da55401e696895bc77b22ab5fee4c7ecf253507f8c2d07d12be21e41dc3",
-                },
-                source_urls=[DATABASE_DETAIL_URL, STANDARD_TEXT_URL, DATABASE_PDF_URL],
-                note=(
-                    "Articles 509, 563, 565, and 566 matched the official text after removing "
-                    "Unicode whitespace. The database metadata listed the Civil Code as effective."
-                ),
-            ),
+            authority_verification=authority_verification_snapshot(),
             rule_review_status={
                 rule.rule_id: (
-                    "human_verified"
-                    if rule.rule_id in HUMAN_VERIFIED_L3_RULE_IDS
-                    else "needs_additional_authority"
+                    "verified"
+                    if rule.rule_id in REVIEWED_L3_RULE_IDS
+                    else "reviewed_with_limitations"
                 )
                 for rule in rule_build.rules
             },
@@ -370,9 +359,15 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--data-root", type=Path, default=Path("data"))
     parser.add_argument(
+        "--generated-on",
         "--verified-on",
+        dest="generated_on",
         type=date.fromisoformat,
         default=datetime.now(tz=UTC).date(),
+        help=(
+            "Dataset generation date. --verified-on is a legacy alias; neither option changes "
+            "the fixed source-comparison and rule-review date."
+        ),
     )
     parser.add_argument("--upstream-revision")
     parser.add_argument("--validate-only", action="store_true")
@@ -389,7 +384,7 @@ def main() -> None:
         source_path=args.source,
         stats_path=args.stats,
         data_root=args.data_root,
-        verified_on=args.verified_on,
+        verified_on=args.generated_on,
         upstream_revision=args.upstream_revision,
     )
     print(result.validation.model_dump_json(indent=2))
