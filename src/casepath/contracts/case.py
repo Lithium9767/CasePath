@@ -11,6 +11,30 @@ from .base import Confidence, ContractModel, Identifier, SourceSpan
 from .enums import ConditionStatus, DecisionStatus, MaturityLevel
 
 
+class CaseIndexRecord(ContractModel):
+    """轻量案例索引。只承载检索所需字段，不包含深度请求、桥接或裁判拆分。"""
+
+    contract_version: Literal["1.3"] = "1.3"
+    case_id: Identifier
+    title: str = Field(min_length=1)
+    case_no: str | None = None
+    court: str | None = None
+    judgment_date: date | None = None
+    cause: str | None = None
+    keywords: list[str] = Field(default_factory=list)
+    facts_text: str = ""
+    reasoning_text: str = ""
+    summary: str = ""
+    related_provision_ids: list[Identifier] = Field(default_factory=list)
+    maturity: MaturityLevel = MaturityLevel.L1
+
+    @model_validator(mode="after")
+    def validate_unique_provision_ids(self) -> CaseIndexRecord:
+        if len(self.related_provision_ids) != len(set(self.related_provision_ids)):
+            raise ValueError("related_provision_ids must be unique")
+        return self
+
+
 class ClaimRecord(ContractModel): # 当事人提出的一项具体请求
     claim_id: Identifier # 请求唯一编号
     claim_type: str = Field(min_length=1) # 标准化请求类型，例如“服务合同解除与返还”

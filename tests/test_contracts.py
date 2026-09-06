@@ -6,6 +6,7 @@ import pytest
 from casepath.contracts import (
     AnswerRequest,
     CapabilityStatus,
+    CaseIndexRecord,
     CaseRecord,
     ComparisonBundle,
     ErrorResponse,
@@ -29,6 +30,7 @@ EXAMPLES = Path("contracts/examples")
         ("provision-record.json", ProvisionRecord),
         ("rule-record.json", RuleRecord),
         ("case-record.json", CaseRecord),
+        ("case-index-record.json", CaseIndexRecord),
         ("comparison-bundle.json", ComparisonBundle),
         ("query-state.json", QueryState),
         ("retrieval-bundle.json", RetrievalBundle),
@@ -95,6 +97,13 @@ def test_v1_1_contracts_reject_wrong_version(filename, model):
     payload["contract_version"] = "9.9"
     with pytest.raises(ValueError):
         model.model_validate(payload)
+
+
+def test_case_index_record_rejects_wrong_version():
+    payload = json.loads((EXAMPLES / "case-index-record.json").read_text(encoding="utf-8"))
+    payload["contract_version"] = "1.1"
+    with pytest.raises(ValueError):
+        CaseIndexRecord.model_validate(payload)
 
 
 def test_case_contract_rejects_unknown_claim_reference():

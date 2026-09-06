@@ -1,0 +1,18 @@
+{
+  "contract_version": "1.3",
+  "case_id": "case.zeng-v-wuhan-fitness.2021",
+  "title": "曾某诉武汉某健身管理有限公司服务合同纠纷案",
+  "case_no": "（2021）鄂0104民初109号",
+  "court": "湖北省武汉市硚口区人民法院",
+  "judgment_date": "2021-12-15",
+  "cause": "服务合同纠纷",
+  "keywords": ["民事", "服务合同纠纷", "会员协议"],
+  "facts_text": "法院经审理查明：2019年，曾某与某健身管理公司签订了《会员协议》。",
+  "reasoning_text": "原告曾某根据《中华人民共和国民法典》第五百六十三条要求解除《会员协议》，符合法律规定。",
+  "summary": "门店关闭后，法院支持解除会员协议并处理未履行服务费用。",
+  "related_provision_ids": [
+    "law.prc.civil_code.2021.article_0509",
+    "law.prc.civil_code.2021.article_0563"
+  ],
+  "maturity": "L1"
+}

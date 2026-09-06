@@ -1,6 +1,7 @@
 from .api import AnswerRequest, CapabilityStatus, ErrorResponse
 from .base import ContractModel, ScoreComponent, SourceSpan
 from .case import (
+    CaseIndexRecord,
     CaseRecord,
     ClaimRecord,
     ConditionFinding,
@@ -54,6 +55,7 @@ __all__ = [
     "CandidateClaim",
     "CapabilityMode",
     "CapabilityStatus",
+    "CaseIndexRecord",
     "CaseRecord",
     "CaseRole",
     "CitationRecord",

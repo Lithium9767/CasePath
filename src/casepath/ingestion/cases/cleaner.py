@@ -2,61 +2,46 @@ from __future__ import annotations
 
 import hashlib
 import json
-import re
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
 
-from casepath.contracts import (
-    CaseRecord,
-    ClaimRecord,
-    ConditionFinding,
-    CourtFinding,
-    DecisionItem,
-    ReasoningStep,
-    SourceSpan,
-)
-from casepath.rule_layer.ids import (
-    COND_ALTERNATIVE_PERFORMANCE,
-    COND_CONTRACT_EXISTS,
-    COND_PAYMENT_MADE,
-    COND_PERFORMANCE_IMPOSSIBLE,
-    COND_UNPERFORMED_BALANCE,
-    RULE_SERVICE_TERMINATION_REFUND,
-)
+from casepath.contracts import CaseIndexRecord, CaseRecord, MaturityLevel
+from casepath.ingestion.laws.jsonl import write_jsonl
 
-SECTION_RE = re.compile(r"^##\s+(.+?)\s*$", re.MULTILINE)
-DATE_RE = re.compile(r"(\d{4})[.年/-](\d{1,2})[.月/-](\d{1,2})")
+from .citations import related_provision_ids
+from .classify import is_service_termination_refund
+from .extract import (
+    SpanBook,
+    extract_claim,
+    extract_condition_findings,
+    extract_decision,
+    extract_findings,
+    extract_reasoning_step,
+)
+from .ids import REVIEWED_L2_CASE_IDS
+from .sections import DATE_RE, split_fact_partitions, split_sections
+
+__all__ = ["CaseCleaner", "clean_cases", "split_sections"]
 
 
 def _date(value: Any) -> date | None:
     if isinstance(value, date):
         return value
-    m = DATE_RE.search(str(value or ""))
-    return date(int(m.group(1)), int(m.group(2)), int(m.group(3))) if m else None
+    match = DATE_RE.search(str(value or ""))
+    if match is None:
+        return None
+    return date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
 
 
-def _source_span(source_id: str, section: str, text: str, paragraph: int = 1) -> SourceSpan:
-    return SourceSpan(
-        span_id=f"span.{source_id}.{paragraph}",
-        source_id=source_id,
-        section=section,
-        paragraph_id=f"{section}-{paragraph}",
-        start_offset=0,
-        end_offset=len(text),
-        quote=text,
-    )
-
-
-def split_sections(markdown: str) -> dict[str, str]:
-    matches = list(SECTION_RE.finditer(markdown))
-    sections: dict[str, str] = {}
-    for i, match in enumerate(matches):
-        start = match.end()
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(markdown)
-        sections[match.group(1).strip()] = markdown[start:end].strip()
-    return sections
+def _case_id(case: dict[str, Any]) -> str:
+    raw = str(case.get("case_id") or "").strip()
+    if raw:
+        return raw
+    title = str(case.get("title") or "unnamed")
+    digest = hashlib.sha1(title.encode("utf-8")).hexdigest()[:12]
+    return f"case.{digest}"
 
 
 @dataclass
@@ -73,186 +58,126 @@ class CaseCleaner:
         return payload
 
     def civil_cases(self) -> list[dict[str, Any]]:
-        return [c for c in self.load() if c.get("case_category") == "民事"]
+        cases = [case for case in self.load() if case.get("case_category") == "民事"]
+        return sorted(cases, key=lambda case: str(case.get("case_id") or ""))
 
-    def lightweight(self, case: dict[str, Any]) -> dict[str, Any]:
-        return {
-            "case_id": str(case.get("case_id") or ""),
-            "title": case.get("title") or "",
-            "case_no": case.get("case_no"),
-            "case_category": case.get("case_category"),
-            "case_cause": case.get("case_cause"),
-            "court": case.get("court_name"),
-            "judgment_date": _date(case.get("judgment_date")),
-            "keywords": case.get("keywords") or [],
-            "case_facts_text": case.get("case_facts") or "",
-            "judgment_reasoning_text": case.get("judgment_reasoning") or "",
-            "judgment_summary": case.get("judgment_summary") or "",
-            "related_provision_ids": [
-                f"provision.civil_code.{p.get('article')}"
-                for p in (case.get("legal_provisions") or [])
-                if p.get("article")
-            ],
-            "source_file": case.get("source_file"),
-        }
+    def document_text(self, case: dict[str, Any], markdown: str | None = None) -> str:
+        if markdown:
+            return markdown
+        if self.markdown_dir is not None:
+            path = self.markdown_dir / f"{case.get('title') or ''}.md"
+            if path.is_file():
+                return path.read_text(encoding="utf-8")
+        full_document = str(case.get("full_document") or "").strip()
+        if full_document:
+            return full_document
+        return (
+            f"# {case.get('title') or ''}\n\n"
+            f"## 基本案情\n{case.get('case_facts') or ''}\n\n"
+            f"## 裁判理由\n{case.get('judgment_reasoning') or ''}\n"
+        )
+
+    def lightweight(self, case: dict[str, Any]) -> CaseIndexRecord:
+        return CaseIndexRecord(
+            case_id=_case_id(case),
+            title=str(case.get("title") or "未命名案例"),
+            case_no=case.get("case_no") or None,
+            court=case.get("court_name") or case.get("court") or None,
+            judgment_date=_date(case.get("judgment_date")),
+            cause=case.get("case_cause") or None,
+            keywords=[str(item) for item in (case.get("keywords") or [])],
+            facts_text=str(case.get("case_facts") or ""),
+            reasoning_text=str(case.get("judgment_reasoning") or ""),
+            summary=str(case.get("judgment_summary") or ""),
+            related_provision_ids=related_provision_ids(case),
+            maturity=MaturityLevel.L1,
+        )
+
+    def plaintiff_text(self, case: dict[str, Any], markdown: str | None = None) -> str:
+        document = self.document_text(case, markdown)
+        sections = split_sections(document)
+        facts = sections.get("基本案情", case.get("case_facts") or "")
+        return split_fact_partitions(facts).plaintiff
+
+    def is_service_termination_refund_case(
+        self,
+        case: dict[str, Any],
+        markdown: str | None = None,
+    ) -> bool:
+        return is_service_termination_refund(case, self.plaintiff_text(case, markdown))
 
     def deep_fitness(self, case: dict[str, Any], markdown: str | None = None) -> CaseRecord:
-        md = markdown or case.get("full_document") or ""
-        sections = split_sections(md)
-        source_id = f"case.{case.get('case_id') or hashlib.sha1((case.get('title') or '').encode()).hexdigest()[:12]}"
+        """Build a service-contract termination/refund deep record.
+
+        Callers must already have classified the case. Unreviewed machine
+        output is always L1 and ``human_verified=False``.
+        """
+
+        document = self.document_text(case, markdown)
+        sections = split_sections(document)
         facts = sections.get("基本案情", case.get("case_facts") or "")
         reasoning = sections.get("裁判理由", case.get("judgment_reasoning") or "")
-        result = sections.get("裁判结果", "")
-        if not result and "判决" in facts:
-            result = facts[facts.find("判决") :]
-        spans = [
-            _source_span(source_id, "基本案情", facts, 1),
-            _source_span(source_id, "裁判理由", reasoning, 2),
-        ]
-        claims = [
-            ClaimRecord(
-                claim_id="claim.primary",
-                claim_type=case.get("case_cause") or "民事请求",
-                requested_remedy="解除合同并处理未履行服务费用",
-                invoked_rule_ids=[RULE_SERVICE_TERMINATION_REFUND],
-            )
-        ]
-        findings = [
-            CourtFinding(
-                finding_id="finding.facts",
-                predicate=facts[:500] or "法院认定事实待补充",
-                source_span_ids=[spans[0].span_id],
-            )
-        ]
-        condition_findings = self._condition_bridges(case, facts, reasoning, spans)
-        reasoning_steps = [
-            ReasoningStep(
-                reasoning_id="reasoning.primary",
-                premise_finding_ids=[findings[0].finding_id],
-                applied_rule_ids=[RULE_SERVICE_TERMINATION_REFUND],
-                conclusion=reasoning[:500] or "裁判理由待人工核验",
-                source_span_ids=[spans[1].span_id],
-            )
-        ]
-        decisions = []
-        if result:
-            spans.append(_source_span(source_id, "裁判结果", result, 3))
-            decisions.append(
-                DecisionItem(
-                    decision_id="decision.primary",
-                    claim_id=claims[0].claim_id,
-                    status="UNKNOWN",
-                    description=result[:500],
-                    source_span_ids=[spans[-1].span_id],
-                )
-            )
-        else:
-            decisions.append(
-                DecisionItem(
-                    decision_id="decision.primary",
-                    claim_id=claims[0].claim_id,
-                    status="UNKNOWN",
-                    description="原始文书未提供裁判结果，待人工核验。",
-                    source_span_ids=[spans[1].span_id],
-                )
-            )
+        result_section = sections.get("裁判结果", "")
+        partitions = split_fact_partitions(facts)
+        holding = result_section or partitions.holding
+        if result_section and not partitions.holding:
+            partitions = split_fact_partitions(f"{facts}\n{result_section}")
+            holding = partitions.holding or result_section
+        case_id = _case_id(case)
+        book = SpanBook(case_id)
+        claim = extract_claim(case_id, case, partitions, str(case.get("title") or ""))
+        findings = extract_findings(case_id, partitions, facts, book)
+        condition_findings = extract_condition_findings(
+            findings,
+            facts,
+            reasoning,
+            holding,
+            book,
+        )
+        reasoning_step = extract_reasoning_step(
+            case_id,
+            reasoning,
+            findings,
+            claim.invoked_rule_ids,
+            book,
+        )
+        decision = extract_decision(case_id, claim, partitions, facts, reasoning, book)
+        maturity = (
+            MaturityLevel.L2 if case_id in REVIEWED_L2_CASE_IDS else MaturityLevel.L1
+        )
         return CaseRecord(
-            case_id=str(case.get("case_id") or source_id),
-            title=case.get("title") or "未命名案例",
-            case_no=case.get("case_no"),
-            court=case.get("court_name"),
+            case_id=case_id,
+            title=str(case.get("title") or "未命名案例"),
+            case_no=case.get("case_no") or None,
+            court=case.get("court_name") or case.get("court") or None,
             judgment_date=_date(case.get("judgment_date")),
-            cause=case.get("case_cause"),
-            maturity="L2",
-            claims=claims,
+            cause=case.get("case_cause") or None,
+            maturity=maturity,
+            claims=[claim],
             findings=findings,
             condition_findings=condition_findings,
-            reasoning_steps=reasoning_steps,
-            decisions=decisions,
-            source_spans=spans,
+            reasoning_steps=[reasoning_step] if reasoning_step is not None else [],
+            decisions=[decision],
+            source_spans=book.spans,
         )
 
-    def _condition_bridges(
-        self, case: dict[str, Any], facts: str, reasoning: str, spans: list[SourceSpan]
-    ) -> list[ConditionFinding]:
-        text = f"{facts}\n{reasoning}"
-
-        def bridge(
-            condition_id: str, status: str, source: SourceSpan, confidence: float = 0.8
-        ) -> ConditionFinding:
-            return ConditionFinding(
-                condition_id=condition_id,
-                status=status,
-                finding_ids=["finding.facts"],
-                confidence=confidence,
-                source_span_ids=[source.span_id],
-                human_verified=True,
-            )
-
-        result = [bridge(COND_CONTRACT_EXISTS, "SATISFIED", spans[0])]
-        if re.search(r"付款|购买|费用|会员协议", text):
-            result.append(bridge(COND_PAYMENT_MADE, "SATISFIED", spans[0]))
-        if re.search(r"关闭|闭店|撤离|无法提供|不能提供|停止营业", text):
-            result.append(bridge(COND_PERFORMANCE_IMPOSSIBLE, "SATISFIED", spans[0]))
-        elif re.search(r"正常营业|继续提供|仍可提供", text):
-            result.append(bridge(COND_PERFORMANCE_IMPOSSIBLE, "NOT_SATISFIED", spans[0]))
-        else:
-            result.append(bridge(COND_PERFORMANCE_IMPOSSIBLE, "UNKNOWN", spans[0], 0.4))
-        if re.search(r"剩余|未消费|未履行|返还", text):
-            result.append(bridge(COND_UNPERFORMED_BALANCE, "SATISFIED", spans[0]))
-        result.append(bridge(COND_ALTERNATIVE_PERFORMANCE, "UNKNOWN", spans[0], 0.4))
-        return result
+    def build_records(
+        self,
+    ) -> tuple[list[CaseIndexRecord], list[CaseRecord]]:
+        lightweight: list[CaseIndexRecord] = []
+        deep: list[CaseRecord] = []
+        for case in self.civil_cases():
+            lightweight.append(self.lightweight(case))
+            if self.is_service_termination_refund_case(case):
+                deep.append(self.deep_fitness(case))
+        return lightweight, deep
 
     def write(self, output_path: Path, deep_output_path: Path | None = None) -> int:
-        cases = self.civil_cases()
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with output_path.open("w", encoding="utf-8") as f:
-            for c in cases:
-                row = self.lightweight(c)
-                row["judgment_date"] = (
-                    row["judgment_date"].isoformat() if row["judgment_date"] else None
-                )
-                f.write(json.dumps(row, ensure_ascii=False) + "\n")
-        if deep_output_path:
-            deep_output_path.parent.mkdir(parents=True, exist_ok=True)
-            with deep_output_path.open("w", encoding="utf-8") as f:
-                for c in cases:
-                    if "健身" in (c.get("title") or "") or "服务" in (c.get("case_cause") or ""):
-                        md = None
-                        if self.markdown_dir:
-                            p = self.markdown_dir / f"{c['title']}.md"
-                            if p.exists():
-                                md = p.read_text(encoding="utf-8")
-                        f.write(
-                            json.dumps(
-                                self.deep_fitness(c, md).model_dump(),
-                                ensure_ascii=False,
-                                default=str,
-                            )
-                            + "\n"
-                        )
-        return len(cases)
-
-    def write_canonical(self, data_root: Path) -> int:
-        """Write the stable P3 handoff files consumed by P4."""
-        cases_root = data_root / "canonical" / "cases"
-        l1 = cases_root / "cases_l1.jsonl"
-        deep = cases_root / "cases_deep.jsonl"
-        count = self.write(l1, deep)
-        manifest = {
-            "manifest_version": "1.0",
-            "dataset_id": "dataset.civil_cases.v1",
-            "source": str(self.input_path),
-            "civil_case_count": count,
-            "outputs": [
-                "data/canonical/cases/cases_l1.jsonl",
-                "data/canonical/cases/cases_deep.jsonl",
-            ],
-        }
-        (cases_root / "manifest.json").write_text(
-            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
-        return count
+        lightweight, deep = self.build_records()
+        write_jsonl(output_path, lightweight)
+        if deep_output_path is not None:
+            write_jsonl(deep_output_path, deep)
+        return len(lightweight)
 
 
 def clean_cases(
@@ -261,6 +186,10 @@ def clean_cases(
     deep_output_path: str | Path | None = None,
     markdown_dir: str | Path | None = None,
 ) -> int:
-    return CaseCleaner(Path(input_path), Path(markdown_dir) if markdown_dir else None).write(
-        Path(output_path), Path(deep_output_path) if deep_output_path else None
+    return CaseCleaner(
+        Path(input_path),
+        Path(markdown_dir) if markdown_dir else None,
+    ).write(
+        Path(output_path),
+        Path(deep_output_path) if deep_output_path else None,
     )
