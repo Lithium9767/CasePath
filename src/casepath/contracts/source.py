@@ -6,6 +6,7 @@ from typing import Literal
 from pydantic import Field, model_validator
 
 from .base import ContractModel, Identifier, SourceSpan
+from .enums import MaturityLevel
 
 
 class LegalSourceRecord(ContractModel): # 一整部法律、司法解释或其他规范性法律来源
@@ -32,14 +33,20 @@ class LegalSourceRecord(ContractModel): # 一整部法律、司法解释或其�
 
 
 class ProvisionRecord(ContractModel): # 一条完整法条原文，是规则层进行检索和引用的基础数据
-    contract_version: Literal["1.1"] = "1.1" # 法条合同版本号，只接受1.1
+    contract_version: Literal["1.1", "1.3"] = "1.3" # 兼容旧数据；P2新数据默认使用1.3
     provision_id: Identifier # 法条稳定唯一编号，例如law.prc.civil_code.2021.article_0563
     source_id: Identifier # 该法条所属的LegalSourceRecord.source_id
     article_no: str = Field(min_length=1) # 人类可读条号，例如“第五百六十三条”
     title: str = Field(min_length=1) # 法条显示名称
     text: str = Field(min_length=1) # 经核验的完整法条正文
+    # P2从上游法条文件中修复并保留层级。字段均为可选，旧v1.1记录无需补写。
+    book: str | None = None # 编，例如“第三编 合同”
+    sub_book: str | None = None # 分编，例如“第一分编 通则”
+    chapter: str | None = None # 章
+    section: str | None = None # 节
     effective_from: date | None = None # 该版本法条开始生效日期
     effective_to: date | None = None # 该版本法条失效日期；仍然有效时为空
+    maturity: MaturityLevel = MaturityLevel.L0 # 原始法条默认属于L0数据
     source_spans: list[SourceSpan] = Field(min_length=1) # 法条正文对应的原文片段，至少一处
 
     @model_validator(mode="after")

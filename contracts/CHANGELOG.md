@@ -2,6 +2,21 @@
 
 ## v1.3 P4工作流与可解释性合同（2026-09-05）
 
+### P2规则数据接入（2026-09-06）
+
+- `ProvisionRecord`继续读取v1.1数据，新建记录默认v1.3，并增加可选的编、分编、章、节
+  层级与`maturity`；每条法条仍把全文`SourceSpan`内嵌在`source_spans`中。
+- `RuleRecord`继续读取v1.1数据，新建记录默认v1.3；`ConditionGroup.role`区分参与
+  规则匹配的`CORE`组和只用于检索、比较、追问的`DIAGNOSTIC`组。
+- P2固定`legal-rag`上游提交与输入哈希，修复109条已知层级错位，发布1,260条法条、
+  1,268个原文片段和5条规则；合同记录以外的完整性信息由manifest与校验器维护。
+
+### 正式运行接入（2026-09-06）
+
+- 增加环境变量运行配置、Neo4j只读客户端、OpenAI兼容结构化LLM客户端、
+  `P4ComponentFactory`和`create_live_app()`装配入口。
+- `/v1/capabilities`动态探测Neo4j；LLM只报告配置状态，避免健康检查产生费用。
+
 ### 版本边界
 
 - `QueryState`、`RetrievalBundle`、`ExplanationPlan` 和 `WorkflowSnapshot` 的新建对象

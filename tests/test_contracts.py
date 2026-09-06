@@ -66,6 +66,14 @@ def test_rule_contract_rejects_ungrouped_conditions():
         RuleRecord.model_validate(payload)
 
 
+def test_rule_contract_requires_a_core_group():
+    payload = json.loads((EXAMPLES / "rule-record.json").read_text(encoding="utf-8"))
+    payload["contract_version"] = "1.3"
+    payload["condition_groups"][0]["role"] = "DIAGNOSTIC"
+    with pytest.raises(ValueError, match="at least one CORE"):
+        RuleRecord.model_validate(payload)
+
+
 @pytest.mark.parametrize(
     ("filename", "model"),
     [

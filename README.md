@@ -1,7 +1,7 @@
 # CasePath
 
 CasePath 是“规范规则层 + 案例适用层”的交互式民事法律信息检索与条件化解释框架。
-当前兼容十一种 v1.1 公共合同，增加 v1.2 会话合同、v1.3 P4工作流合同及多轮会话服务。
+当前兼容历史 v1.1 公共合同，增加 v1.2 会话合同、v1.3 P4工作流/规则合同及多轮会话服务。
 默认仍使用演示检索和保守回答记录器，不提供自动法律判断，引用尚未核验。
 
 ## 当前完成
@@ -14,6 +14,7 @@ CasePath 是“规范规则层 + 案例适用层”的交互式民事法律信�
 - JSON Schema 导出脚本和契约测试；
 - FastAPI 可选入口。
 - 单进程内存会话服务：创建、读取、回答、原文保存、并发版本检查和成功请求重放。
+- P2规则数据：1部民法典、1,260条法条、1,268个原文片段和5条核验规则。
 
 ## 目录职责
 
@@ -24,7 +25,10 @@ src/casepath/ports/       外部数据库、检索器、LLM的抽象端口
 src/casepath/workflow/    确定性状态机与模块编排
 src/casepath/adapters/    内存、Neo4j、向量库、LLM等实现
 src/casepath/api/         HTTP接口，不放业务规则
+src/casepath/ingestion/   P2离线法条读取、层级修复和来源校验
+src/casepath/rule_layer/  P2规则构造、原子发布和数据验收
 contracts/examples/       跨模块示例JSON
+data/canonical/rules/     P2生成并发布的规范规则层数据
 scripts/                  Schema导出等开发工具
 tests/                    契约和纵向链路测试
 ```
@@ -32,7 +36,7 @@ tests/                    契约和纵向链路测试
 ## 本地运行
 
 ```powershell
-uv sync --extra api --group dev
+uv sync --extra api --extra live --group dev
 uv run casepath-demo
 uv run pytest
 uv run uvicorn casepath.api.main:app --reload
@@ -85,6 +89,20 @@ Invoke-RestMethod -Uri "$baseUrl/v1/sessions/$sessionId"
 Demo 会把“不清楚”的完整原文保存在 `DialogueTurn.answer`、重新运行工作流并停止重复询问；
 相关条件仍为 UNKNOWN，解释继续展示不确定性。测试中的固定 P4 替身则另外验证了
 状态确实变化时，新状态会传给案例检索器，更新后再生成解释。
+
+## 正式基础设施接入
+
+复制`.env.example`中的变量到本机环境，但不要提交真实密码或API Key。运行配置由
+`RuntimeSettings.from_env()`统一加载；只有显式设置`CASEPATH_MODE=live`才进入正式装配。
+
+- `Neo4jGraphGateway`以只读路由、明确数据库和事务超时执行P4提供的参数化Cypher。
+- `OpenAICompatibleStructuredLanguageModel`调用OpenAI兼容接口，并用Pydantic目标合同
+  再次验证结构化输出。
+- P4实现`P4ComponentFactory`，接收P1管理的图与LLM端口，返回工作流组件和能力状态。
+- `create_live_app()`只负责装配，不会在Live模式静默改用Demo；资源在应用关闭时释放。
+
+`GET /v1/capabilities`会动态探测Neo4j。LLM探测可能产生费用，因此只报告配置状态，
+真实不可用错误在调用时转换为稳定503，并且失败不会提交会话更新。
 
 ## P4 接入约定
 
@@ -148,6 +166,22 @@ RuleRetriever
   旧的 `Workflow.apply_answer()` 和无状态 Demo HTTP 接口均已删除。
 - v1.1历史JSON仍可读取；新建查询、检索、解释和快照默认输出v1.3。
   P5接收新增字段前应按`contracts/CHANGELOG.md`更新Schema。
+
+## P2 规范规则数据
+
+P2以同级`../legal-rag`仓库固定提交中的《民法典》JSON为输入，修复已知的109条
+层级错位，再生成P1公共合同格式的数据。`condition_id`是P2、P3和P4共享的稳定连接键。
+
+```powershell
+uv run python -m casepath.rule_layer --verified-on 2026-09-04 `
+  --upstream-revision ce7872c7ae343e5ff860d627195ec4e72c7ef7ce
+uv run python -m casepath.rule_layer --validate-only
+uv run pytest tests/ingestion/laws tests/rule_layer
+```
+
+构建器先在临时目录生成并完成跨文件校验，最后才替换五个发布文件；发布中途失败会恢复旧数据。
+规则条件通过`ConditionGroup.role`区分`CORE`法定核心条件和`DIAGNOSTIC`案例比较条件，
+P4不得把诊断条件直接当作规则成立要件。
 
 ## 验证
 

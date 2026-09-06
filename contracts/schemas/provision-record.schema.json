@@ -1,5 +1,15 @@
 {
   "$defs": {
+    "MaturityLevel": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2",
+        "L3"
+      ],
+      "title": "MaturityLevel",
+      "type": "string"
+    },
     "SourceSpan": {
       "additionalProperties": false,
       "properties": {
@@ -67,8 +77,11 @@
   "additionalProperties": false,
   "properties": {
     "contract_version": {
-      "const": "1.1",
-      "default": "1.1",
+      "default": "1.3",
+      "enum": [
+        "1.1",
+        "1.3"
+      ],
       "title": "Contract Version",
       "type": "string"
     },
@@ -97,6 +110,54 @@
       "title": "Text",
       "type": "string"
     },
+    "book": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Book"
+    },
+    "sub_book": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sub Book"
+    },
+    "chapter": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Chapter"
+    },
+    "section": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Section"
+    },
     "effective_from": {
       "anyOf": [
         {
@@ -122,6 +183,10 @@
       ],
       "default": null,
       "title": "Effective To"
+    },
+    "maturity": {
+      "$ref": "#/$defs/MaturityLevel",
+      "default": "L0"
     },
     "source_spans": {
       "items": {
