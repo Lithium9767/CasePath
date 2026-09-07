@@ -27,6 +27,12 @@ from .ids import (
     DATASET_ID,
     EXPECTED_CANONICAL_OUTPUT_HASHES,
     EXPECTED_CIVIL_CASE_COUNT,
+    EXPECTED_DEEP_CASE_COUNT,
+    EXPECTED_LEXREL_REPOSITORY_URL,
+    EXPECTED_LEXREL_REVISION,
+    EXPECTED_LEXREL_SERVICE_PATH,
+    EXPECTED_LEXREL_SERVICE_RECORD_COUNT,
+    EXPECTED_LEXREL_SERVICE_SHA256,
     EXPECTED_PROCESSED_CASES_PATH,
     EXPECTED_PROCESSED_CASES_SHA256,
     EXPECTED_UPSTREAM_RECORD_COUNT,
@@ -196,6 +202,7 @@ def validate_canonical_cases(data_root: Path) -> CaseDatasetValidationReport:
         manifest.l1_case_count != len(lightweight)
         or manifest.deep_case_count != len(deep)
         or manifest.l1_case_count != EXPECTED_CIVIL_CASE_COUNT
+        or manifest.deep_case_count != EXPECTED_DEEP_CASE_COUNT
     ):
         raise ValueError("manifest case counts do not match the published files")
     if set(manifest.reviewed_l2_case_ids) != set(REVIEWED_L2_CASE_IDS):
@@ -250,8 +257,8 @@ def _require_manifest_identity(manifest: CaseDatasetManifest) -> None:
 
 
 def _validate_manifest_input(manifest: CaseDatasetManifest, manifest_root: Path) -> None:
-    if len(manifest.inputs) != 1:
-        raise ValueError("manifest must record exactly one processed-cases input")
+    if len(manifest.inputs) != 2:
+        raise ValueError("manifest must record processed-cases and LexRel service-contract inputs")
     item = manifest.inputs[0]
     if (
         Path(item.path).as_posix() != EXPECTED_PROCESSED_CASES_PATH
@@ -264,3 +271,15 @@ def _validate_manifest_input(manifest: CaseDatasetManifest, manifest_root: Path)
     input_path = manifest_root / item.path
     if input_path.is_file() and sha256_file(input_path) != item.sha256:
         raise ValueError(f"manifest hash mismatch for {item.path}")
+    lexrel = manifest.inputs[1]
+    if (
+        Path(lexrel.path).as_posix() != EXPECTED_LEXREL_SERVICE_PATH
+        or lexrel.sha256 != EXPECTED_LEXREL_SERVICE_SHA256
+        or lexrel.record_count != EXPECTED_LEXREL_SERVICE_RECORD_COUNT
+        or lexrel.repository_url != EXPECTED_LEXREL_REPOSITORY_URL
+        or lexrel.revision != EXPECTED_LEXREL_REVISION
+    ):
+        raise ValueError("manifest input metadata mismatch for lexrel_service_contract.json")
+    lexrel_path = manifest_root / lexrel.path
+    if lexrel_path.is_file() and sha256_file(lexrel_path) != lexrel.sha256:
+        raise ValueError(f"manifest hash mismatch for {lexrel.path}")

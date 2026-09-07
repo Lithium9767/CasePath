@@ -30,29 +30,49 @@ from .ids import CLAIM_TYPE_GENERIC, CLAIM_TYPE_SERVICE_TERMINATION_REFUND
 from .sections import (
     FactPartitions,
     court_finding_sentences,
+    numbered_fact_items,
     parse_granted_amount,
     parse_requested_amount,
 )
 
 _CONTRACT_RE = re.compile(r"签订.{0,20}(协议|合同)")
+# "购买/约定购买" alone is not proof of payment; require transfer/receipt language.
 _SERVICE_PAYMENT_RE = re.compile(
-    r"(购买|支付|交纳|付款).{0,24}(会籍|私教|会员|服务费|课程|服务)"
+    r"(支付|交纳|缴纳|付款).{0,24}(会籍|私教|会员|服务费|课程|服务|培训费|旅游费|团费)|"
+    r"(会籍|私教|会员|服务费|课程|培训费|旅游费|团费).{0,16}(支付|交纳|缴纳|付款)|"
+    r"出具.{0,16}收据|收据.{0,40}(金额|元)"
 )
 _REPAIR_FEE_RE = re.compile(r"维修费|停车管理费")
-_IMPOSSIBLE_RE = re.compile(r"关闭|闭店|撤离|无法提供|不能提供|停止营业|相继关闭")
+_IMPOSSIBLE_RE = re.compile(r"关闭|闭店|撤离|无法提供|不能提供|停止营业|相继关闭|未正式开业")
 _STILL_OPEN_RE = re.compile(r"正常营业|继续提供|仍可提供")
-_UNPERFORMED_RE = re.compile(r"剩余|未消费|未履行|不能提供服务的|未使用")
+_UNPERFORMED_RE = re.compile(r"剩余|未消费|未履行|未使用|未开始上课|尚有\d+次课|尚有.{0,8}次课")
 _ALTERNATIVE_RE = re.compile(r"转让|安置|另一.{0,8}(会所|门店)|替代")
 _ALTERNATIVE_FAIL_RE = re.compile(r"距离较远|不便于|未经.{0,8}同意")
 _TERMINATED_RE = re.compile(r"解除.{0,20}(协议|合同)")
 _REJECT_ALL_RE = re.compile(r"驳回原告.{0,20}诉讼请求")
 _REJECT_OTHER_RE = re.compile(r"驳回.{0,8}其他诉讼请求")
+_APPLIES_TERMINATION_REFUND_RE = re.compile(
+    r"(解除.{0,30}符合法律规定)|"
+    r"(根据《中华人民共和国民法典》第五百六十三.{0,40}解除)|"
+    r"(根据《中华人民共和国民法典》第五百六十六.{0,40}返还)"
+)
 
 
 @dataclass
 class SpanBook:
     case_id: str
     spans: list[SourceSpan] = field(default_factory=list)
+
+    def _next_index(self) -> int:
+        indexes: list[int] = []
+        prefix = f"{self.case_id}.span."
+        for span in self.spans:
+            if not span.span_id.startswith(prefix):
+                continue
+            suffix = span.span_id[len(prefix) :]
+            if suffix.isdigit():
+                indexes.append(int(suffix))
+        return (max(indexes) if indexes else 0) + 1
 
     def add(
         self,
@@ -66,11 +86,12 @@ class SpanBook:
             if existing.section == section and existing.quote == quote:
                 return existing
         start, end = locate_quote(document, quote, region)
+        index = self._next_index()
         span = SourceSpan(
-            span_id=entity_id(self.case_id, "span", len(self.spans) + 1),
+            span_id=entity_id(self.case_id, "span", index),
             source_id=f"case.{self.case_id}",
             section=section,
-            paragraph_id=f"{section}-{len(self.spans) + 1:03d}",
+            paragraph_id=f"{section}-{index:03d}",
             start_offset=start,
             end_offset=end,
             quote=quote,
@@ -171,14 +192,45 @@ def extract_findings(
     return findings
 
 
+def extract_findings_from_facts(
+    case_id: str,
+    facts_text: str,
+    book: SpanBook,
+) -> list[CourtFinding]:
+    """Build court findings from numbered recognized facts, not 诉称/辩称."""
+
+    items = numbered_fact_items(facts_text)
+    if not items:
+        items = court_finding_sentences(facts_text)
+    compact = facts_text.strip()
+    if not items and len(compact) >= 8:
+        items = [compact]
+    findings: list[CourtFinding] = []
+    for sentence in items:
+        try:
+            span = book.add("基本案情", facts_text, sentence)
+        except ValueError:
+            continue
+        findings.append(
+            CourtFinding(
+                finding_id=entity_id(case_id, "finding", len(findings) + 1),
+                predicate=sentence,
+                polarity=True,
+                source_span_ids=[span.span_id],
+            )
+        )
+    return findings
+
+
 def extract_reasoning_step(
     case_id: str,
     reasoning_text: str,
     findings: list[CourtFinding],
-    invoked_rule_ids: list[str],
     book: SpanBook,
 ) -> ReasoningStep | None:
-    sentence = _key_reasoning_sentence(reasoning_text)
+    # 适用关系与引用必须来自同一句肯定说理，不能扫描全文后挂到另一句话。
+    application_sentence = application_evidence(reasoning_text)
+    sentence = application_sentence or _key_reasoning_sentence(reasoning_text)
     if not sentence:
         return None
     try:
@@ -188,10 +240,46 @@ def extract_reasoning_step(
     return ReasoningStep(
         reasoning_id=entity_id(case_id, "reasoning", 1),
         premise_finding_ids=[item.finding_id for item in findings[:1]],
-        applied_rule_ids=invoked_rule_ids,
+        # APPLIES must be grounded in court reasoning, never copied from claim INVOKES.
+        applied_rule_ids=[RULE_SERVICE_TERMINATION_REFUND] if application_sentence else [],
         conclusion=sentence,
         source_span_ids=[span.span_id],
     )
+
+
+def applied_rule_ids_from_reasoning(reasoning_text: str) -> list[str]:
+    """只为可定位的法院肯定说理返回规则，不从诉讼请求复制关系。"""
+
+    return [RULE_SERVICE_TERMINATION_REFUND] if application_evidence(reasoning_text) else []
+
+
+def application_evidence(reasoning_text: str) -> str | None:
+    """保守的 L1 规则适用识别，返回实际证明适用的原句。
+
+    这不是完整法律推理器。存在否定/假设或角色不清时宁可不建边；以后应
+    按说理步骤精确标注，不能把降低召回率误认为法院没有适用该规则。
+    """
+
+    text = reasoning_text or ""
+    # 包含跨句转折否定的段落也不建边，避免先引用主张、下一句再驳回。
+    if re.search(r"不予支持|不予采纳|不予认可|不支持|不成立|不适用|不能适用|不应适用|"
+                 r"不符合法律规定|并非|并不|无需返还|无须返还|不得返还|驳回|假如|如果|假设", text):
+        return None
+    for match in re.finditer(r"[^。；\n]+[。；]?", text):
+        sentence = match.group(0).strip()
+        if not _APPLIES_TERMINATION_REFUND_RE.search(sentence):
+            continue
+        # 引用当事人观点本身不足以构成法院适用，即使引句含“符合法律规定”。
+        if re.search(r"主张|诉称|辩称|认为|称", sentence) and not sentence.startswith(
+            ("本院认为", "法院认为", "本院认定")
+        ):
+            continue
+        # 无法条的宽泛“解除合法”不能挂到特定服务退款规则。
+        if not re.search(r"第五百六十[三六]条|第(?:563|566)条", sentence):
+            continue
+        if re.search(r"符合法律规定|应予返还|应当返还|应返还|予以支持|本院支持", sentence):
+            return sentence
+    return None
 
 
 def extract_decision(
@@ -201,14 +289,20 @@ def extract_decision(
     facts_text: str,
     reasoning_text: str,
     book: SpanBook,
-) -> DecisionItem:
+) -> DecisionItem | None:
     holding = partitions.holding or ""
+    quote = _holding_quote(holding)
+    if not quote:
+        return None
     document = facts_text if holding and holding in facts_text else reasoning_text
     section = "裁判结果" if holding and holding in facts_text else "裁判理由"
-    quote = _holding_quote(holding) or _first_sentence(reasoning_text) or "裁判结果待核验"
     if quote not in document:
-        document = quote
-        section = "裁判结果"
+        if quote in facts_text:
+            document, section = facts_text, "裁判结果"
+        elif quote in reasoning_text:
+            document, section = reasoning_text, "裁判理由"
+        else:
+            return None
     span = book.add(section, document, quote)
     granted = parse_granted_amount(holding)
     status = decide_status(claim.amount, granted, holding, claim.requested_remedy)
@@ -268,7 +362,7 @@ def extract_condition_findings(
             "基本案情",
             facts_text,
         ),
-        _payment_bridge(sentences, finding_by_predicate, book, facts_text),
+        _payment_bridge(sentences, finding_by_predicate, book, facts_text, reasoning_text),
         _bridge(
             COND_PERFORMANCE_IMPOSSIBLE,
             _match_status(sentences, _IMPOSSIBLE_RE, _STILL_OPEN_RE),
@@ -289,6 +383,7 @@ def _payment_bridge(
     finding_by_predicate: dict[str, CourtFinding],
     book: SpanBook,
     facts_text: str,
+    reasoning_text: str = "",
 ) -> ConditionFinding:
     service_hits = [sentence for sentence in sentences if _SERVICE_PAYMENT_RE.search(sentence)]
     repair_hits = [sentence for sentence in sentences if _REPAIR_FEE_RE.search(sentence)]
@@ -303,6 +398,25 @@ def _payment_bridge(
         )
     if repair_hits:
         return _unknown(COND_PAYMENT_MADE)
+    # Court reasoning may recognize payment ("交纳") when findings only say "购买".
+    for match in re.finditer(r"[^。；\n]+[。；]?", reasoning_text or ""):
+        sentence = match.group(0).strip()
+        if _SERVICE_PAYMENT_RE.search(sentence) or re.search(
+            r"交纳的.{0,12}(会籍|课程|服务)?费用|已支付|已经支付",
+            sentence,
+        ):
+            try:
+                span = book.add("裁判理由", reasoning_text, sentence)
+            except ValueError:
+                break
+            return ConditionFinding(
+                condition_id=COND_PAYMENT_MADE,
+                status=ConditionStatus.SATISFIED,
+                finding_ids=[],
+                confidence=0.55,
+                source_span_ids=[span.span_id],
+                human_verified=False,
+            )
     return _unknown(COND_PAYMENT_MADE)
 
 
@@ -326,7 +440,7 @@ def _unperformed_bridge(
     reasoning_hits = [
         match.group(0).strip()
         for match in re.finditer(r"[^。；\n]+[。；]?", reasoning_text)
-        if _UNPERFORMED_RE.search(match.group(0)) or "不能提供服务" in match.group(0)
+        if _UNPERFORMED_RE.search(match.group(0))
     ]
     if reasoning_hits:
         try:

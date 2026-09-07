@@ -20,6 +20,7 @@ HOLDING_RE = re.compile(
     r"(?:判决|判决如下)[：:]"
 )
 SENTENCE_RE = re.compile(r"[^。；\n]+[。；]?")
+NUMBERED_FACT_RE = re.compile(r"(?m)^\s*\d+\.\s+")
 
 
 @dataclass(frozen=True)
@@ -62,6 +63,21 @@ def split_fact_partitions(facts: str) -> FactPartitions:
         court=court,
         holding=holding,
     )
+
+
+def numbered_fact_items(text: str) -> list[str]:
+    """Split LexRel-style court-recognized facts that start with ``1.`` ``2.``."""
+
+    matches = list(NUMBERED_FACT_RE.finditer(text or ""))
+    if not matches:
+        return []
+    items: list[str] = []
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        quote = text[match.start() : end].strip()
+        if len(quote) >= 8:
+            items.append(quote)
+    return items
 
 
 def court_finding_sentences(court_text: str) -> list[str]:

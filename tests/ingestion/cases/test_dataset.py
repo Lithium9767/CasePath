@@ -18,7 +18,11 @@ from casepath.ingestion.cases.build import PINNED_GENERATED_ON, build_dataset
 from casepath.ingestion.cases.ids import (
     EXPECTED_CANONICAL_OUTPUT_HASHES,
     EXPECTED_CIVIL_CASE_COUNT,
+    EXPECTED_DEEP_CASE_COUNT,
+    EXPECTED_LEGAL_RAG_CIVIL_COUNT,
+    EXPECTED_LEXREL_SERVICE_CASE_COUNT,
     GYM_CASE_ID,
+    LEXREL_CASE_ID_PREFIX,
     PROPERTY_CASE_ID,
     REVIEWED_L2_CASE_IDS,
 )
@@ -72,7 +76,13 @@ def test_all_l1_records_match_case_index_record(canonical_data_root: Path) -> No
 def test_all_civil_code_provision_ids_resolve(canonical_data_root: Path) -> None:
     report = validate_canonical_cases(canonical_data_root)
     lightweight, _ = _read_cases(canonical_data_root)
-    cited = [pid for record in lightweight for pid in record.related_provision_ids]
+    legal_rag = [
+        record
+        for record in lightweight
+        if not record.case_id.startswith(LEXREL_CASE_ID_PREFIX)
+    ]
+    cited = [pid for record in legal_rag for pid in record.related_provision_ids]
+    assert len(legal_rag) == EXPECTED_LEGAL_RAG_CIVIL_COUNT
     assert cited
     assert report.resolved_civil_code_citation_count == 70
     assert len(cited) == 70
@@ -82,16 +92,68 @@ def test_all_civil_code_provision_ids_resolve(canonical_data_root: Path) -> None
     assert all("provision.civil_code." not in pid for pid in cited)
 
 
+def test_all_legal_rag_cases_have_deep_records(canonical_data_root: Path) -> None:
+    lightweight, deep = _read_cases(canonical_data_root)
+    legal_rag_l1 = [
+        record for record in lightweight if not record.case_id.startswith(LEXREL_CASE_ID_PREFIX)
+    ]
+    legal_rag_deep = [
+        record for record in deep if not record.case_id.startswith(LEXREL_CASE_ID_PREFIX)
+    ]
+    assert len(legal_rag_l1) == EXPECTED_LEGAL_RAG_CIVIL_COUNT
+    assert {record.case_id for record in legal_rag_l1} == {record.case_id for record in legal_rag_deep}
+    for record in legal_rag_deep:
+        assert record.contract_version == "1.1"
+        assert record.claims
+        assert all("诉称" not in finding.predicate for finding in record.findings)
+        assert all("辩称" not in finding.predicate for finding in record.findings)
+
+
+def test_lexrel_service_cases_are_deep_without_invented_holdings(
+    canonical_data_root: Path,
+) -> None:
+    lightweight, deep = _read_cases(canonical_data_root)
+    lexrel_l1 = [record for record in lightweight if record.case_id.startswith(LEXREL_CASE_ID_PREFIX)]
+    lexrel_deep = [record for record in deep if record.case_id.startswith(LEXREL_CASE_ID_PREFIX)]
+    assert len(lexrel_l1) == EXPECTED_LEXREL_SERVICE_CASE_COUNT
+    assert {record.case_id for record in lexrel_l1} == {record.case_id for record in lexrel_deep}
+    assert all(record.cause == "服务合同纠纷" for record in lexrel_l1)
+    assert all(record.maturity == MaturityLevel.L1 for record in lexrel_deep)
+    for record in lexrel_deep:
+        assert record.findings
+        assert record.reasoning_steps == []
+        assert record.decisions == []
+        assert all(item.human_verified is False for item in record.condition_findings)
+
+
 def test_property_damages_case_is_not_in_refund_deep_set(canonical_data_root: Path) -> None:
     _, deep = _read_cases(canonical_data_root)
     deep_ids = {record.case_id for record in deep}
-    assert PROPERTY_CASE_ID not in deep_ids
+    assert PROPERTY_CASE_ID in deep_ids
+    property_case = next(record for record in deep if record.case_id == PROPERTY_CASE_ID)
     assert all(
         RULE_SERVICE_TERMINATION_REFUND not in claim.invoked_rule_ids
-        or record.case_id != PROPERTY_CASE_ID
-        for record in deep
-        for claim in record.claims
+        for claim in property_case.claims
     )
+    assert property_case.condition_findings == []
+
+
+def test_refund_comparison_set_is_small_and_evidence_backed(
+    canonical_data_root: Path,
+) -> None:
+    from casepath.ingestion.cases.refinements import SERVICE_REFUND_COMPARISON_CASE_IDS
+
+    _, deep = _read_cases(canonical_data_root)
+    comparison = [record for record in deep if record.case_id in SERVICE_REFUND_COMPARISON_CASE_IDS]
+    assert len(comparison) == len(SERVICE_REFUND_COMPARISON_CASE_IDS)
+    for record in deep:
+        if record.case_id in SERVICE_REFUND_COMPARISON_CASE_IDS:
+            assert len(record.condition_findings) == 6
+            known = [item for item in record.condition_findings if item.status.value != "UNKNOWN"]
+            assert known
+            assert all(item.source_span_ids for item in known)
+        else:
+            assert record.condition_findings == []
 
 
 def test_machine_bridges_and_unreviewed_cases_stay_l1(canonical_data_root: Path) -> None:
@@ -190,7 +252,7 @@ def test_public_validator_accepts_canonical_dataset(canonical_data_root: Path) -
     report = validate_canonical_cases(canonical_data_root)
     assert report.status == "passed"
     assert report.l1_case_count == EXPECTED_CIVIL_CASE_COUNT
-    assert report.deep_case_count >= 1
+    assert report.deep_case_count == EXPECTED_DEEP_CASE_COUNT
     manifest = json.loads(
         (canonical_data_root / "manifests" / "cases.manifest.json").read_text(encoding="utf-8")
     )

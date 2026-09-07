@@ -34,15 +34,21 @@ def is_property_damages_claim(case: dict[str, Any], plaintiff_text: str) -> bool
     return bool(_PROPERTY_DAMAGE.search(haystack) or "赔偿" in plaintiff_text)
 
 
-def is_service_termination_refund(case: dict[str, Any], plaintiff_text: str) -> bool:
-    """True only for service-contract termination plus unperformed-fee refund."""
+def is_service_contract_dispute(case: dict[str, Any], plaintiff_text: str) -> bool:
+    """True for 服务合同纠纷, excluding 物业服务 and property-damage claims."""
 
     if is_property_damages_claim(case, plaintiff_text):
         return False
     title = str(case.get("title") or "")
     cause = str(case.get("case_cause") or "")
-    if not (_SERVICE_CAUSE.search(cause) or _SERVICE_CAUSE.search(title)):
+    if _PROPERTY_CAUSE.search(cause):
         return False
-    if _PROPERTY_CAUSE.search(cause) and not _TERMINATION.search(plaintiff_text):
+    return bool(_SERVICE_CAUSE.search(cause) or _SERVICE_CAUSE.search(title))
+
+
+def is_service_termination_refund(case: dict[str, Any], plaintiff_text: str) -> bool:
+    """True only for service-contract termination plus unperformed-fee refund."""
+
+    if not is_service_contract_dispute(case, plaintiff_text):
         return False
     return bool(_TERMINATION.search(plaintiff_text) and _REFUND.search(plaintiff_text))

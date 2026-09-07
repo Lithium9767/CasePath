@@ -141,9 +141,27 @@ def test_llm_failure_is_not_hidden_by_template(catalog):
 
 def test_case_injection_has_distinct_findings_reasoning_and_decisions(catalog):
     state, bundle, comparison = inputs()
-    case_id = next(iter(catalog.case_records))
+    # 新数据包含缺少查明或主文的 L1 案例，不能假定文件第一条恰好完整。
+    complete = [
+        case
+        for case in catalog.case_records.values()
+        if case.findings and case.reasoning_steps and case.decisions
+    ]
+    assert complete, "该测试需要至少一条具备三种证据的案例"
+    case_id = min(complete, key=lambda case: len(case.model_dump_json())).case_id
     bundle.support_case_refs = [ScoredReference(object_id=case_id, score=1)]
     package = evidence_package(catalog, state, bundle, comparison)
     case = package["cases"][0]
     assert case["role"] == "support"
     assert case["findings"] and case["reasoning_steps"] and case["decisions"]
+
+
+def test_missing_case_findings_are_not_invented(catalog):
+    state, bundle, comparison = inputs()
+    sparse = [case for case in catalog.case_records.values() if not case.findings]
+    if not sparse:
+        pytest.skip("当前发布没有缺少查明事实的案例")
+    case_id = min(sparse, key=lambda case: len(case.model_dump_json())).case_id
+    bundle.boundary_case_refs = [ScoredReference(object_id=case_id, score=1)]
+    package = evidence_package(catalog, state, bundle, comparison)
+    assert package["cases"][0]["findings"] == []

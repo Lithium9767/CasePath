@@ -78,6 +78,24 @@ def resolve_civil_code_provision_id(law_name: object, article: object) -> str | 
     return provision_id(number)
 
 
+_CIVIL_CODE_IN_TEXT_RE = re.compile(
+    r"(?:《中华人民共和国民法典》|中华人民共和国民法典|民法典)"
+    r"第([零〇一二三四五六七八九十百千两0-9]+)条"
+)
+
+
+def related_provision_ids_from_text(*texts: str) -> list[str]:
+    """Resolve Civil Code article mentions in free text; ignore bare 第X条."""
+
+    resolved: set[str] = set()
+    blob = "\n".join(str(text or "") for text in texts)
+    for match in _CIVIL_CODE_IN_TEXT_RE.finditer(blob):
+        number = parse_article_number(match.group(1))
+        if number is not None:
+            resolved.add(provision_id(number))
+    return sorted(resolved)
+
+
 def related_provision_ids(case: dict[str, Any]) -> list[str]:
     resolved: set[str] = set()
     for item in case.get("legal_provisions") or []:
@@ -86,4 +104,5 @@ def related_provision_ids(case: dict[str, Any]) -> list[str]:
         provision = resolve_civil_code_provision_id(item.get("law_name"), item.get("article"))
         if provision is not None:
             resolved.add(provision)
+    resolved.update(related_provision_ids_from_text(*(case.get("cited_texts") or [])))
     return sorted(resolved)

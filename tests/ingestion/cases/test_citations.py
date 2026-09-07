@@ -2,6 +2,7 @@ from casepath.ingestion.cases.citations import (
     parse_article_number,
     parse_chinese_int,
     related_provision_ids,
+    related_provision_ids_from_text,
     resolve_civil_code_provision_id,
 )
 from casepath.ingestion.laws.civil_code import provision_id
@@ -44,3 +45,10 @@ def test_related_provision_ids_deduplicate_and_ignore_unresolved():
         ]
     }
     assert related_provision_ids(case) == [provision_id(509)]
+
+
+def test_related_provision_ids_from_text_require_civil_code_name():
+    assert related_provision_ids_from_text("协议第一条借款本金") == []
+    assert related_provision_ids_from_text(
+        "原告依据《中华人民共和国民法典》第五百六十三条请求解除合同。"
+    ) == [provision_id(563)]

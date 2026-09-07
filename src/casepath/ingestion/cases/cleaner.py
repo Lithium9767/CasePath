@@ -21,6 +21,7 @@ from .extract import (
     extract_reasoning_step,
 )
 from .ids import REVIEWED_L2_CASE_IDS
+from .refinements import apply_case_overlay, uses_refund_condition_template
 from .sections import DATE_RE, split_fact_partitions, split_sections
 
 __all__ = ["CaseCleaner", "clean_cases", "split_sections"]
@@ -106,11 +107,12 @@ class CaseCleaner:
     ) -> bool:
         return is_service_termination_refund(case, self.plaintiff_text(case, markdown))
 
-    def deep_fitness(self, case: dict[str, Any], markdown: str | None = None) -> CaseRecord:
-        """Build a service-contract termination/refund deep record.
+    def deep_record(self, case: dict[str, Any], markdown: str | None = None) -> CaseRecord:
+        """Build a CaseRecord from a legal-rag civil case.
 
-        Callers must already have classified the case. Unreviewed machine
-        output is always L1 and ``human_verified=False``.
+        Refund rule IDs are attached only after claim classification. Holdings
+        and reasoning steps are omitted when they cannot be anchored in the
+        canonical case text. Unreviewed machine output stays L1.
         """
 
         document = self.document_text(case, markdown)
@@ -127,25 +129,28 @@ class CaseCleaner:
         book = SpanBook(case_id)
         claim = extract_claim(case_id, case, partitions, str(case.get("title") or ""))
         findings = extract_findings(case_id, partitions, facts, book)
-        condition_findings = extract_condition_findings(
-            findings,
-            facts,
-            reasoning,
-            holding,
-            book,
+        condition_findings = (
+            extract_condition_findings(
+                findings,
+                facts,
+                reasoning,
+                holding,
+                book,
+            )
+            if uses_refund_condition_template(case_id)
+            else []
         )
         reasoning_step = extract_reasoning_step(
             case_id,
             reasoning,
             findings,
-            claim.invoked_rule_ids,
             book,
         )
         decision = extract_decision(case_id, claim, partitions, facts, reasoning, book)
         maturity = (
             MaturityLevel.L2 if case_id in REVIEWED_L2_CASE_IDS else MaturityLevel.L1
         )
-        return CaseRecord(
+        record = CaseRecord(
             case_id=case_id,
             title=str(case.get("title") or "未命名案例"),
             case_no=case.get("case_no") or None,
@@ -157,9 +162,13 @@ class CaseCleaner:
             findings=findings,
             condition_findings=condition_findings,
             reasoning_steps=[reasoning_step] if reasoning_step is not None else [],
-            decisions=[decision],
+            decisions=[decision] if decision is not None else [],
             source_spans=book.spans,
         )
+        return apply_case_overlay(record, facts, reasoning)
+
+    def deep_fitness(self, case: dict[str, Any], markdown: str | None = None) -> CaseRecord:
+        return self.deep_record(case, markdown)
 
     def build_records(
         self,
@@ -168,8 +177,7 @@ class CaseCleaner:
         deep: list[CaseRecord] = []
         for case in self.civil_cases():
             lightweight.append(self.lightweight(case))
-            if self.is_service_termination_refund_case(case):
-                deep.append(self.deep_fitness(case))
+            deep.append(self.deep_record(case))
         return lightweight, deep
 
     def write(self, output_path: Path, deep_output_path: Path | None = None) -> int:

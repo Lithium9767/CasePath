@@ -10,13 +10,18 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-from casepath.contracts import ProvisionRecord, RuleRecord
+from casepath.contracts import CaseIndexRecord, CaseRecord, ProvisionRecord, RuleRecord
 from casepath.ingestion.laws.jsonl import read_jsonl, sha256_file, write_json, write_jsonl
 from casepath.ingestion.laws.manifest import ManifestFile
 
 from .cleaner import CaseCleaner
 from .ids import (
     DATASET_ID,
+    EXPECTED_LEXREL_REPOSITORY_URL,
+    EXPECTED_LEXREL_REVISION,
+    EXPECTED_LEXREL_SERVICE_PATH,
+    EXPECTED_LEXREL_SERVICE_RECORD_COUNT,
+    EXPECTED_LEXREL_SERVICE_SHA256,
     EXPECTED_PROCESSED_CASES_PATH,
     EXPECTED_PROCESSED_CASES_SHA256,
     EXPECTED_UPSTREAM_RECORD_COUNT,
@@ -25,6 +30,7 @@ from .ids import (
     GENERATOR,
     REVIEWED_L2_CASE_IDS,
 )
+from .lexrel import load_service_contract_cases
 from .manifest import CaseDatasetManifest
 from .validation import (
     CaseDatasetValidationReport,
@@ -32,7 +38,7 @@ from .validation import (
     validate_records,
 )
 
-PINNED_GENERATED_ON = date(2026, 9, 6)
+PINNED_GENERATED_ON = date(2026, 9, 7)
 GENERATED_PATHS = (
     Path("canonical/cases/cases_l1.jsonl"),
     Path("canonical/cases/cases_deep.jsonl"),
@@ -45,8 +51,18 @@ LIMITATIONS = [
         "related_provision_ids and are not retained as raw citations in this dataset."
     ),
     (
-        "Only cases whose pleadings clearly seek service-contract termination and unperformed-fee "
-        "refund enter the deep comparison set. Property-damage claims are excluded from that template."
+        "Every legal-rag civil case and every LexRel expert-annotated 服务合同关系 "
+        "sample remains a deep CaseRecord for text retrieval. Refund-rule condition "
+        "bridges are limited to SERVICE_REFUND_COMPARISON_CASE_IDS. The gym refund "
+        "rule is invoked only for prepaid-closure / 解除+返还 cases in that set. "
+        "LexRel train splits are unused."
+    ),
+    (
+        "Holdings, reasoning steps, and court findings are omitted when they cannot "
+        "be anchored in 法院经审理查明/法院认定, 裁判理由, or the judgment 主文. "
+        "诉称 and 辩称 are never written as CourtFinding records. UNKNOWN conditions "
+        "mean the source does not establish the predicate; they are not "
+        "NOT_SATISFIED."
     ),
     "CourtFinding records are taken from 法院经审理查明/法院认定, never from 诉称 or 辩称.",
     "Condition mapping is conservative machine heuristics and always sets human_verified=false.",
@@ -134,6 +150,35 @@ def _stage_rules(final_data_root: Path, staged_data_root: Path) -> None:
     shutil.copytree(source_rules, target_rules)
 
 
+def _lexrel_input_path(data_root: Path) -> Path:
+    candidate = data_root / "inputs" / Path(EXPECTED_LEXREL_SERVICE_PATH).name
+    if candidate.is_file():
+        return candidate
+    return Path(__file__).resolve().parents[4] / EXPECTED_LEXREL_SERVICE_PATH
+
+
+def _merge_lexrel_cases(
+    lightweight: list[CaseIndexRecord],
+    deep: list[CaseRecord],
+    lexrel_path: Path,
+) -> tuple[list[CaseIndexRecord], list[CaseRecord]]:
+    lexrel_digest = sha256_file(lexrel_path)
+    if lexrel_digest != EXPECTED_LEXREL_SERVICE_SHA256:
+        raise ValueError(
+            "unexpected LexRel service-contract hash: "
+            f"expected {EXPECTED_LEXREL_SERVICE_SHA256}, received {lexrel_digest}"
+        )
+    lexrel_l1, lexrel_deep = load_service_contract_cases(lexrel_path)
+    seen = {item.case_id for item in lightweight}
+    for item in lexrel_l1:
+        if item.case_id in seen:
+            raise ValueError(f"duplicate case_id from LexRel: {item.case_id}")
+        seen.add(item.case_id)
+    merged_l1 = sorted([*lightweight, *lexrel_l1], key=lambda item: item.case_id)
+    merged_deep = sorted([*deep, *lexrel_deep], key=lambda item: item.case_id)
+    return merged_l1, merged_deep
+
+
 def build_dataset(
     input_path: Path,
     data_root: Path,
@@ -164,6 +209,11 @@ def build_dataset(
 
     cleaner = CaseCleaner(input_path, markdown_dir)
     lightweight, deep = cleaner.build_records()
+    lightweight, deep = _merge_lexrel_cases(
+        lightweight,
+        deep,
+        _lexrel_input_path(final_data_root),
+    )
     validate_records(lightweight, deep, provisions, rules)
 
     final_data_root.parent.mkdir(parents=True, exist_ok=True)
@@ -195,7 +245,14 @@ def build_dataset(
                     record_count=len(payload),
                     repository_url=EXPECTED_UPSTREAM_REPOSITORY_URL,
                     revision=revision,
-                )
+                ),
+                ManifestFile(
+                    path=EXPECTED_LEXREL_SERVICE_PATH,
+                    sha256=EXPECTED_LEXREL_SERVICE_SHA256,
+                    record_count=EXPECTED_LEXREL_SERVICE_RECORD_COUNT,
+                    repository_url=EXPECTED_LEXREL_REPOSITORY_URL,
+                    revision=EXPECTED_LEXREL_REVISION,
+                ),
             ],
             outputs=[
                 ManifestFile(
