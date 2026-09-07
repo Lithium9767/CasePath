@@ -69,9 +69,16 @@ def test_configured_llm_reaches_p4_and_is_closed(monkeypatch, provider_fails):
         calls.append(kwargs)
         if provider_fails:
             raise TimeoutError("private-provider-details")
-        return SimpleNamespace(
-            choices=[SimpleNamespace(message=SimpleNamespace(content='{"links": []}'))]
+        content = '{"links": []}' if len(calls) == 2 else (
+            '{"paragraphs":[{"text":"根据你提供的原话，尚需进一步核对相关条件。",'
+            '"evidence_ids":[],"fact_ids":["fact.initial.query"]}],"branches":[]}'
         )
+        if len(calls) == 1:
+            import json
+            candidates = json.loads(kwargs["messages"][1]["content"])["candidates"]
+            content = json.dumps({"items": [{"rule_id": item["rule_id"],
+                "relevance": "GENERAL", "reason": "测试候选"} for item in candidates]})
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content))])
 
     sdk = SimpleNamespace(
         chat=SimpleNamespace(completions=SimpleNamespace(create=complete)),
@@ -92,6 +99,7 @@ def test_configured_llm_reaches_p4_and_is_closed(monkeypatch, provider_fails):
     for name, value in {
         "CASEPATH_MODE": "live",
         "CASEPATH_LLM_REQUIRED": "true",
+        "CASEPATH_MAX_QUESTION_TURNS": "0",
         "CASEPATH_LLM_API_KEY": "test-only-key",
         "CASEPATH_LLM_MODEL": "test-model",
         "CASEPATH_LLM_BASE_URL": "https://provider.invalid/v1",
@@ -110,7 +118,7 @@ def test_configured_llm_reaches_p4_and_is_closed(monkeypatch, provider_fails):
         response = client.post("/v1/sessions", json={"query": "健身房办了卡，已经付款，关门了"})
         assert response.status_code == (503 if provider_fails else 201), response.text
         assert "private-provider-details" not in response.text
-        assert len(calls) == 1
+        assert len(calls) == (1 if provider_fails else 3)
         assert calls[0]["model"] == "test-model"
         assert calls[0]["timeout"] == 7
         assert calls[0]["max_completion_tokens"] == 300

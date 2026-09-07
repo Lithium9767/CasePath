@@ -6,7 +6,10 @@ P1 只保证调用超时、JSON格式和Pydantic合同；Prompt与条件判断�
 from __future__ import annotations
 
 import json
+import logging
+import time
 from typing import Any, TypeVar
+from urllib.parse import urlsplit
 
 from pydantic import ValidationError
 
@@ -26,6 +29,8 @@ class OpenAICompatibleStructuredLanguageModel:
         default_timeout_seconds: float,
         max_completion_tokens: int,
         output_mode: StructuredOutputMode,
+        provider: str = "openai_compatible",
+        stage_policies: dict | None = None,
     ) -> None:
         self._client = client
         self._model = model
@@ -33,6 +38,8 @@ class OpenAICompatibleStructuredLanguageModel:
         self._max_completion_tokens = max_completion_tokens
         self._output_mode = output_mode
         self._closed = False
+        self._provider = provider
+        self._stage_policies = stage_policies or {}
 
     @classmethod
     def connect(
@@ -45,6 +52,7 @@ class OpenAICompatibleStructuredLanguageModel:
         max_retries: int,
         max_completion_tokens: int,
         output_mode: StructuredOutputMode,
+        stage_policies: dict | None = None,
     ) -> OpenAICompatibleStructuredLanguageModel:
         try:
             from openai import OpenAI
@@ -63,6 +71,10 @@ class OpenAICompatibleStructuredLanguageModel:
             default_timeout_seconds=timeout_seconds,
             max_completion_tokens=max_completion_tokens,
             output_mode=output_mode,
+            provider="deepseek"
+            if urlsplit(base_url).hostname == "api.deepseek.com"
+            else "openai_compatible",
+            stage_policies=stage_policies,
         )
 
     def generate_structured(
@@ -72,8 +84,15 @@ class OpenAICompatibleStructuredLanguageModel:
         user_prompt: str,
         response_model: type[ContractT],
         timeout_seconds: float | None = None,
+        stage: str = "default",
     ) -> ContractT:
-        timeout = self._default_timeout_seconds if timeout_seconds is None else timeout_seconds
+        policy = self._stage_policies.get(stage)
+        timeout = (
+            (policy.timeout_seconds if policy else self._default_timeout_seconds)
+            if timeout_seconds is None
+            else timeout_seconds
+        )
+        limit = policy.max_tokens if policy else self._max_completion_tokens
         if timeout <= 0:
             raise ValueError("timeout_seconds must be positive")
         schema = response_model.model_json_schema()
@@ -94,20 +113,45 @@ class OpenAICompatibleStructuredLanguageModel:
                 "仅输出一个 JSON 对象，不要输出 Markdown 或额外说明。"
                 f"输出必须符合以下 JSON Schema：{json.dumps(schema, ensure_ascii=False)}"
             )
+        # 兼容协议不意味着参数通用：DeepSeek 使用 max_tokens，并显式控制思考模式。
+        options = {"max_tokens" if self._provider == "deepseek" else "max_completion_tokens": limit}
+        if self._provider == "deepseek" and policy:
+            options["extra_body"] = {"thinking": {"type": policy.thinking}}
+        client = (
+            self._client.with_options(max_retries=policy.max_retries) if policy else self._client
+        )
+        started = time.monotonic()
         try:
-            completion = self._client.chat.completions.create(
+            completion = client.chat.completions.create(
                 model=self._model,
                 messages=[
                     {"role": "system", "content": effective_system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
                 response_format=response_format,
-                max_completion_tokens=self._max_completion_tokens,
+                **options,
                 timeout=timeout,
             )
         except Exception as exc:
+            logging.getLogger(__name__).warning(
+                "LLM stage=%s elapsed=%.2f error=%s",
+                stage,
+                time.monotonic() - started,
+                type(exc).__name__,
+            )
             raise LanguageModelUnavailable("结构化语言模型调用失败") from exc
         try:
+            # 不把截断的 JSON 当成随机解析错误；不记录正文、密钥或供应商错误原文。
+            if getattr(completion.choices[0], "finish_reason", None) == "length":
+                raise InvalidComponentOutput("结构化模型输出达到长度上限，请调整阶段预算")
+            usage = getattr(completion, "usage", None)
+            logging.getLogger(__name__).info(
+                "LLM stage=%s elapsed=%.2f input_tokens=%s output_tokens=%s",
+                stage,
+                time.monotonic() - started,
+                getattr(usage, "prompt_tokens", None),
+                getattr(usage, "completion_tokens", None),
+            )
             content = completion.choices[0].message.content
             if not isinstance(content, str) or not content.strip():
                 raise ValueError("model returned empty structured content")

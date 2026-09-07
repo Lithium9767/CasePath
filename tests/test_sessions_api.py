@@ -164,3 +164,15 @@ def test_infrastructure_failures_use_stable_503_errors(client, error, code, reas
     payload = assert_error(response, 503)
     assert payload.code == code
     assert payload.details["reason"] == reason
+
+
+def test_frontend_origin_can_call_session_api(client):
+    response = client.options(
+        "/v1/sessions",
+        headers={
+            "Origin": "http://127.0.0.1:5173",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert response.status_code in {200, 204}
+    assert response.headers.get("access-control-allow-origin") == "http://127.0.0.1:5173"

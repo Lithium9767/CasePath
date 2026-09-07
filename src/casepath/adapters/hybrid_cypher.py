@@ -173,7 +173,10 @@ class HybridCypherRuleRetriever:
         neighbors = self.navigator.neighbor_rules(context, seed_ids)
         graph_ids = list(dict.fromkeys(item.rule_id for item in neighbors))
         ranked = {
-            "bm25": [item.object_id for item in fulltext],
+            "bm25": [
+                item.object_id for item in fulltext if "vector" not in item.retrieval_channels
+            ],
+            "vector": [item.object_id for item in fulltext if "vector" in item.retrieval_channels],
             "claim": claim_ids,
             "graph": graph_ids,
         }
@@ -183,7 +186,8 @@ class HybridCypherRuleRetriever:
                 "bm25": self.settings.fulltext_weight,
                 "vector": self.settings.vector_weight,
                 "claim": self.settings.claim_weight,
-                "graph": self.settings.graph_weight,
+                # 邻接通道没有查询相关度，不让按 ID 排序的首位与直接命中平权。
+                "graph": 0.25 * self.settings.graph_weight,
             },
             k=self.settings.rrf_k,
         )
@@ -215,6 +219,14 @@ class HybridCypherRuleRetriever:
                         name="bm25", value=raw[(rule_id, "bm25")], explanation="全文原始分"
                     )
                 )
+            if (rule_id, "vector") in raw:
+                components.append(
+                    ScoreComponent(
+                        name="vector",
+                        value=raw[(rule_id, "vector")],
+                        explanation="向量原始余弦分数",
+                    )
+                )
             reasons = []
             if rule_id in ranked["claim"]:
                 reasons.append("请求权类型与规则 claim_types 重合")
@@ -234,6 +246,7 @@ class HybridCypherRuleRetriever:
                     paths=paths,
                 )
             )
+        # 图扩展保留为低权重边界候选，不能靠任意邻接顺序占据解释头部。
         limit = min(self.settings.rule_top_k, len(results))
         return results[:limit]
 
@@ -459,7 +472,8 @@ class HybridCypherCaseRetriever:
         cite_ids = list(dict.fromkeys(item.case_id for item in cite_hits))
         apply_ids = list(dict.fromkeys(item.case_id for item in apply_hits))
         ranked = {
-            "bm25": [item.object_id for item in hybrid],
+            "bm25": [item.object_id for item in hybrid if "vector" not in item.retrieval_channels],
+            "vector": [item.object_id for item in hybrid if "vector" in item.retrieval_channels],
             "graph": graph_ids,
             "applies": apply_ids,
             "cites": cite_ids,
@@ -470,6 +484,7 @@ class HybridCypherCaseRetriever:
                 "bm25": self.settings.fulltext_weight,
                 "graph": self.settings.graph_weight,
                 "applies": 0.6,
+                "vector": self.settings.vector_weight,
                 "cites": self.settings.cites_weight,
             },
             k=self.settings.rrf_k,
@@ -491,6 +506,7 @@ class HybridCypherCaseRetriever:
                     )
                 )
         scored_cases: list[tuple[float, str, list[str], list[ScoreComponent]]] = []
+        raw_case_scores = _raw_scores(hybrid)
         for case_id, rrf_score in fused.items():
             case = self.catalog.cases.get(case_id)
             if case is None:
@@ -501,6 +517,15 @@ class HybridCypherCaseRetriever:
                 ScoreComponent(name="rrf", value=rrf_score, explanation="混合与图通道RRF"),
                 ScoreComponent(name="compatibility", value=compat, explanation="已知条件相容性"),
             ]
+            for channel in ("bm25", "vector"):
+                if (case_id, channel) in raw_case_scores:
+                    components.append(
+                        ScoreComponent(
+                            name=channel,
+                            value=raw_case_scores[(case_id, channel)],
+                            explanation="召回通道原始分数",
+                        )
+                    )
             scored_cases.append((final, case_id, reasons, components))
         scored_cases.sort(key=lambda item: (-item[0], item[1]))
         pool = scored_cases[: self.settings.case_pool_size]
@@ -565,9 +590,15 @@ class HybridCypherCaseRetriever:
                     for key, value in paths.items()
                     if key in fused_ids
                 },
-                graph_only_ids=frozenset(set(graph_ids) - set(ranked["bm25"])),
+                graph_only_ids=frozenset(
+                    set(graph_ids) - set(ranked["bm25"]) - set(ranked["vector"])
+                ),
                 cite_only_ids=frozenset(
-                    set(cite_ids) - set(ranked["bm25"]) - set(graph_ids) - set(apply_ids)
+                    set(cite_ids)
+                    - set(ranked["bm25"])
+                    - set(ranked["vector"])
+                    - set(graph_ids)
+                    - set(apply_ids)
                 ),
                 fused_case_ids=fused_ids,
                 undetermined_case_ids=frozenset(undetermined),

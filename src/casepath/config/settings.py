@@ -6,10 +6,12 @@ P1 负责把环境变量转换成经过校验的连接参数；P4 只能接收�
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
 from enum import StrEnum
 from os import environ
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 
@@ -24,6 +26,16 @@ class StructuredOutputMode(StrEnum):
 
     JSON_OBJECT = "json_object"
     JSON_SCHEMA = "json_schema"
+
+
+class LLMStagePolicy(BaseModel):
+    """P1 阶段预算；thinking 仅由明确支持该参数的供应商适配器发送。"""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    timeout_seconds: float = Field(default=45, gt=0, le=180)
+    max_tokens: int = Field(default=1400, ge=128, le=16384)
+    max_retries: int = Field(default=0, ge=0, le=2)
+    thinking: Literal["enabled", "disabled"] = "disabled"
 
 
 class RuntimeSettings(BaseModel):
@@ -55,6 +67,16 @@ class RuntimeSettings(BaseModel):
     llm_max_retries: int = Field(default=2, ge=0, le=10)
     llm_max_completion_tokens: int = Field(default=2048, ge=1)
     llm_structured_output: StructuredOutputMode = StructuredOutputMode.JSON_OBJECT
+    # 可按阶段覆盖；未填写的字段由 LLMStagePolicy 的安全默认值补齐。
+    llm_stage_policies: dict[Literal["relevance", "projection", "explanation"], LLMStagePolicy] = (
+        Field(
+            default_factory=lambda: {
+                "relevance": LLMStagePolicy(max_tokens=1000),
+                "projection": LLMStagePolicy(max_tokens=1400),
+                "explanation": LLMStagePolicy(max_tokens=1800, timeout_seconds=60),
+            }
+        )
+    )
 
     @field_validator(
         "neo4j_uri",
@@ -108,10 +130,23 @@ class RuntimeSettings(BaseModel):
             "llm_max_retries": "CASEPATH_LLM_MAX_RETRIES",
             "llm_max_completion_tokens": "CASEPATH_LLM_MAX_COMPLETION_TOKENS",
             "llm_structured_output": "CASEPATH_LLM_STRUCTURED_OUTPUT",
+            "llm_stage_policies": "CASEPATH_LLM_STAGE_POLICIES",
         }
         payload: dict[str, str] = {
             field: source[name] for field, name in names.items() if source.get(name)
         }
         if "llm_api_key" not in payload and source.get("DASHSCOPE_API_KEY"):
             payload["llm_api_key"] = source["DASHSCOPE_API_KEY"]
+        if "llm_stage_policies" in payload:
+            defaults = cls().llm_stage_policies
+            supplied = json.loads(payload["llm_stage_policies"])
+            if not isinstance(supplied, dict):
+                raise ValueError("LLM stage policies must be an object")
+            payload["llm_stage_policies"] = {
+                **defaults,
+                **{
+                    key: {**(defaults[key].model_dump() if key in defaults else {}), **value}
+                    for key, value in supplied.items()
+                },
+            }
         return cls.model_validate(payload)

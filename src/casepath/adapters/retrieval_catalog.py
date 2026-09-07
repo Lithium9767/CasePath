@@ -11,7 +11,7 @@ import re
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from contextvars import ContextVar, Token
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from itertools import pairwise
 from pathlib import Path
 from typing import Literal
@@ -156,6 +156,9 @@ class RetrievalCatalog:
     conditions: dict[str, ConditionCard]
     rule_ids_by_condition: dict[str, tuple[str, ...]]
     provision_text: dict[str, str]
+    # 解释侧证据，不参与检索文本或 index_version，避免无意义地重建 embedding。
+    rule_records: dict[str, RuleRecord] = field(default_factory=dict)
+    case_records: dict[str, CaseRecord] = field(default_factory=dict)
 
     def context(self) -> RetrievalContext:
         return RetrievalContext(self.release_id, self.index_version, self.embedding_model)
@@ -286,6 +289,7 @@ def build_catalog(
     deep: Iterable[CaseRecord],
     embedding_model: str = "none",
 ) -> RetrievalCatalog:
+    rules = list(rules)
     provision_text = {item.provision_id: item.text for item in provisions}
     rule_docs: dict[str, RuleDocument] = {}
     conditions: dict[str, ConditionCard] = {}
@@ -419,6 +423,8 @@ def build_catalog(
         conditions=conditions,
         rule_ids_by_condition={key: tuple(dict.fromkeys(value)) for key, value in owners.items()},
         provision_text=provision_text,
+        rule_records={item.rule_id: item for item in rules},
+        case_records=deep_by_id,
     )
 
 

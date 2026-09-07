@@ -1,4 +1,8 @@
-"""P4 实现区：有引用的条件化解释。未核验原文不得标成 verified。"""
+"""P4 实现区：有引用的条件化解释。未核验原文不得标成 verified。
+
+主解释只写本案已检索到的规则、已知条件和案例证据。算法未完成项留在
+comparison_bundle.degradation_reason，不拼进用户可见正文。
+"""
 
 from __future__ import annotations
 
@@ -14,10 +18,93 @@ from casepath.contracts import (
     RetrievalBundle,
 )
 
+_KNOWN = {
+    ConditionStatus.SATISFIED,
+    ConditionStatus.NOT_SATISFIED,
+    ConditionStatus.CONFLICTING,
+}
+
+
+def _label(catalog: RetrievalCatalog, condition_id: str) -> str:
+    item = catalog.conditions.get(condition_id)
+    return item.label if item is not None else condition_id
+
+
+def _known_facts(state: QueryState, catalog: RetrievalCatalog) -> list[str]:
+    lines: list[str] = []
+    for item in state.condition_states:
+        if item.status not in _KNOWN:
+            continue
+        name = _label(catalog, item.condition_id)
+        if item.status is ConditionStatus.SATISFIED:
+            lines.append(f"「{name}」已有用户原话支持")
+        elif item.status is ConditionStatus.NOT_SATISFIED:
+            lines.append(f"「{name}」按现有原话更接近不满足")
+        else:
+            lines.append(f"「{name}」存在互相冲突的原话")
+        if len(lines) >= 5:
+            break
+    return lines
+
+
+def _rule_titles(bundle: RetrievalBundle, catalog: RetrievalCatalog) -> list[str]:
+    titles: list[str] = []
+    for ref in bundle.rule_refs:
+        rule = catalog.rules.get(ref.object_id)
+        if rule is None:
+            continue
+        titles.append(rule.title)
+        if len(titles) >= 3:
+            break
+    return titles
+
+
+def _main_explanation(
+    state: QueryState,
+    bundle: RetrievalBundle,
+    catalog: RetrievalCatalog,
+) -> str:
+    claims = "、".join(item.claim_type for item in state.candidate_claims) or "民事咨询"
+    parts = [f"根据你描述的情况，当前按「{claims}」检索相关规则。"]
+    known = _known_facts(state, catalog)
+    if known:
+        parts.append("已经落到规则条件上的事实包括：" + "；".join(known) + "。")
+    else:
+        parts.append("目前还没有足够可定位的原话，把关键条件标成满足或不满足。")
+    titles = _rule_titles(bundle, catalog)
+    if titles:
+        parts.append("正在对照的规则包括：" + "；".join(titles) + "。")
+    elif bundle.rule_refs:
+        parts.append("已召回候选规则，但本地目录尚未解析到标题。")
+    else:
+        parts.append("这一轮没有稳定召回可用规则，不能把检索空结果写成没有法律依据。")
+    case_n = (
+        len(bundle.support_case_refs)
+        + len(bundle.limiting_case_refs)
+        + len(bundle.boundary_case_refs)
+    )
+    if case_n:
+        parts.append(
+            f"检索到{case_n}件可对照案例，分别用于支持、限制或划清边界，不是对本案的预判。"
+        )
+    else:
+        parts.append(
+            "现有规则依据仍可讨论，但可比对的案例证据不足；缺少案例不等于没有相关法律依据。"
+        )
+    unresolved = [
+        _label(catalog, item.condition_id)
+        for item in state.condition_states
+        if item.status in {ConditionStatus.UNKNOWN, ConditionStatus.CONFLICTING}
+    ]
+    if unresolved:
+        parts.append("要收窄解释，还需要确认：" + "、".join(unresolved[:3]) + "。")
+    return "".join(parts)
+
 
 class EvidenceExplanationPlanner:
-    def __init__(self, catalog: RetrievalCatalog) -> None:
+    def __init__(self, catalog: RetrievalCatalog, language_model=None) -> None:
         self.catalog = catalog
+        self.language_model = language_model
 
     def build(
         self,
@@ -25,31 +112,38 @@ class EvidenceExplanationPlanner:
         bundle: RetrievalBundle,
         comparison: ComparisonBundle,
     ) -> ExplanationPlan:
+        if state.status.value == "NEEDS_CLARIFICATION":
+            # 澄清轮只给事实回顾，不等待长解释，也不伪装为生成失败后的成功降级。
+            # 问题由 workflow.next_question 返回；完整法律解释留到澄清结束。
+            fact = state.user_facts[-1].text if state.user_facts else state.initial_query
+            return ExplanationPlan(
+                session_id=state.session_id,
+                main_explanation="我看到你说：“"
+                + fact[:180]
+                + ("……”" if len(fact) > 180 else "”。")
+                + "我先确认下面这个细节，再结合你的回答说明。现在还没有形成完整解释。",
+                candidate_claims=[claim.claim_type for claim in state.candidate_claims],
+                applicable_rule_ids=[ref.object_id for ref in bundle.rule_refs],
+                unresolved_condition_ids=[
+                    item.condition_id
+                    for item in state.condition_states
+                    if item.status.value in {"UNKNOWN", "CONFLICTING"}
+                ],
+            )
+        if self.language_model is not None:
+            from casepath.adapters.grounded_explanation import generate_explanation
+
+            generated = generate_explanation(
+                self.language_model, self.catalog, state, bundle, comparison
+            )
+            if generated is not None:
+                return generated
         statuses = {item.condition_id: item.status for item in state.condition_states}
         unresolved = [
             key
             for key, value in statuses.items()
             if value in {ConditionStatus.UNKNOWN, ConditionStatus.CONFLICTING}
         ]
-        mature = [
-            self.catalog.rules[item.object_id].maturity
-            for item in bundle.rule_refs
-            if item.object_id in self.catalog.rules
-        ]
-        warning = ""
-        if any(item in {"L1", "L2"} for item in mature):
-            warning = "所用规则含尚未深度复核的条目，解释带成熟度警告。"
-        if comparison.degraded and comparison.degradation_reason:
-            warning = f"{warning}{comparison.degradation_reason}"
-        impossible = statuses.get("cond.performance_impossible")
-        if impossible is ConditionStatus.SATISFIED:
-            main = "当前事实更支持分析服务合同解除及未履行部分的补救，但仍取决于其余核心条件。"
-        elif impossible is ConditionStatus.NOT_SATISFIED:
-            main = "若经营者仍能继续履行，合同目的不能实现的解除路径不能仅凭该事实成立。"
-        else:
-            main = "当前仍需确认关键履行事实后，才能在解除、催告迟延或继续履行之间收窄解释。"
-        if warning:
-            main = f"{main}{warning}"
         citations = []
         branches = []
         for ref in bundle.rule_refs:
@@ -73,7 +167,11 @@ class EvidenceExplanationPlanner:
                     citation_ids=[citation_id],
                 )
             )
-        for ref in (*bundle.support_case_refs, *bundle.limiting_case_refs, *bundle.boundary_case_refs):
+        for ref in (
+            *bundle.support_case_refs,
+            *bundle.limiting_case_refs,
+            *bundle.boundary_case_refs,
+        ):
             if not ref.source_span_ids:
                 continue
             citation_id = f"citation.{ref.object_id}"
@@ -104,7 +202,7 @@ class EvidenceExplanationPlanner:
         ]
         return ExplanationPlan(
             session_id=state.session_id,
-            main_explanation=main,
+            main_explanation=_main_explanation(state, bundle, self.catalog),
             candidate_claims=[claim.claim_type for claim in state.candidate_claims],
             applicable_rule_ids=[item.object_id for item in bundle.rule_refs],
             support_case_ids=[item.object_id for item in bundle.support_case_refs],

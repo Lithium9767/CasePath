@@ -826,19 +826,25 @@ def _status_of(state: QueryState, condition_id: str) -> ConditionStatus:
     return next(item.status for item in state.condition_states if item.condition_id == condition_id)
 
 
+def _mapping_refs():
+    # 条件映射测试显式提供规则，不再依赖空召回时扫描全库的旧行为。
+    from casepath.contracts import ScoredReference
+    return [ScoredReference(object_id="rule.map.v1", score=1.0)]
+
+
 def test_initial_projection_rejects_intent_negation_and_overclaim():
     projector = SemanticConditionProjector(_mapping_catalog())
     balance = projector.project(
         QueryState(session_id="p", initial_query="还有未消费余额"),
-        [],
+        _mapping_refs(),
     )
     intent = projector.project(
         QueryState(session_id="p", initial_query="我想解除合同"),
-        [],
+        _mapping_refs(),
     )
     unpaid = projector.project(
         QueryState(session_id="p", initial_query="费用100元，还没付款"),
-        [],
+        _mapping_refs(),
     )
     assert _status_of(balance, "cond.unperformed_balance") is ConditionStatus.SATISFIED
     assert _status_of(intent, "cond.contract_terminated") is ConditionStatus.UNKNOWN
@@ -857,14 +863,14 @@ def test_initial_projection_rejects_intent_negation_and_overclaim():
 )
 def test_hypothetical_or_ambiguous_payment_is_unknown(query):
     state = SemanticConditionProjector(_mapping_catalog()).project(
-        QueryState(session_id="guard", initial_query=query), []
+        QueryState(session_id="guard", initial_query=query), _mapping_refs()
     )
     assert _status_of(state, "cond.payment_made") is ConditionStatus.UNKNOWN
 
 
 def test_hypothetical_sentence_does_not_hide_separate_fact():
     state = SemanticConditionProjector(_mapping_catalog()).project(
-        QueryState(session_id="guard", initial_query="如果解除合同会怎样？已经付款。"), []
+        QueryState(session_id="guard", initial_query="如果解除合同会怎样？已经付款。"), _mapping_refs()
     )
     assert _status_of(state, "cond.payment_made") is ConditionStatus.SATISFIED
 
@@ -887,7 +893,7 @@ def test_llm_cannot_attach_empty_or_wrong_fact_evidence(quote, fact_id):
             )
 
     state = SemanticConditionProjector(_mapping_catalog(), Model()).project(
-        QueryState(session_id="guard", initial_query="咨询一下"), []
+        QueryState(session_id="guard", initial_query="咨询一下"), _mapping_refs()
     )
     assert _status_of(state, "cond.payment_made") is ConditionStatus.UNKNOWN
 
@@ -926,7 +932,7 @@ def test_llm_repeated_quote_requires_explicit_fact_id(fact_id, expected):
                 UserFact(fact_id="f2", text="交款", source_turn=0),
             ],
         ),
-        [],
+        _mapping_refs(),
     )
     payment = next(
         item for item in state.condition_states if item.condition_id == "cond.payment_made"
@@ -966,10 +972,10 @@ def test_roles_and_ranking_use_group_truth():
     assert _assign_role(case, known, {rule_id}, catalog, claims)[0] == "boundary"
 
 
-def test_llm_can_replace_or_conflict_lexical_candidate():
+def test_llm_correction_is_not_a_user_fact_conflict():
     class FlipLLM:
         def generate_structured(
-            self, *, system_prompt, user_prompt, response_model, timeout_seconds=None
+            self, *, system_prompt, user_prompt, response_model, timeout_seconds=None, stage='default'
         ):
             return ConditionLinkBatch(
                 links=[
@@ -984,12 +990,151 @@ def test_llm_can_replace_or_conflict_lexical_candidate():
             )
 
     projector = SemanticConditionProjector(_mapping_catalog(), FlipLLM())
-    state = projector.project(QueryState(session_id="llm", initial_query="我充了5000元"), [])
+    state = projector.project(QueryState(session_id="llm", initial_query="我充了5000元"), _mapping_refs())
     payment = next(
         item for item in state.condition_states if item.condition_id == "cond.payment_made"
     )
-    assert payment.status is ConditionStatus.CONFLICTING
+    assert payment.status is ConditionStatus.NOT_SATISFIED
     assert payment.evidence[0].relation == "OPPOSES"
+
+
+def test_vector_only_hits_and_version_guard(tmp_path):
+    from casepath.adapters.vector_search import VectorHybridSearch, VectorIndex
+    from casepath.ports.embedding import EmbeddingSpec
+
+    catalog = fixture_catalog()
+    wanted = catalog.rules["rule.refund.v1"].search_text
+
+    class Model:
+        spec = EmbeddingSpec("fake-semantic", "test-v1", 2)
+
+        def embed(self, texts):
+            return [[1.0, 0.0] if text in {wanted, "zzzzzz"} else [0.0, 1.0] for text in texts]
+
+    model = Model()
+    index = VectorIndex.build(catalog, model, batch_size=1)
+    path = tmp_path / "vectors.json"
+    index.save(path)
+    search = VectorHybridSearch(catalog, model, VectorIndex.load(path))
+    refs = search.search("zzzzzz", target="rule", context=catalog.context(), top_k=5)
+    assert [(item.object_id, item.retrieval_channels) for item in refs] == [
+        ("rule.refund.v1", ["vector"])
+    ]
+    retriever = HybridCypherRuleRetriever(MemoryGraphNavigator(catalog), search, catalog=catalog)
+    output = retriever.retrieve(QueryState(session_id="v", initial_query="zzzzzz"))
+    assert any(
+        item.object_id == "rule.refund.v1" and "vector" in item.retrieval_channels
+        for item in output
+    )
+    model.spec = EmbeddingSpec("fake-semantic", "test-v2", 2)
+    with pytest.raises(ValueError, match="版本"):
+        VectorHybridSearch(catalog, model, index)
+
+
+def test_vector_rejects_missing_records_and_bad_dimensions():
+    from casepath.adapters.vector_search import VectorHybridSearch, VectorIndex
+    from casepath.ports.embedding import EmbeddingSpec
+
+    class Model:
+        spec = EmbeddingSpec("fake", "v1", 2)
+
+        def embed(self, texts):
+            return [[1, 0] for _ in texts]
+
+    catalog = fixture_catalog()
+    index = VectorIndex.build(catalog, Model())
+    index.payload["records"].pop()
+    with pytest.raises(ValueError, match="覆盖"):
+        VectorHybridSearch(catalog, Model(), index)
+    model = Model()
+    model.embed = lambda texts: [[1] for _ in texts]
+    with pytest.raises(ValueError, match="维度"):
+        VectorIndex.build(catalog, model)
+
+
+def test_new_fact_updates_other_condition_and_preserves_history():
+    from casepath.contracts import ConditionEvidence, DialogueTurn, UserFact
+
+    state = QueryState(
+        session_id="history",
+        initial_query="咨询",
+        user_facts=[
+            UserFact(fact_id="initial", text="咨询", source_turn=0),
+            UserFact(fact_id="old", text="已经付款", source_turn=1),
+            UserFact(fact_id="new", text="没有付款。还有余额。", source_turn=2),
+        ],
+        condition_states=[
+            QueryConditionState(
+                condition_id="cond.payment_made",
+                status=ConditionStatus.SATISFIED,
+                supporting_fact_ids=["old"],
+                evidence=[
+                    ConditionEvidence(
+                        fact_id="old", relation="SUPPORTS", confidence=0.7, reason="历史事实"
+                    )
+                ],
+                last_updated_turn=1,
+            ),
+            QueryConditionState(condition_id="cond.unperformed_balance"),
+        ],
+        dialogue_history=[
+            DialogueTurn(
+                turn_id=1,
+                question_id="q1",
+                condition_id="cond.payment_made",
+                question="是否付款",
+                answer="已经付款",
+            ),
+            DialogueTurn(
+                turn_id=2,
+                question_id="q2",
+                condition_id="cond.unperformed_balance",
+                question="是否有余额",
+                answer="没有付款。还有余额。",
+            ),
+        ],
+    )
+    output = SemanticConditionProjector(_mapping_catalog()).project(state, [])
+    assert _status_of(output, "cond.payment_made") is ConditionStatus.CONFLICTING
+    assert _status_of(output, "cond.unperformed_balance") is ConditionStatus.SATISFIED
+    assert len(state.condition_states) == 2
+
+
+def test_calibration_requires_labels_and_is_monotone():
+    from casepath.adapters.confidence_calibration import ConfidenceCalibrator
+
+    fitted = ConfidenceCalibrator.fit(
+        [(0.5, False), (0.9, False), (0.9, True)], dataset_id="heldout-v1"
+    )
+    assert 0 < fitted.transform(0.5) <= fitted.transform(0.9) < 0.9
+    with pytest.raises(ValueError):
+        ConfidenceCalibrator.fit([], dataset_id="empty")
+
+
+def test_simulated_information_gain_is_about_candidate_distinction():
+    from casepath.adapters.question_simulation import simulate_question
+    from casepath.contracts import RetrievalBundle, ScoredReference
+
+    catalog = fixture_catalog()
+    state = QueryState(
+        session_id="simulation",
+        initial_query="咨询",
+        condition_states=[QueryConditionState(condition_id=key) for key in catalog.conditions],
+    )
+    before = state.model_dump(mode="json")
+    bundle = RetrievalBundle(
+        rule_refs=[ScoredReference(object_id=key, score=0.5) for key in catalog.rules]
+    )
+    gain, movement = simulate_question(
+        catalog, state, bundle, "cond.payment_made", _compatible_rules
+    )
+    assert gain > 0
+    assert 0 <= movement <= 1
+    neutral, _ = simulate_question(
+        catalog, state, bundle, "cond.alternative_performance", _compatible_rules
+    )
+    assert neutral == pytest.approx(0)
+    assert state.model_dump(mode="json") == before
 
 
 def test_returned_paths_exist_in_projection_and_fulltext_has_no_fake_path():
@@ -1116,7 +1261,7 @@ def test_factory_reports_vector_missing_even_with_graph_and_llm():
 
     class FakeLLM:
         def generate_structured(
-            self, *, system_prompt, user_prompt, response_model, timeout_seconds=None
+            self, *, system_prompt, user_prompt, response_model, timeout_seconds=None, stage='default'
         ):
             return ConditionLinkBatch(links=[])
 

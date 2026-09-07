@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+# 类型提示元数据，这个变量的值必须等于Literal中的某一个
 from typing import Literal
 
+# Field 类似C的类型约束，包括类型信息和约束信息
 from pydantic import Field, field_validator
 
 from .base import ContractModel, Identifier
@@ -15,6 +17,8 @@ class AnswerRequest(ContractModel): # P5向P1提交的一次用户追问回答
     answer: str = Field(min_length=1) # 用户回答原文，由P4进一步投影为ConditionStatus
     selected_option: str | None = None # 用户选择的预设选项；自由回答时允许为空
 
+    # @ 装饰器，用于修饰函数，先创建函数对象，再把函数交给其他函数包装/标记，参数是answer
+    # 验证answer，在什么时候验证：在AnswerRequest实例化时验证
     @field_validator("answer")
     @classmethod
     def reject_blank_answer(cls, value: str) -> str:

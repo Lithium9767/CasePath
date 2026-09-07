@@ -6,6 +6,7 @@ from collections.abc import Callable, Sequence
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from casepath.application.session_service import SessionService
 from casepath.bootstrap import (
@@ -43,6 +44,16 @@ def create_app(
                 callback()
 
     application = FastAPI(title="CasePath API", version="0.1.0", lifespan=lifespan)
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://127.0.0.1:5173",
+            "http://localhost:5173",
+        ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     if service is None:
         service = build_demo_session_service()
         if capabilities is None and capability_provider is None:

@@ -8,12 +8,12 @@
 from __future__ import annotations
 
 from casepath.adapters.question_cards import option_status
+from casepath.adapters.semantic_condition_projector import _aggregate, _is_intent_or_conditional
 from casepath.contracts import (
     AnswerInterpretation,
     AnswerRequest,
     ConditionEvidence,
     ConditionStatus,
-    QueryConditionState,
     QueryState,
     QuestionCandidate,
     UserFact,
@@ -78,10 +78,15 @@ def _status(pending: QuestionCandidate, request: AnswerRequest) -> ConditionStat
         return mapped
     if any(token == answer or token in answer for token in _UNKNOWN):
         return ConditionStatus.UNKNOWN
+    if pending.condition_id == "cond.contract_terminated" and answer in (_BARE_NO | _BARE_YES):
+        # 日常沟通问题的“是/没有”不足以认定法律关系是否已结束。
+        return ConditionStatus.UNKNOWN
     if answer in _BARE_NO:
         return ConditionStatus.NOT_SATISFIED
     if answer in _BARE_YES:
         return ConditionStatus.SATISFIED
+    if _is_intent_or_conditional(answer):
+        return ConditionStatus.UNKNOWN
     patterns = _FREE_TEXT.get(pending.condition_id, {})
     negative = _longest_hits(answer, patterns.get(ConditionStatus.NOT_SATISFIED, ()))
     positive = _longest_hits(answer, patterns.get(ConditionStatus.SATISFIED, ()))
@@ -124,32 +129,36 @@ class SemanticAnswerInterpreter:
         if same:
             return AnswerInterpretation()
         status = _status(pending_question, answer_request)
-        if status is ConditionStatus.UNKNOWN:
-            return AnswerInterpretation()
         fact = UserFact(
             fact_id=f"fact.answer.{turn_id}.{pending_question.condition_id}",
             text=quote,
             source_turn=turn_id,
         )
+        if status is ConditionStatus.UNKNOWN:
+            # 没回答清当前问题，不代表整段回答没有其他有用事实。
+            return AnswerInterpretation(new_facts=[fact])
         relation = "SUPPORTS" if status is ConditionStatus.SATISFIED else "OPPOSES"
+        old = next(
+            item
+            for item in state.condition_states
+            if item.condition_id == pending_question.condition_id
+        )
+        evidence = [
+            *old.evidence,
+            ConditionEvidence(
+                fact_id=fact.fact_id,
+                relation=relation,
+                confidence=0.7,
+                reason="本轮问题选项/自由回答映射；分数未经过标注集校准",
+            ),
+        ]
+        update = _aggregate(
+            pending_question.condition_id,
+            evidence,
+            reasons=["保留历史证据；不同事实相反时标记冲突"],
+        )
+        update.last_updated_turn = turn_id
         return AnswerInterpretation(
             new_facts=[fact],
-            condition_updates=[
-                QueryConditionState(
-                    condition_id=pending_question.condition_id,
-                    status=status,
-                    supporting_fact_ids=[fact.fact_id],
-                    confidence=0.7,
-                    evidence=[
-                        ConditionEvidence(
-                            fact_id=fact.fact_id,
-                            relation=relation,
-                            confidence=0.7,
-                            reason="本轮回答按当前问题的选项或否定范围映射",
-                        )
-                    ],
-                    mapping_reasons=["回答解释器只更新当前问题对应条件"],
-                    last_updated_turn=turn_id,
-                )
-            ],
+            condition_updates=[update],
         )

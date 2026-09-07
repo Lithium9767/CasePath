@@ -189,6 +189,7 @@ def _build_language_model(settings: RuntimeSettings) -> ManagedStructuredLanguag
         max_retries=settings.llm_max_retries,
         max_completion_tokens=settings.llm_max_completion_tokens,
         output_mode=settings.llm_structured_output,
+        stage_policies=settings.llm_stage_policies,
     )
 
 

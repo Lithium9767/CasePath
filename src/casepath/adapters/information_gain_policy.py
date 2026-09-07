@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from casepath.adapters.condition_logic import group_truth
 from casepath.adapters.question_cards import QUESTION_CARDS
+from casepath.adapters.question_simulation import simulate_question
 from casepath.adapters.retrieval_catalog import RetrievalCatalog
 from casepath.contracts import (
     ComparisonBundle,
@@ -97,7 +98,13 @@ class InformationGainPolicy:
             item.condition_id for item in state.condition_states
         ]
         best: QuestionCandidate | None = None
+        # 缓存只存在于本次 select，不能跨用户、轮次或发布版本复用。
+        simulation_cache = {}
         for condition_id in ranked:
+            # 没有经过日常语言设计的问题卡，不能把法律 predicate 直接丢给用户。
+            # 这会限制跨领域追问覆盖率，但不把未知条件改成已满足。
+            if condition_id not in QUESTION_CARDS:
+                continue
             condition = next(
                 (item for item in state.condition_states if item.condition_id == condition_id),
                 None,
@@ -113,15 +120,23 @@ class InformationGainPolicy:
             ebr = self._rule_candidate_reduction(state, rule_ids, current, condition_id)
             record = by_comparison.get(condition_id)
             cost = 0.06 if not _is_core(self.catalog, condition_id, rule_ids) else 0.04
-            entropy = record.condition_entropy if record else 0.0
+            if condition_id not in simulation_cache:
+                simulation_cache[condition_id] = simulate_question(
+                    self.catalog, state, bundle, condition_id, _compatible_rules
+                )
+            gain, rank_change = simulation_cache[condition_id]
+            # 澄清首位规则的必要事实有独立价值；即使只有一个案例，仍需询问。
+            # 这只是显式工程项，不冒充模拟信息增益。仅用于人工编写的可理解问题卡。
+            lead_reduction = 0.0
+            if condition_id in QUESTION_CARDS and rule_ids and rule_ids[0] in current:
+                lead_reduction = self._rule_candidate_reduction(
+                    state, [rule_ids[0]], {rule_ids[0]}, condition_id
+                )
             utility = max(
                 0.0,
                 min(
                     1.0,
-                    0.65 * ebr
-                    + 0.20 * min(1.0, entropy / 1.5)
-                    + 0.15 * (record.case_disagreement_score if record else 0.0)
-                    - cost,
+                    0.55 * gain + 0.30 * rank_change + 0.15 * ebr + 0.30 * lead_reduction - cost,
                 ),
             )
             if utility < self.stop_threshold:
@@ -135,6 +150,21 @@ class InformationGainPolicy:
                 options=options,
                 utility=utility,
                 score_components=[
+                    ScoreComponent(
+                        name="leading_rule_clarification",
+                        value=lead_reduction,
+                        explanation="首位候选的关键事实澄清工程项，不是信息增益",
+                    ),
+                    ScoreComponent(
+                        name="expected_information_gain",
+                        value=gain,
+                        explanation="固定候选证据池的模型化信息增益；似然是假设，不是法律结果概率",
+                    ),
+                    ScoreComponent(
+                        name="expected_rank_change",
+                        value=rank_change,
+                        explanation="模拟满足/不满足/不知道后的期望归一化名次变化",
+                    ),
                     ScoreComponent(
                         name="expected_rule_candidate_reduction",
                         value=ebr,
