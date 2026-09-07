@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field, SecretStr
 
-from casepath.adapters.embedding_client import EmbeddingClient
+from casepath.adapters.infrastructure.embedding_client import EmbeddingClient
 from casepath.ports.embedding import EmbeddingSpec
 
 

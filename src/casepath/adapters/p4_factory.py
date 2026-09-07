@@ -1,31 +1,35 @@
-"""P4 实现区：HybridCypher 组件工厂。默认 Demo 不被本文件替换。
+"""正式 P4 算法装配入口（HybridCypher）。
 
-资源由 P1 注入。占位能力不得报告 available=True。向量通道未实现，必须单独降级。
+不替代 `adapters.demo` 离线基线。图/LLM/向量由 P1 注入；未注入的通道须降级报告。
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from casepath.adapters.condition_comparator import ConditionComparator
-from casepath.adapters.evidence_explanation_planner import EvidenceExplanationPlanner
-from casepath.adapters.graph_navigator import MemoryGraphNavigator, Neo4jGraphNavigator
-from casepath.adapters.hybrid_cypher import HybridCypherCaseRetriever, HybridCypherRuleRetriever
-from casepath.adapters.information_gain_policy import InformationGainPolicy
-from casepath.adapters.retrieval_catalog import (
+from casepath.adapters.conditions.condition_comparator import ConditionComparator
+from casepath.adapters.conditions.semantic_answer_interpreter import SemanticAnswerInterpreter
+from casepath.adapters.conditions.semantic_condition_projector import SemanticConditionProjector
+from casepath.adapters.explanation.evidence_explanation_planner import EvidenceExplanationPlanner
+from casepath.adapters.questioning.information_gain_policy import InformationGainPolicy
+from casepath.adapters.retrieval.graph_navigator import MemoryGraphNavigator, Neo4jGraphNavigator
+from casepath.adapters.retrieval.hybrid_cypher import (
+    HybridCypherCaseRetriever,
+    HybridCypherRuleRetriever,
+)
+from casepath.adapters.retrieval.retrieval_catalog import (
     MemoryHybridSearch,
     RetrievalCatalog,
     load_canonical_catalog,
 )
-from casepath.adapters.rule_relevance import RelevantRuleRetriever
-from casepath.adapters.semantic_answer_interpreter import SemanticAnswerInterpreter
-from casepath.adapters.semantic_condition_projector import SemanticConditionProjector
-from casepath.adapters.vector_search import VectorHybridSearch, VectorIndex
+from casepath.adapters.retrieval.rule_relevance import RelevantRuleRetriever
+from casepath.adapters.retrieval.vector_search import VectorHybridSearch, VectorIndex
 from casepath.bootstrap import P4Components
 from casepath.contracts import CapabilityMode, CapabilityStatus
 from casepath.ports import LegalGraphGateway, StructuredLanguageModel
 from casepath.ports.embedding import EmbeddingModel
 from casepath.workflow import WorkflowDependencies
+
 
 
 def _capability(
@@ -98,7 +102,7 @@ class HybridCypherP4Factory:
             explanation_planner=EvidenceExplanationPlanner(catalog, language_model),
         )
         graph_mode = CapabilityMode.LIVE if graph_gateway is not None else CapabilityMode.MEMORY
-        retriever_reason = "BM25＋图召回基线；向量通道未实现，检索结果降级。"
+        retriever_reason = "BM25＋图召回基线；未注入 embedding/向量索引，向量通道降级。"
         if vector_enabled:
             retriever_reason = "BM25＋版本固定的向量召回＋图召回；向量索引校验通过。"
         if graph_gateway is None:

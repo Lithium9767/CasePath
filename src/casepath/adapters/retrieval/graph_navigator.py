@@ -9,7 +9,11 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 
-from casepath.adapters.retrieval_catalog import CaseAssessment, RetrievalCatalog, RetrievalContext
+from casepath.adapters.retrieval.retrieval_catalog import (
+    CaseAssessment,
+    RetrievalCatalog,
+    RetrievalContext,
+)
 from casepath.application.errors import GraphUnavailable
 from casepath.ports import LegalGraphGateway
 

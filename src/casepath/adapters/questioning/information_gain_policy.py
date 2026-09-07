@@ -6,10 +6,10 @@ CORE 条件组按 ALL/ANY 求相容性；当前指标是剩余规则数量缩减
 
 from __future__ import annotations
 
-from casepath.adapters.condition_logic import group_truth
-from casepath.adapters.question_cards import QUESTION_CARDS
-from casepath.adapters.question_simulation import simulate_question
-from casepath.adapters.retrieval_catalog import RetrievalCatalog
+from casepath.adapters.conditions.condition_logic import group_truth
+from casepath.adapters.questioning.question_cards import QUESTION_CARDS
+from casepath.adapters.questioning.question_simulation import simulate_question
+from casepath.adapters.retrieval.retrieval_catalog import RetrievalCatalog
 from casepath.contracts import (
     ComparisonBundle,
     ConditionStatus,

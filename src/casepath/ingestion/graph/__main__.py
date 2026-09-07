@@ -25,7 +25,7 @@ def main():
     if args.import_neo4j:
         from neo4j import GraphDatabase
 
-        from casepath.adapters.neo4j_writer import publish
+        from casepath.adapters.infrastructure.neo4j_writer import publish
 
         # 写账号独立配置，绝不从在线只读账号自动取密码。
         password = os.getenv("CASEPATH_NEO4J_WRITE_PASSWORD")

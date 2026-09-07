@@ -4,13 +4,26 @@ from datetime import date
 
 import pytest
 
-from casepath.adapters.condition_comparator import ConditionComparator
-from casepath.adapters.evidence_explanation_planner import EvidenceExplanationPlanner
-from casepath.adapters.graph_navigator import MemoryGraphNavigator
-from casepath.adapters.hybrid_cypher import HybridCypherCaseRetriever, HybridCypherRuleRetriever
-from casepath.adapters.information_gain_policy import InformationGainPolicy, _compatible_rules
+from casepath.adapters.conditions.condition_comparator import ConditionComparator
+from casepath.adapters.conditions.semantic_answer_interpreter import SemanticAnswerInterpreter
+from casepath.adapters.conditions.semantic_condition_projector import (
+    ConditionLinkBatch,
+    ConditionLinkDraft,
+    SemanticConditionProjector,
+)
+from casepath.adapters.demo import build_demo_workflow
+from casepath.adapters.explanation.evidence_explanation_planner import EvidenceExplanationPlanner
 from casepath.adapters.p4_factory import HybridCypherP4Factory
-from casepath.adapters.retrieval_catalog import (
+from casepath.adapters.questioning.information_gain_policy import (
+    InformationGainPolicy,
+    _compatible_rules,
+)
+from casepath.adapters.retrieval.graph_navigator import MemoryGraphNavigator
+from casepath.adapters.retrieval.hybrid_cypher import (
+    HybridCypherCaseRetriever,
+    HybridCypherRuleRetriever,
+)
+from casepath.adapters.retrieval.retrieval_catalog import (
     MemoryHybridSearch,
     bind_context,
     build_catalog,
@@ -18,14 +31,7 @@ from casepath.adapters.retrieval_catalog import (
     current_round,
     scored_reference,
 )
-from casepath.adapters.semantic_answer_interpreter import SemanticAnswerInterpreter
-from casepath.adapters.semantic_condition_projector import (
-    ConditionLinkBatch,
-    ConditionLinkDraft,
-    SemanticConditionProjector,
-)
 from casepath.application.errors import RetrieverUnavailable
-from casepath.bootstrap import build_demo_workflow
 from casepath.contracts import (
     AnswerRequest,
     CapabilityMode,
@@ -943,8 +949,8 @@ def test_llm_repeated_quote_requires_explicit_fact_id(fact_id, expected):
 
 
 def test_roles_and_ranking_use_group_truth():
-    from casepath.adapters.hybrid_cypher import _assign_role, _compatibility
-    from casepath.adapters.retrieval_catalog import ConditionGroupSpec
+    from casepath.adapters.retrieval.hybrid_cypher import _assign_role, _compatibility
+    from casepath.adapters.retrieval.retrieval_catalog import ConditionGroupSpec
 
     catalog = fixture_catalog()
     rule_id = "rule.refund.v1"
@@ -999,7 +1005,7 @@ def test_llm_correction_is_not_a_user_fact_conflict():
 
 
 def test_vector_only_hits_and_version_guard(tmp_path):
-    from casepath.adapters.vector_search import VectorHybridSearch, VectorIndex
+    from casepath.adapters.retrieval.vector_search import VectorHybridSearch, VectorIndex
     from casepath.ports.embedding import EmbeddingSpec
 
     catalog = fixture_catalog()
@@ -1032,7 +1038,7 @@ def test_vector_only_hits_and_version_guard(tmp_path):
 
 
 def test_vector_rejects_missing_records_and_bad_dimensions():
-    from casepath.adapters.vector_search import VectorHybridSearch, VectorIndex
+    from casepath.adapters.retrieval.vector_search import VectorHybridSearch, VectorIndex
     from casepath.ports.embedding import EmbeddingSpec
 
     class Model:
@@ -1101,7 +1107,7 @@ def test_new_fact_updates_other_condition_and_preserves_history():
 
 
 def test_calibration_requires_labels_and_is_monotone():
-    from casepath.adapters.confidence_calibration import ConfidenceCalibrator
+    from casepath.adapters.conditions.confidence_calibration import ConfidenceCalibrator
 
     fitted = ConfidenceCalibrator.fit(
         [(0.5, False), (0.9, False), (0.9, True)], dataset_id="heldout-v1"
@@ -1112,7 +1118,7 @@ def test_calibration_requires_labels_and_is_monotone():
 
 
 def test_simulated_information_gain_is_about_candidate_distinction():
-    from casepath.adapters.question_simulation import simulate_question
+    from casepath.adapters.questioning.question_simulation import simulate_question
     from casepath.contracts import RetrievalBundle, ScoredReference
 
     catalog = fixture_catalog()

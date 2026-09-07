@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import re
 
-from casepath.adapters.retrieval_catalog import RetrievalCatalog
+from casepath.adapters.retrieval.retrieval_catalog import RetrievalCatalog
 from casepath.application.errors import LanguageModelUnavailable
 from casepath.contracts import (
     CandidateClaim,

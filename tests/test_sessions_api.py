@@ -3,9 +3,9 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from casepath.adapters.demo import build_demo_session_service
 from casepath.api.main import create_app
 from casepath.application.errors import GraphUnavailable, LanguageModelUnavailable
-from casepath.bootstrap import build_demo_session_service
 from casepath.contracts import ErrorResponse, WorkflowSnapshot
 
 

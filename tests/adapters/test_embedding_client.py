@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from casepath.adapters.embedding_client import EmbeddingClient
+from casepath.adapters.infrastructure.embedding_client import EmbeddingClient
 from casepath.application.errors import RetrieverUnavailable
 from casepath.ports.embedding import EmbeddingSpec
 
@@ -42,8 +42,8 @@ def test_configured_vector_index_is_loaded_without_embedding_on_startup(tmp_path
 
     from fastapi.testclient import TestClient
 
-    from casepath.adapters.retrieval_catalog import load_canonical_catalog
-    from casepath.adapters.vector_search import VectorIndex
+    from casepath.adapters.retrieval.retrieval_catalog import load_canonical_catalog
+    from casepath.adapters.retrieval.vector_search import VectorIndex
     from casepath.api.configured import create_configured_app
     from casepath.config import RuntimeSettings
     from casepath.config.embedding import EmbeddingSettings

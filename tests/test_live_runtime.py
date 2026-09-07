@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from casepath.adapters import (
+from casepath.adapters.demo import (
     DemoCaseComparator,
     DemoCaseRetriever,
     DemoConditionProjector,

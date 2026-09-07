@@ -11,9 +11,13 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
-from casepath.adapters.condition_logic import group_truth
-from casepath.adapters.graph_navigator import GraphHit, GraphNavigator, MemoryGraphNavigator
-from casepath.adapters.retrieval_catalog import (
+from casepath.adapters.conditions.condition_logic import group_truth
+from casepath.adapters.retrieval.graph_navigator import (
+    GraphHit,
+    GraphNavigator,
+    MemoryGraphNavigator,
+)
+from casepath.adapters.retrieval.retrieval_catalog import (
     CaseAssessment,
     CaseDocument,
     RetrievalCatalog,

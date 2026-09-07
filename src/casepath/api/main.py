@@ -8,11 +8,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from casepath.adapters.demo import build_demo_capabilities, build_demo_session_service
 from casepath.application.session_service import SessionService
 from casepath.bootstrap import (
     P4ComponentFactory,
-    build_demo_capabilities,
-    build_demo_session_service,
     build_live_runtime,
 )
 from casepath.config import RuntimeSettings

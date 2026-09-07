@@ -6,7 +6,7 @@ CasePath 使用 HybridCypher：全文/向量混合召回＋固定 Cypher 图扩�
 驱动的独立图召回通道。这里是方法名称，不代表已安装或实现 Neo4j 同名 SDK 类。
 不做四选一选择器，不将 A/B/C 分别硬分配给四种检索模式。
 
-新增 adapters/hybrid_cypher.py 只提供 A/C 框架和内部索引端口；调用未完成算法会
+新增 adapters/retrieval/hybrid_cypher.py 只提供 A/C 框架和内部索引端口；调用未完成算法会
 抛 NotImplementedError。没有装配到 Demo 或 Live，没有宣称 LIVE 能力可用。
 KG 已有离线投影与写入器，但真实 Neo4j 入库仍需本机写账号配置并完成验证。
 
@@ -16,7 +16,7 @@ KG 已有离线投影与写入器，但真实 Neo4j 入库仍需本机写账号�
 2. ports/interfaces.py：A/B/C/D/E 和回答解释器的实际签名。
 3. workflow/engine.py：规则→投影→案例→分化→追问→解释。
 4. bootstrap.py：P4ComponentFactory/P4Components 与依赖注入。
-5. ingestion/graph/projection.py、adapters/neo4j_writer.py，以及 KG两层图谱接入.md。
+5. ingestion/graph/projection.py、adapters/infrastructure/neo4j_writer.py，以及 KG两层图谱接入.md。
 6. ingestion/cases/validation.py、rule_layer/validation.py：已发布数据的限制。
 
 公共版本按具体对象处理：RuleRecord/CaseIndexRecord 默认 1.3，CaseRecord 1.1；
@@ -26,13 +26,13 @@ KG 已有离线投影与写入器，但真实 Neo4j 入库仍需本机写账号�
 
 |模块|实现位置建议|输入 → 输出|核心工作|
 |---|---|---|---|
-|A|adapters/hybrid_cypher.py|QueryState → ScoredReference[]|规则全文/向量融合，请求权匹配、图扩展|
-|B|adapters/semantic_condition_projector.py|QueryState＋rule_refs → QueryState|候选条件获取、语义判定、多事实聚合|
-|C|adapters/hybrid_cypher.py|投影后的 QueryState＋rule_refs → RetrievalBundle|案例混合召回、独立条件图召回、重排与角色组织|
-|D|adapters/condition_comparator.py|QueryState＋RetrievalBundle → ComparisonBundle|计算一次共享分化指标|
-|E|adapters/information_gain_policy.py|状态＋检索＋比较 → QuestionCandidate或None|回答模拟、收益/成本、停止策略|
-|回答解释|adapters/semantic_answer_interpreter.py|状态＋问题＋回答 → AnswerInterpretation|仅摘取回答原话、条件增量|
-|解释|adapters/evidence_explanation_planner.py|状态＋检索＋比较 → ExplanationPlan|有引用的条件化解释|
+|A|adapters/retrieval/hybrid_cypher.py|QueryState → ScoredReference[]|规则全文/向量融合，请求权匹配、图扩展|
+|B|adapters/conditions/semantic_condition_projector.py|QueryState＋rule_refs → QueryState|候选条件获取、语义判定、多事实聚合|
+|C|adapters/retrieval/hybrid_cypher.py|投影后的 QueryState＋rule_refs → RetrievalBundle|案例混合召回、独立条件图召回、重排与角色组织|
+|D|adapters/conditions/condition_comparator.py|QueryState＋RetrievalBundle → ComparisonBundle|计算一次共享分化指标|
+|E|adapters/questioning/information_gain_policy.py|状态＋检索＋比较 → QuestionCandidate或None|回答模拟、收益/成本、停止策略|
+|回答解释|adapters/conditions/semantic_answer_interpreter.py|状态＋问题＋回答 → AnswerInterpretation|仅摘取回答原话、条件增量|
+|解释|adapters/explanation/evidence_explanation_planner.py|状态＋检索＋比较 → ExplanationPlan|有引用的条件化解释|
 
 除 A/C 框架外，上表文件尚待创建。不新建 p4 目录。每个文件顶部写明 P4 算法所有权。
 

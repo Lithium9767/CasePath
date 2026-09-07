@@ -6,13 +6,13 @@ import json
 import os
 from pathlib import Path
 
-from casepath.adapters.graph_navigator import (
+from casepath.adapters.infrastructure.neo4j_gateway import Neo4jGraphGateway
+from casepath.adapters.retrieval.graph_navigator import (
     MemoryGraphNavigator,
     Neo4jGraphNavigator,
 )
-from casepath.adapters.hybrid_cypher import HybridCypherCaseRetriever
-from casepath.adapters.neo4j_gateway import Neo4jGraphGateway
-from casepath.adapters.retrieval_catalog import (
+from casepath.adapters.retrieval.hybrid_cypher import HybridCypherCaseRetriever
+from casepath.adapters.retrieval.retrieval_catalog import (
     bind_context,
     current_round,
     load_canonical_catalog,
@@ -83,7 +83,7 @@ def verify_offline() -> dict:
             [ScoredReference(object_id=TARGET_RULE, score=1.0)],
         )
     finally:
-        from casepath.adapters.retrieval_catalog import reset_context
+        from casepath.adapters.retrieval.retrieval_catalog import reset_context
 
         reset_context(token)
     recovered = {
@@ -144,7 +144,7 @@ def import_if_configured(summary: dict) -> None:
         return
     from neo4j import GraphDatabase
 
-    from casepath.adapters.neo4j_writer import publish
+    from casepath.adapters.infrastructure.neo4j_writer import publish
 
     uri, user, password, database = creds
     bundle = load_projection(DATA)
@@ -229,7 +229,7 @@ def verify_neo4j_read(summary: dict) -> None:
             )
             evidence = current_round()
         finally:
-            from casepath.adapters.retrieval_catalog import reset_context
+            from casepath.adapters.retrieval.retrieval_catalog import reset_context
 
             reset_context(token)
         fused = set(evidence.fused_case_ids) if evidence is not None else set()

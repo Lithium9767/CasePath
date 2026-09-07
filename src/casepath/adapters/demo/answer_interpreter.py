@@ -1,9 +1,4 @@
-"""P4 回答解释器的演示基线。
-
-负责人：P4。P4 可在保持 AnswerInterpreter 输入输出合同兼容的前提下替换本实现，
-完成用户回答到 UserFact 和 QueryConditionState 的条件级语义映射。
-P1 只负责调用、校验、合并和保存；当前实现不做法律语义判断。
-"""
+"""离线演示用的回答解释器：只保留原文，不做条件语义映射。"""
 
 from casepath.contracts import (
     AnswerInterpretation,

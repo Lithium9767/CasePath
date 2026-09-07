@@ -4,7 +4,7 @@ import os
 
 import pytest
 
-from casepath.adapters.neo4j_writer import publish
+from casepath.adapters.infrastructure.neo4j_writer import publish
 from casepath.ingestion.graph.projection import GraphProjection
 
 

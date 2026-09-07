@@ -7,8 +7,11 @@
 
 from __future__ import annotations
 
-from casepath.adapters.question_cards import option_status
-from casepath.adapters.semantic_condition_projector import _aggregate, _is_intent_or_conditional
+from casepath.adapters.conditions.semantic_condition_projector import (
+    _aggregate,
+    _is_intent_or_conditional,
+)
+from casepath.adapters.questioning.question_cards import option_status
 from casepath.contracts import (
     AnswerInterpretation,
     AnswerRequest,

@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
-from casepath.adapters.structured_llm import OpenAICompatibleStructuredLanguageModel
+from casepath.adapters.infrastructure.structured_llm import OpenAICompatibleStructuredLanguageModel
 from casepath.api.configured import create_configured_app
 from casepath.application.errors import LanguageModelUnavailable
 from casepath.bootstrap import build_live_runtime

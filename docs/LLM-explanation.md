@@ -13,7 +13,7 @@
 
 ## 提示词与验证
 
-提示词在 `src/casepath/adapters/grounded_explanation.py` 的 `SYSTEM_PROMPT`。用户原话、文书和历史对话均作为不可信数据，不作为系统指令；要求回答当前问题、区分陈述和认定、未知和否定、事实和假设，不用模型记忆补法律依据。
+提示词在 `src/casepath/adapters/explanation/grounded_explanation.py` 的 `SYSTEM_PROMPT`。用户原话、文书和历史对话均作为不可信数据，不作为系统指令；要求回答当前问题、区分陈述和认定、未知和否定、事实和假设，不用模型记忆补法律依据。
 
 模型输出结构化段落和条件分支。后端检查引用与事实 ID 白名单、分支规则与条件归属、目标规则原文引用，最后生成公开 ExplanationPlan 和数字引用标记。模型失败或非法输出不会伪装成成功的模板回答。
 

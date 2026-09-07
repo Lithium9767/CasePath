@@ -5,12 +5,16 @@ from pathlib import Path
 
 import pytest
 
-from casepath.adapters.graph_navigator import MemoryGraphNavigator
-from casepath.adapters.hybrid_cypher import HybridCypherRuleRetriever
-from casepath.adapters.information_gain_policy import InformationGainPolicy
-from casepath.adapters.retrieval_catalog import load_canonical_catalog, scored_reference
-from casepath.adapters.rule_relevance import RelevanceBatch, RelevanceItem, RelevantRuleRetriever
-from casepath.adapters.semantic_condition_projector import SemanticConditionProjector
+from casepath.adapters.conditions.semantic_condition_projector import SemanticConditionProjector
+from casepath.adapters.questioning.information_gain_policy import InformationGainPolicy
+from casepath.adapters.retrieval.graph_navigator import MemoryGraphNavigator
+from casepath.adapters.retrieval.hybrid_cypher import HybridCypherRuleRetriever
+from casepath.adapters.retrieval.retrieval_catalog import load_canonical_catalog, scored_reference
+from casepath.adapters.retrieval.rule_relevance import (
+    RelevanceBatch,
+    RelevanceItem,
+    RelevantRuleRetriever,
+)
 from casepath.application.errors import InvalidComponentOutput
 from casepath.contracts import ComparisonBundle, ConditionStatus, QueryState, RetrievalBundle
 

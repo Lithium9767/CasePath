@@ -1,7 +1,7 @@
 """显式离线向量构建，会向配置的 embedding 服务发送规则/案例检索文本并产生费用。"""
 
-from casepath.adapters.retrieval_catalog import load_canonical_catalog
-from casepath.adapters.vector_search import VectorIndex
+from casepath.adapters.retrieval.retrieval_catalog import load_canonical_catalog
+from casepath.adapters.retrieval.vector_search import VectorIndex
 from casepath.config import RuntimeSettings
 from casepath.config.embedding import EmbeddingSettings
 

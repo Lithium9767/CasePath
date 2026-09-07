@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-from casepath.adapters.retrieval_catalog import load_canonical_catalog
+from casepath.adapters.retrieval.retrieval_catalog import load_canonical_catalog
 from casepath.contracts import ErrorResponse, WorkflowSnapshot
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -137,8 +137,10 @@ def verify_illegal_json_failure() -> None:
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
     from threading import Thread
 
-    from casepath.adapters.semantic_condition_projector import ConditionLinkBatch
-    from casepath.adapters.structured_llm import OpenAICompatibleStructuredLanguageModel
+    from casepath.adapters.conditions.semantic_condition_projector import ConditionLinkBatch
+    from casepath.adapters.infrastructure.structured_llm import (
+        OpenAICompatibleStructuredLanguageModel,
+    )
     from casepath.application.errors import InvalidComponentOutput, LanguageModelUnavailable
     from casepath.config import StructuredOutputMode
 

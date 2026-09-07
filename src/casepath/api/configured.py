@@ -26,7 +26,7 @@ def create_configured_app() -> FastAPI:
     index = None
     try:
         if os.getenv("CASEPATH_VECTOR_INDEX"):
-            from casepath.adapters.vector_search import VectorIndex
+            from casepath.adapters.retrieval.vector_search import VectorIndex
             from casepath.config.embedding import EmbeddingSettings
 
             embedding_settings = EmbeddingSettings.from_env()

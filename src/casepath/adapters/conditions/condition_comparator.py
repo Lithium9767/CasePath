@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 from collections import Counter
 
-from casepath.adapters.retrieval_catalog import RetrievalCatalog, current_round
+from casepath.adapters.retrieval.retrieval_catalog import RetrievalCatalog, current_round
 from casepath.contracts import (
     ComparisonBundle,
     ConditionComparison,

@@ -3,15 +3,15 @@ from pathlib import Path
 
 import pytest
 
-from casepath.adapters.evidence_explanation_planner import EvidenceExplanationPlanner
-from casepath.adapters.grounded_explanation import (
+from casepath.adapters.explanation.evidence_explanation_planner import EvidenceExplanationPlanner
+from casepath.adapters.explanation.grounded_explanation import (
     Assumption,
     Branch,
     ExplanationDraft,
     Paragraph,
     evidence_package,
 )
-from casepath.adapters.retrieval_catalog import load_canonical_catalog
+from casepath.adapters.retrieval.retrieval_catalog import load_canonical_catalog
 from casepath.application.errors import InvalidComponentOutput, LanguageModelUnavailable
 from casepath.contracts import (
     ComparisonBundle,

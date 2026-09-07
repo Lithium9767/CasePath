@@ -6,7 +6,7 @@ comparison_bundle.degradation_reason，不拼进用户可见正文。
 
 from __future__ import annotations
 
-from casepath.adapters.retrieval_catalog import RetrievalCatalog
+from casepath.adapters.retrieval.retrieval_catalog import RetrievalCatalog
 from casepath.contracts import (
     CitationRecord,
     ComparisonBundle,
@@ -131,7 +131,7 @@ class EvidenceExplanationPlanner:
                 ],
             )
         if self.language_model is not None:
-            from casepath.adapters.grounded_explanation import generate_explanation
+            from casepath.adapters.explanation.grounded_explanation import generate_explanation
 
             generated = generate_explanation(
                 self.language_model, self.catalog, state, bundle, comparison

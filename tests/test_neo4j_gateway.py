@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from casepath.adapters.neo4j_gateway import Neo4jGraphGateway
+from casepath.adapters.infrastructure.neo4j_gateway import Neo4jGraphGateway
 from casepath.application.errors import GraphUnavailable
 
 

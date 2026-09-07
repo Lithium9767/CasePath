@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from casepath.adapters.structured_llm import OpenAICompatibleStructuredLanguageModel
+from casepath.adapters.infrastructure.structured_llm import OpenAICompatibleStructuredLanguageModel
 from casepath.application.errors import InvalidComponentOutput, LanguageModelUnavailable
 from casepath.config import StructuredOutputMode
 from casepath.contracts import ContractModel

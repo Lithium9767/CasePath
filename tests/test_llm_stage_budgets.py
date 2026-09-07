@@ -6,10 +6,10 @@ from types import SimpleNamespace
 
 import pytest
 
-from casepath.adapters.evidence_explanation_planner import EvidenceExplanationPlanner
-from casepath.adapters.question_cards import option_status
-from casepath.adapters.retrieval_catalog import load_canonical_catalog
-from casepath.adapters.structured_llm import OpenAICompatibleStructuredLanguageModel
+from casepath.adapters.explanation.evidence_explanation_planner import EvidenceExplanationPlanner
+from casepath.adapters.infrastructure.structured_llm import OpenAICompatibleStructuredLanguageModel
+from casepath.adapters.questioning.question_cards import option_status
+from casepath.adapters.retrieval.retrieval_catalog import load_canonical_catalog
 from casepath.application.errors import InvalidComponentOutput
 from casepath.config import RuntimeSettings, StructuredOutputMode
 from casepath.config.settings import LLMStagePolicy

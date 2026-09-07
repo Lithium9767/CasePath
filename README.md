@@ -23,7 +23,7 @@ src/casepath/contracts/   五人共同遵守的数据合同
 src/casepath/application/ 会话记录、跨轮次服务和应用错误
 src/casepath/ports/       外部数据库、检索器、LLM的抽象端口
 src/casepath/workflow/    确定性状态机与模块编排
-src/casepath/adapters/    内存、Neo4j、向量库、LLM等实现
+src/casepath/adapters/    按职责分组的实现（infrastructure/retrieval/conditions/questioning/explanation/demo）
 src/casepath/api/         HTTP接口，不放业务规则
 src/casepath/ingestion/   P2离线法条读取、层级修复和来源校验
 src/casepath/rule_layer/  P2规则构造、原子发布和数据验收
@@ -54,14 +54,14 @@ API 启动后：
 ## P1 会话模块怎么阅读
 
 按 `api/sessions.py → application/session_service.py → ports/interfaces.py →
-workflow/engine.py → adapters/memory_session_repository.py` 阅读。
+workflow/engine.py → adapters/infrastructure/memory_session_repository.py` 阅读。
 
 | 文件 | 负责的事情 |
 | --- | --- |
 | `contracts/session.py` | 新增创建请求和 P4 回答解释结果；不改已有 v1.1 对象 |
 | `application/models.py` | 保存最新快照、状态版本和回答回执 |
 | `ports/session_repository.py` | 规定创建、读取、原子版本更新接口 |
-| `adapters/memory_session_repository.py` | 带锁和深拷贝的内存仓库 |
+| `adapters/infrastructure/memory_session_repository.py` | 带锁和深拷贝的内存仓库 |
 | `ports/interfaces.py` | 增加 `AnswerInterpreter`，由 P4 实现语义映射 |
 | `application/session_service.py` | 校验待回答问题、调用 P4、合并证据、重跑、保存 |
 | `api/sessions.py` / `api/errors.py` | 三个会话入口及统一错误响应 |

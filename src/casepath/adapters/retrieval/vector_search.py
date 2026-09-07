@@ -8,7 +8,7 @@ import math
 from dataclasses import asdict
 from pathlib import Path
 
-from casepath.adapters.retrieval_catalog import MemoryHybridSearch, scored_reference
+from casepath.adapters.retrieval.retrieval_catalog import MemoryHybridSearch, scored_reference
 from casepath.application.errors import RetrieverUnavailable
 from casepath.contracts import ScoreComponent
 from casepath.ingestion.laws.jsonl import write_json

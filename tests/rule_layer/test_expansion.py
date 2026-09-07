@@ -75,7 +75,10 @@ def test_publish_roundtrip_and_failure_preserves_files(tmp_path, monkeypatch):
 
 
 def test_published_expansion_and_cross_domain_index():
-    from casepath.adapters.retrieval_catalog import MemoryHybridSearch, load_canonical_catalog
+    from casepath.adapters.retrieval.retrieval_catalog import (
+        MemoryHybridSearch,
+        load_canonical_catalog,
+    )
 
     report = validate_expanded(ROOT)
     assert report.rule_count == 776
