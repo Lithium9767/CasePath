@@ -82,7 +82,9 @@ class HybridCypherP4Factory:
     ) -> P4Components:
         # 取得catalog
         catalog = self._catalog_or_load()
+        # 默认先用内存/BM25。
         search = MemoryHybridSearch(catalog)
+        # 
         vector_enabled = self._embedding_model is not None
         if vector_enabled:
             search = VectorHybridSearch(catalog, self._embedding_model, self._vector_index)
