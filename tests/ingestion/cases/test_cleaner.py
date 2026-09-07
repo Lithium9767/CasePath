@@ -27,3 +27,20 @@ def test_deep_record_uses_unknown_when_result_missing():
     record = cleaner.deep_fitness({"case_id": "x", "title": "健身案", "case_cause": "服务合同纠纷", "full_document": "## 基本案情\n事实\n## 裁判理由\n理由"})
     assert record.decisions[0].status == "UNKNOWN"
     assert len({span.span_id for span in record.source_spans}) == len(record.source_spans)
+
+
+def test_curated_additional_cases_are_verified_civil_records():
+    path = Path("data/canonical/cases/additional_cases.jsonl")
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    existing = {
+        json.loads(line)["case_id"]
+        for line in Path("data/canonical/cases/cases_l1.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    }
+    assert len(rows) == 6
+    assert all(row["case_category"] == "民事" for row in rows)
+    assert all(row["case_cause"].endswith("纠纷") for row in rows)
+    assert all(row["source_file"].startswith("https://www.court.gov.cn/") for row in rows)
+    assert all(row["related_provision_ids"] for row in rows)
+    assert not existing.intersection(row["case_id"] for row in rows)
