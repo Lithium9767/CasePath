@@ -2,7 +2,7 @@ from dataclasses import replace
 
 import pytest
 
-from casepath.bootstrap import build_demo_workflow
+from casepath.adapters.demo import build_demo_workflow
 from casepath.contracts import DialogueTurn, QueryState, QuestionCandidate, SessionStatus
 from casepath.workflow import CasePathWorkflow, WorkflowInvariantError
 

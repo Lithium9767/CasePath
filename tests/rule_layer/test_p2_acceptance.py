@@ -7,7 +7,13 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator, FormatChecker
 
-from casepath.contracts import RuleCondition, RuleException, RuleRecord, SourceSpan
+from casepath.contracts import (
+    ConditionGroupRole,
+    RuleCondition,
+    RuleException,
+    RuleRecord,
+    SourceSpan,
+)
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 CANONICAL_ROOT = REPOSITORY_ROOT / "data" / "canonical" / "rules"
@@ -19,8 +25,8 @@ SCHEMA_ROOT = REPOSITORY_ROOT / "contracts" / "schemas"
     [
         ("legal_sources.jsonl", "legal-source-record", 1, None),
         ("provisions.jsonl", "provision-record", 1260, None),
-        ("rules.jsonl", "rule-record", 5, None),
-        ("source_spans.jsonl", "provision-record", 1268, "SourceSpan"),
+        ("rules.jsonl", "rule-record", 776, None),
+        ("source_spans.jsonl", "provision-record", 3269, "SourceSpan"),
     ],
 )
 def test_published_records_pass_exported_json_schema(
@@ -79,10 +85,19 @@ def test_rules_file_alone_supports_indexes_and_complete_references(
             assert span.end_offset - span.start_offset == len(span.quote)
             assert span_index.setdefault(span.span_id, span) == span
 
-        sourced_items = [*rule.conditions, *rule.exceptions, *rule.consequences]
-        for item in sourced_items:
+        for item in [*rule.exceptions, *rule.consequences]:
             assert item.source_span_ids
             assert set(item.source_span_ids) <= embedded_spans.keys()
+        diagnostic_condition_ids = {
+            condition_id
+            for group in rule.condition_groups
+            if group.role == ConditionGroupRole.DIAGNOSTIC
+            for condition_id in group.member_condition_ids
+        }
+        for condition in rule.conditions:
+            if condition.condition_id not in diagnostic_condition_ids:
+                assert condition.source_span_ids
+            assert set(condition.source_span_ids) <= embedded_spans.keys()
 
         fact_pairs = [
             *((condition.condition_id, condition) for condition in rule.conditions),
@@ -117,16 +132,17 @@ def test_rules_file_alone_supports_indexes_and_complete_references(
         assert all(isinstance(value, str) and value.strip() for value in text_fields)
         search_documents[rule.rule_id] = "\n".join(text_fields)
 
-    assert len(records) == len(rule_index) == 5
+    assert len(records) == len(rule_index) == 776
+    assert sum(rule.maturity == "L1" for rule in records) == 771
     assert sum(rule.maturity == "L3" for rule in records) == 4
-    assert set(rule_index) == {
+    assert set(rule_index) >= {
         "rule.contract.performance.good_faith.v1",
         "rule.contract.termination.delay_after_demand.v1",
         "rule.contract.termination.nonperformance.v1",
         "rule.contract.termination.restitution.v1",
         "rule.service_contract.termination_refund.v1",
     }
-    assert set(fact_index) == {
+    assert set(fact_index) >= {
         "cond.contract_exists",
         "cond.main_obligation_delayed",
         "cond.demand_delivered",
@@ -137,8 +153,8 @@ def test_rules_file_alone_supports_indexes_and_complete_references(
         "cond.payment_made",
         "cond.unperformed_balance",
     }
-    assert len(span_index) == 8
-    assert isinstance(fact_index["cond.alternative_performance"], RuleException)
+    assert len(span_index) >= 8
+    assert isinstance(fact_index["cond.alternative_performance"], RuleCondition)
     assert rules_by_fact["cond.alternative_performance"] == {
         "rule.contract.termination.nonperformance.v1",
         "rule.service_contract.termination_refund.v1",

@@ -2,7 +2,7 @@
 
 import pytest
 
-from casepath.bootstrap import build_demo_session_service
+from casepath.adapters.demo import build_demo_session_service
 from casepath.contracts import (
     AnswerInterpretation,
     AnswerRequest,

@@ -14,6 +14,10 @@
           "title": "Label",
           "type": "string"
         },
+        "role": {
+          "$ref": "#/$defs/ConditionGroupRole",
+          "default": "CORE"
+        },
         "operator": {
           "$ref": "#/$defs/ConditionGroupOperator"
         },
@@ -42,6 +46,15 @@
         "ANY"
       ],
       "title": "ConditionGroupOperator",
+      "type": "string"
+    },
+    "ConditionGroupRole": {
+      "description": "条件组是否参与规则成立判断。\n\nCORE 组由 P4 用于计算规则匹配；DIAGNOSTIC 组只用于检索、比较和追问，\n不能因为状态未知或不满足而直接否定规则。",
+      "enum": [
+        "CORE",
+        "DIAGNOSTIC"
+      ],
+      "title": "ConditionGroupRole",
       "type": "string"
     },
     "LegalConsequence": {
@@ -301,8 +314,11 @@
   "additionalProperties": false,
   "properties": {
     "contract_version": {
-      "const": "1.1",
-      "default": "1.1",
+      "default": "1.3",
+      "enum": [
+        "1.1",
+        "1.3"
+      ],
       "title": "Contract Version",
       "type": "string"
     },

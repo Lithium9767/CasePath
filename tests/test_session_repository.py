@@ -5,7 +5,7 @@ from threading import Barrier
 
 import pytest
 
-from casepath.adapters.memory_session_repository import InMemorySessionRepository
+from casepath.adapters.infrastructure.memory_session_repository import InMemorySessionRepository
 from casepath.application.errors import SessionConflict, SessionNotFound
 from casepath.application.models import SessionRecord
 

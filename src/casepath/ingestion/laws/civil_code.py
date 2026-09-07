@@ -1,5 +1,8 @@
+"""把固定版本的legal-rag民法典数据转换为P1公共合同。"""
+
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -9,6 +12,7 @@ from pydantic import Field, model_validator
 from casepath.contracts import (
     ContractModel,
     LegalSourceRecord,
+    MaturityLevel,
     ProvisionRecord,
     SourceSpan,
 )
@@ -92,11 +96,9 @@ def repair_shifted_hierarchy(
     *,
     source_sha256: str,
 ) -> tuple[list[RawCivilCodeArticle], int]:
-    """Repair the known one-record-early hierarchy bug in the pinned upstream file.
+    """修复固定上游文件中“层级提前写入前一条法条”的已知问题。
 
-    The upstream DOCX converter updates hierarchy state before flushing the preceding
-    article.  Repairs are therefore derived from an immutable snapshot; using already
-    repaired values here would propagate the previous hierarchy through the dataset.
+    修复必须读取不可变快照；如果继续读取已修复对象，新层级会被错误地向后传播。
     """
 
     if source_sha256 != EXPECTED_SOURCE_SHA256:
@@ -113,6 +115,16 @@ def repair_shifted_hierarchy(
             repair_count += 1
         repaired.append(article)
     return repaired, repair_count
+
+
+def _normalise_heading(value: str) -> str | None:
+    if not value:
+        return None
+    compact = re.sub(r"\s+", "", value)
+    match = re.match(r"^(第.+?(?:分编|编|章|节))(.*)$", compact)
+    if match and match.group(2):
+        return f"{match.group(1)} {match.group(2)}"
+    return compact
 
 
 def provision_id(article_number: int) -> str:
@@ -150,16 +162,17 @@ def convert_civil_code(loaded: LoadedCivilCode) -> ConversionResult:
     spans: list[SourceSpan] = []
     for article in articles:
         span_id = full_span_id(article.number)
-        full_span = SourceSpan(
-            span_id=span_id,
-            source_id=CIVIL_CODE_SOURCE_ID,
-            section=f"第{article.number}条",
-            paragraph_id=f"article-{article.number:04d}",
-            start_offset=0,
-            end_offset=len(article.content),
-            quote=article.content,
+        spans.append(
+            SourceSpan(
+                span_id=span_id,
+                source_id=CIVIL_CODE_SOURCE_ID,
+                section=f"第{article.number}条",
+                paragraph_id=f"article-{article.number:04d}",
+                start_offset=0,
+                end_offset=len(article.content),
+                quote=article.content,
+            )
         )
-        spans.append(full_span)
         provisions.append(
             ProvisionRecord(
                 provision_id=provision_id(article.number),
@@ -167,9 +180,14 @@ def convert_civil_code(loaded: LoadedCivilCode) -> ConversionResult:
                 article_no=str(article.number),
                 title=f"中华人民共和国民法典第{article.number}条",
                 text=article.content,
+                book=_normalise_heading(article.book),
+                sub_book=_normalise_heading(article.sub_book),
+                chapter=_normalise_heading(article.chapter),
+                section=_normalise_heading(article.section),
                 effective_from=date(2021, 1, 1),
                 effective_to=None,
-                source_spans=[full_span],
+                maturity=MaturityLevel.L0,
+                source_spans=[spans[-1]],
             )
         )
 

@@ -9,7 +9,7 @@ from .base import Confidence, ContractModel, Identifier, ScoreComponent
 from .enums import ConditionStatus, SessionStatus
 
 
-class UserFact(ContractModel): # 从用户初始问题或后续回答中提取的一项事实
+class UserFact(ContractModel): # 用户初始问题或后续回答中提取的一项事实
     fact_id: Identifier # 用户事实唯一编号，供QueryConditionState.supporting_fact_ids引用
     text: str = Field(min_length=1) # 用户表达该事实时的原话，不能为空
     predicate: str | None = None # 规范化事实类型或命题；无法可靠结构化时允许为空

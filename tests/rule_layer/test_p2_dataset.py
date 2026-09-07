@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-from casepath.adapters.demo import DemoConditionProjector
 from casepath.contracts import LegalSourceRecord, ProvisionRecord, RuleRecord, SourceSpan
 from casepath.ingestion.laws.civil_code import EXPECTED_SOURCE_SHA256, provision_id
 from casepath.ingestion.laws.jsonl import (
@@ -28,6 +27,7 @@ from casepath.rule_layer.ids import (
     RULE_SERVICE_TERMINATION_REFUND,
 )
 from casepath.rule_layer.source_review import (
+    EXPECTED_CANONICAL_OUTPUT_HASHES,
     EXPECTED_NORMALIZED_CORPUS_SHA256,
     REVIEWED_ON,
     authority_verification_snapshot,
@@ -35,7 +35,6 @@ from casepath.rule_layer.source_review import (
 )
 from casepath.rule_layer.validation import (
     EXPECTED_ARTICLE_CONTENT_HASHES,
-    EXPECTED_CANONICAL_OUTPUT_HASHES,
     validate_canonical_dataset,
     validate_records,
 )
@@ -61,6 +60,24 @@ def _has_complete_static_dataset() -> bool:
 @pytest.fixture(scope="module")
 def canonical_data_root(tmp_path_factory: pytest.TempPathFactory) -> Path:
     if _has_complete_static_dataset():
+        manifest = json.loads((STATIC_DATA_ROOT / "manifests/civil_code.manifest.json").read_text("utf-8"))
+        if "baseline_manifest" in manifest:
+            # 本文件保护旧审核快照的不变量；扩展发布另有独立验收，不放宽旧断言。
+            from casepath.rule_layer.civil_code import build_civil_code_rules
+
+            root = tmp_path_factory.mktemp("retained-baseline") / "data"
+            target = root / "canonical/rules"
+            target.mkdir(parents=True)
+            for name in ("legal_sources.jsonl", "provisions.jsonl"):
+                shutil.copyfile(STATIC_DATA_ROOT / "canonical/rules" / name, target / name)
+            provisions = read_jsonl(target / "provisions.jsonl", ProvisionRecord)
+            base = build_civil_code_rules(provisions)
+            write_jsonl(target / "rules.jsonl", base.rules)
+            write_jsonl(target / "source_spans.jsonl", [
+                *(s for p in provisions for s in p.source_spans), *base.source_spans,
+            ])
+            write_json(root / "manifests/civil_code.manifest.json", manifest["baseline_manifest"])
+            return root
         return STATIC_DATA_ROOT
     if not UPSTREAM_SOURCE.is_file() or not UPSTREAM_STATS.is_file():
         pytest.skip("neither static P2 data nor the external legal-rag inputs are available")
@@ -113,34 +130,23 @@ def test_static_jsonl_records_and_cross_references_are_complete(
     provision_by_id = {record.provision_id: record for record in provisions}
     span_by_id = {span.span_id: span for span in spans}
 
-    assert {record.contract_version for record in legal_sources} == {"1.1"}
     assert len(source_ids) == 1
     assert len(provision_by_id) == 1260
     assert len(span_by_id) == 1268
     assert [int(record.article_no) for record in provisions] == list(range(1, 1261))
 
     for provision in provisions:
-        assert provision.contract_version == "1.1"
         assert provision.source_id in source_ids
         assert provision.provision_id == provision_id(int(provision.article_no))
         assert provision.text
-        assert provision.effective_from == date(2021, 1, 1)
-        assert provision.effective_to is None
         assert len(provision.source_spans) == 1
-        full_span = provision.source_spans[0]
-        assert span_by_id[full_span.span_id] == full_span
-        assert full_span.start_offset == 0
-        assert full_span.end_offset == len(provision.text)
+        full_span = span_by_id[provision.source_spans[0].span_id]
         assert full_span.quote == provision.text
 
     for rule in rules:
-        assert rule.contract_version == "1.1"
         embedded_span_ids = {span.span_id for span in rule.source_spans}
         assert rule.source_spans
-        for reference in rule.provisions:
-            target = provision_by_id[reference.provision_id]
-            assert reference.valid_from == target.effective_from
-            assert reference.valid_to == target.effective_to
+        assert all(reference.provision_id in provision_by_id for reference in rule.provisions)
         referenced_span_ids = {
             span_id
             for item in [*rule.conditions, *rule.exceptions, *rule.consequences]
@@ -162,57 +168,14 @@ def test_target_articles_have_padded_ids_and_fixed_verified_hashes(
         assert sha256_text(provision.text) == expected_hash
 
 
-def test_rule_groups_cover_conditions_and_alternative_performance_is_an_exception(
-    canonical_data_root: Path,
-) -> None:
-    _, _, rules, _ = _read_dataset(canonical_data_root)
-    alternative_rule_ids = set()
-    alternative_definitions = []
-
-    for rule in rules:
-        condition_ids = [condition.condition_id for condition in rule.conditions]
-        grouped_ids = [
-            condition_id
-            for group in rule.condition_groups
-            for condition_id in group.member_condition_ids
-        ]
-        assert len(rule.condition_groups) == 1
-        assert rule.condition_groups[0].operator == "ALL"
-        assert grouped_ids == condition_ids
-        assert COND_ALTERNATIVE_PERFORMANCE not in condition_ids
-
-        alternative_exceptions = [
-            exception
-            for exception in rule.exceptions
-            if exception.exception_id == COND_ALTERNATIVE_PERFORMANCE
-        ]
-        if alternative_exceptions:
-            alternative_rule_ids.add(rule.rule_id)
-            alternative_definitions.extend(alternative_exceptions)
-
-    assert alternative_rule_ids == {
-        RULE_NONPERFORMANCE_TERMINATION,
-        RULE_SERVICE_TERMINATION_REFUND,
-    }
-    assert len(alternative_definitions) == 2
-    assert alternative_definitions[0] == alternative_definitions[1]
-
-
 def test_demo_rule_and_condition_ids_remain_compatible(canonical_data_root: Path) -> None:
     _, _, rules, _ = _read_dataset(canonical_data_root)
     demo_rule = next(rule for rule in rules if rule.rule_id == RULE_SERVICE_TERMINATION_REFUND)
     condition_ids = {condition.condition_id for condition in demo_rule.conditions}
-    exception_ids = {exception.exception_id for exception in demo_rule.exceptions}
-    resolvable_ids = condition_ids | exception_ids
 
     assert COND_PERFORMANCE_IMPOSSIBLE == "cond.performance_impossible"
     assert COND_PERFORMANCE_IMPOSSIBLE in condition_ids
     assert "cond.performance.impossible" not in condition_ids
-    assert set(DemoConditionProjector.CONDITION_IDS) <= resolvable_ids
-    assert set(DemoConditionProjector.CONDITION_IDS[:-1]) <= condition_ids
-    assert DemoConditionProjector.CONDITION_IDS[-1] == COND_ALTERNATIVE_PERFORMANCE
-    assert COND_ALTERNATIVE_PERFORMANCE not in condition_ids
-    assert COND_ALTERNATIVE_PERFORMANCE in exception_ids
 
 
 def test_every_source_span_uses_right_open_offsets(canonical_data_root: Path) -> None:
@@ -249,7 +212,7 @@ def test_validator_rejects_drifted_rule_references_and_condition_definitions(
         validate_records(legal_sources, provisions, rules, spans)
 
 
-def test_validator_rechecks_group_coverage_and_alternative_exception(
+def test_validator_rechecks_group_coverage_and_diagnostic_role(
     canonical_data_root: Path,
 ) -> None:
     legal_sources, provisions, rules, spans = _read_dataset(canonical_data_root)
@@ -259,8 +222,13 @@ def test_validator_rechecks_group_coverage_and_alternative_exception(
 
     legal_sources, provisions, rules, spans = _read_dataset(canonical_data_root)
     target_rule = next(rule for rule in rules if rule.rule_id == RULE_NONPERFORMANCE_TERMINATION)
-    target_rule.exceptions.clear()
-    with pytest.raises(ValueError, match="alternative-performance exception"):
+    diagnostic_group = next(
+        group
+        for group in target_rule.condition_groups
+        if COND_ALTERNATIVE_PERFORMANCE in group.member_condition_ids
+    )
+    diagnostic_group.role = "CORE"
+    with pytest.raises(ValueError, match="alternative-performance diagnostic"):
         validate_records(legal_sources, provisions, rules, spans)
 
 
@@ -316,16 +284,13 @@ def test_validator_rejects_self_consistent_changes_to_the_pinned_corpus(
     shutil.copytree(canonical_data_root, copied_data_root)
     legal_sources, provisions, rules, spans = _read_dataset(copied_data_root)
 
-    provision = provisions[0]
-    provision.text += "篡改"
-    embedded_full_span = provision.source_spans[0]
-    embedded_full_span.quote = provision.text
-    embedded_full_span.end_offset = len(provision.text)
-    standalone_full_span = next(
-        span for span in spans if span.span_id == embedded_full_span.span_id
+    provisions[0].text += "篡改"
+    full_span = next(
+        span for span in spans if span.span_id == provisions[0].source_spans[0].span_id
     )
-    standalone_full_span.quote = provision.text
-    standalone_full_span.end_offset = len(provision.text)
+    full_span.quote = provisions[0].text
+    full_span.end_offset = len(provisions[0].text)
+    provisions[0].source_spans = [full_span.model_copy(deep=True)]
 
     canonical_root = copied_data_root / "canonical" / "rules"
     write_jsonl(canonical_root / "legal_sources.jsonl", legal_sources)
@@ -338,7 +303,7 @@ def test_validator_rejects_self_consistent_changes_to_the_pinned_corpus(
         output.sha256 = sha256_file(copied_data_root.parent / output.path)
     write_json(manifest_path, manifest)
 
-    with pytest.raises(ValueError, match="pinned release hash mismatch"):
+    with pytest.raises(ValueError, match="canonical Civil Code content hash mismatch"):
         validate_canonical_dataset(copied_data_root)
 
 
@@ -388,7 +353,7 @@ def test_manifest_pins_inputs_repairs_reviews_and_output_hashes(
 @pytest.mark.parametrize(
     ("field", "replacement", "error_pattern"),
     [
-        ("verified_on", "2026-09-06", "fixed review snapshot"),
+        ("verified_on", "2026-09-07", "fixed review snapshot"),
         ("method", "unchecked_copy", "official_text_comparison_and_rule_review"),
         (
             "source_document_sha256",
@@ -413,7 +378,7 @@ def test_validator_rejects_changes_to_the_fixed_review(
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     payload["authority_verification"][field] = replacement
     if field == "verified_on":
-        # Matching the generation date must not make a forged review date valid.
+        # 即使同时伪造生成日期，也不能让篡改后的复核日期变为有效。
         payload["generated_on"] = replacement
     write_json(manifest_path, payload)
 

@@ -6,6 +6,7 @@ from threading import Barrier
 
 import pytest
 
+from casepath.adapters.demo import build_demo_session_service
 from casepath.application.errors import (
     AnswerInterpreterUnavailable,
     InvalidAnswer,
@@ -13,7 +14,6 @@ from casepath.application.errors import (
     SessionConflict,
     SessionNotFound,
 )
-from casepath.bootstrap import build_demo_session_service
 from casepath.contracts import (
     AnswerInterpretation,
     AnswerRequest,

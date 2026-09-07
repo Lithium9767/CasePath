@@ -1,3 +1,5 @@
+"""P2规范规则数据的确定性构建、校验、原子发布与失败回滚。"""
+
 from __future__ import annotations
 
 import argparse
@@ -202,6 +204,16 @@ def build_dataset(
     if final_data_root.exists() and not final_data_root.is_dir():
         raise ValueError(f"data_root exists but is not a directory: {final_data_root}")
     _validate_generated_output_paths(final_data_root)
+
+    # 旧构建器只生成五条基线，不得误把已发布的 L1 扩展重置掉。
+    existing_manifest = final_data_root / "manifests/civil_code.manifest.json"
+    if existing_manifest.is_file():
+        try:
+            current = json.loads(existing_manifest.read_text("utf-8"))
+        except (ValueError, UnicodeError):
+            current = {}
+        if current.get("dataset_id") == "dataset.civil_code.rules.expanded.v1":
+            raise ValueError("目标已有扩展规则；请使用 expansion 发布或将基线构建到独立目录")
 
     # Resolve fallible source metadata before preparing output. In particular,
     # Git lookup failures must not leave new JSONL files with an old manifest.

@@ -1,3 +1,5 @@
+"""从民法典法条构造可供P3/P4复用的规则条件空间。"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -5,12 +7,12 @@ from dataclasses import dataclass
 from casepath.contracts import (
     ConditionGroup,
     ConditionGroupOperator,
+    ConditionGroupRole,
     LegalConsequence,
     MaturityLevel,
     ProvisionRecord,
     ProvisionRef,
     RuleCondition,
-    RuleException,
     RuleRecord,
     SourceSpan,
 )
@@ -60,16 +62,6 @@ def _provision_ref(provision: ProvisionRecord) -> ProvisionRef:
     )
 
 
-def _all_conditions_group(rule_id: str, conditions: list[RuleCondition]) -> ConditionGroup:
-    """Place every ordinary condition in the rule's executable AND group."""
-    return ConditionGroup(
-        group_id=f"group.{rule_id.removeprefix('rule.')}.all",
-        label="规则适用的一般条件",
-        operator=ConditionGroupOperator.ALL,
-        member_condition_ids=[condition.condition_id for condition in conditions],
-    )
-
-
 def _clause_span(provision: ProvisionRecord, suffix: str, quote: str) -> SourceSpan:
     start_offset = provision.text.find(quote)
     if start_offset < 0:
@@ -83,6 +75,24 @@ def _clause_span(provision: ProvisionRecord, suffix: str, quote: str) -> SourceS
         start_offset=start_offset,
         end_offset=end_offset,
         quote=quote,
+    )
+
+
+def _condition_group(
+    group_id: str,
+    label: str,
+    member_condition_ids: list[str],
+    *,
+    role: ConditionGroupRole = ConditionGroupRole.CORE,
+) -> ConditionGroup:
+    """按P1合同显式声明条件用途，避免P4把诊断事实当成法定要件。"""
+
+    return ConditionGroup(
+        group_id=group_id,
+        label=label,
+        role=role,
+        operator=ConditionGroupOperator.ALL,
+        member_condition_ids=member_condition_ids,
     )
 
 
@@ -150,12 +160,13 @@ def build_civil_code_rules(provisions: list[ProvisionRecord]) -> RuleBuildResult
         evidence_types=["永久停业通知", "主体注销信息", "拒绝履行记录", "履行能力证明"],
         source_span_ids=[span_563_item_4.span_id],
     )
-    exception_alternative_performance = RuleException(
-        exception_id=COND_ALTERNATIVE_PERFORMANCE,
+    condition_alternative_performance = RuleCondition(
+        condition_id=COND_ALTERNATIVE_PERFORMANCE,
         label="存在足以实现合同目的的替代履行",
         predicate="替代服务是否符合约定并仍足以实现原合同目的",
-        effect="例外成立时，不能仅以原履行方案变化认定合同目的不能实现。",
-        source_span_ids=[span_563_item_4.span_id],
+        evidence_types=["转店方案", "替代门店信息", "补充协议", "服务能力证明"],
+        # “替代履行”来自案例比较经验，不是第563条的明文要件，因此不伪造法条引句。
+        source_span_ids=[],
     )
     condition_contract_terminated = RuleCondition(
         condition_id=COND_CONTRACT_TERMINATED,
@@ -165,14 +176,19 @@ def build_civil_code_rules(provisions: list[ProvisionRecord]) -> RuleBuildResult
         source_span_ids=[span_565_procedure.span_id, span_566_unperformed.span_id],
     )
 
-    good_faith_conditions = [condition_contract_exists]
     rule_good_faith = RuleRecord(
         rule_id=RULE_GOOD_FAITH,
         title="合同全面履行与诚信履行规则",
         claim_types=["服务合同履行"],
         provisions=[_provision_ref(article_509)],
-        conditions=good_faith_conditions,
-        condition_groups=[_all_conditions_group(RULE_GOOD_FAITH, good_faith_conditions)],
+        conditions=[condition_contract_exists],
+        condition_groups=[
+            _condition_group(
+                "group.contract.performance.core",
+                "全面履行规则核心条件",
+                [COND_CONTRACT_EXISTS],
+            )
+        ],
         consequences=[
             LegalConsequence(
                 consequence_id="consequence.perform_as_agreed",
@@ -188,7 +204,6 @@ def build_civil_code_rules(provisions: list[ProvisionRecord]) -> RuleBuildResult
         source_spans=[span_509_performance, span_509_good_faith],
     )
 
-    nonperformance_conditions = [condition_contract_exists, condition_performance_impossible]
     rule_nonperformance = RuleRecord(
         rule_id=RULE_NONPERFORMANCE_TERMINATION,
         title="违约致使合同目的不能实现时的法定解除规则",
@@ -198,19 +213,32 @@ def build_civil_code_rules(provisions: list[ProvisionRecord]) -> RuleBuildResult
             _provision_ref(article_563),
             _provision_ref(article_565),
         ],
-        conditions=nonperformance_conditions,
-        condition_groups=[
-            _all_conditions_group(RULE_NONPERFORMANCE_TERMINATION, nonperformance_conditions)
+        conditions=[
+            condition_contract_exists,
+            condition_performance_impossible,
+            condition_alternative_performance,
         ],
-        exceptions=[exception_alternative_performance],
+        condition_groups=[
+            _condition_group(
+                "group.contract.termination.nonperformance.core",
+                "合同目的不能实现解除路径的核心条件",
+                [COND_CONTRACT_EXISTS, COND_PERFORMANCE_IMPOSSIBLE],
+            ),
+            _condition_group(
+                "group.contract.termination.nonperformance.diagnostic",
+                "用于案例比较的替代履行事实",
+                [COND_ALTERNATIVE_PERFORMANCE],
+                role=ConditionGroupRole.DIAGNOSTIC,
+            ),
+        ],
         consequences=[
             LegalConsequence(
                 consequence_id="consequence.statutory_termination",
                 consequence_type="法定解除权",
                 description=(
-                    "相对方违约致使合同目的不能实现且不存在足以实现该目的的替代履行时，"
-                    "解除权人取得解除权；替代履行状态未知时不得作确定判断，本规则也不表示"
-                    "合同自动解除。未先通知而直接起诉或申请仲裁的，须经法院或仲裁机构确认"
+                    "相对方违约致使合同目的不能实现时，解除权人取得解除权；本规则不表示"
+                    "合同自动解除。替代履行仅作为判断合同目的能否实现时的案例比较事实，"
+                    "不能单独当作法定阻却条件。未先通知而直接起诉或申请仲裁的，须经法院或仲裁机构确认"
                     "解除主张，合同才按第565条规定时点发生效力。本规则不判断第564条所涉"
                     "解除权行使期限。"
                 ),
@@ -230,30 +258,6 @@ def build_civil_code_rules(provisions: list[ProvisionRecord]) -> RuleBuildResult
         ],
     )
 
-    delay_after_demand_conditions = [
-        condition_contract_exists,
-        RuleCondition(
-            condition_id=COND_MAIN_OBLIGATION_DELAYED,
-            label="主要债务迟延履行",
-            predicate="经营者是否已经迟延履行合同的主要服务义务",
-            evidence_types=["合同履行期限", "预约记录", "服务记录", "停业通知"],
-            source_span_ids=[span_563_item_3.span_id],
-        ),
-        RuleCondition(
-            condition_id=COND_DEMAND_DELIVERED,
-            label="已经催告履行",
-            predicate="用户是否已向经营者发出履行催告并能证明送达",
-            evidence_types=["催告函", "快递回执", "短信", "聊天记录"],
-            source_span_ids=[span_563_item_3.span_id],
-        ),
-        RuleCondition(
-            condition_id=COND_REASONABLE_PERIOD_EXPIRED,
-            label="合理期限届满后仍未履行",
-            predicate="催告给予的合理期限是否已届满且经营者仍未履行",
-            evidence_types=["催告内容", "送达时间", "届满后的服务记录"],
-            source_span_ids=[span_563_item_3.span_id],
-        ),
-    ]
     rule_delay_after_demand = RuleRecord(
         rule_id=RULE_DELAY_AFTER_DEMAND,
         title="迟延履行主要债务且经催告后仍未履行的法定解除规则",
@@ -263,9 +267,41 @@ def build_civil_code_rules(provisions: list[ProvisionRecord]) -> RuleBuildResult
             _provision_ref(article_563),
             _provision_ref(article_565),
         ],
-        conditions=delay_after_demand_conditions,
+        conditions=[
+            condition_contract_exists,
+            RuleCondition(
+                condition_id=COND_MAIN_OBLIGATION_DELAYED,
+                label="主要债务迟延履行",
+                predicate="经营者是否已经迟延履行合同的主要服务义务",
+                evidence_types=["合同履行期限", "预约记录", "服务记录", "停业通知"],
+                source_span_ids=[span_563_item_3.span_id],
+            ),
+            RuleCondition(
+                condition_id=COND_DEMAND_DELIVERED,
+                label="已经催告履行",
+                predicate="用户是否已向经营者发出履行催告并能证明送达",
+                evidence_types=["催告函", "快递回执", "短信", "聊天记录"],
+                source_span_ids=[span_563_item_3.span_id],
+            ),
+            RuleCondition(
+                condition_id=COND_REASONABLE_PERIOD_EXPIRED,
+                label="合理期限届满后仍未履行",
+                predicate="催告给予的合理期限是否已届满且经营者仍未履行",
+                evidence_types=["催告内容", "送达时间", "届满后的服务记录"],
+                source_span_ids=[span_563_item_3.span_id],
+            ),
+        ],
         condition_groups=[
-            _all_conditions_group(RULE_DELAY_AFTER_DEMAND, delay_after_demand_conditions)
+            _condition_group(
+                "group.contract.termination.delay_after_demand.core",
+                "催告后迟延履行解除路径的核心条件",
+                [
+                    COND_CONTRACT_EXISTS,
+                    COND_MAIN_OBLIGATION_DELAYED,
+                    COND_DEMAND_DELIVERED,
+                    COND_REASONABLE_PERIOD_EXPIRED,
+                ],
+            )
         ],
         consequences=[
             LegalConsequence(
@@ -292,15 +328,18 @@ def build_civil_code_rules(provisions: list[ProvisionRecord]) -> RuleBuildResult
         ],
     )
 
-    restitution_conditions = [condition_contract_terminated]
     rule_restitution = RuleRecord(
         rule_id=RULE_TERMINATION_RESTITUTION,
         title="合同解除后的终止履行、恢复原状与补救规则",
         claim_types=["服务合同解除与返还"],
         provisions=[_provision_ref(article_565), _provision_ref(article_566)],
-        conditions=restitution_conditions,
+        conditions=[condition_contract_terminated],
         condition_groups=[
-            _all_conditions_group(RULE_TERMINATION_RESTITUTION, restitution_conditions)
+            _condition_group(
+                "group.contract.termination.effects.core",
+                "解除后果规则核心条件",
+                [COND_CONTRACT_TERMINATED],
+            )
         ],
         consequences=[
             LegalConsequence(
@@ -331,25 +370,6 @@ def build_civil_code_rules(provisions: list[ProvisionRecord]) -> RuleBuildResult
         span_566_unperformed,
         span_566_restitution,
     ]
-    service_refund_conditions = [
-        condition_contract_exists,
-        RuleCondition(
-            condition_id=COND_PAYMENT_MADE,
-            label="用户已经支付服务费用",
-            predicate="用户是否已为约定服务付款",
-            evidence_types=["付款凭证", "发票", "会员账户记录"],
-            source_span_ids=[span_566_restitution.span_id],
-        ),
-        RuleCondition(
-            condition_id=COND_UNPERFORMED_BALANCE,
-            label="存在未履行服务或未消费余额",
-            predicate="是否仍有尚未提供的服务或未消费费用",
-            evidence_types=["会员余额", "消费记录", "课时记录"],
-            source_span_ids=[span_566_unperformed.span_id, span_566_restitution.span_id],
-        ),
-        condition_performance_impossible,
-        condition_contract_terminated,
-    ]
     rule_service_refund = RuleRecord(
         rule_id=RULE_SERVICE_TERMINATION_REFUND,
         title="民法典下一般服务合同解除与费用补救框架",
@@ -360,21 +380,54 @@ def build_civil_code_rules(provisions: list[ProvisionRecord]) -> RuleBuildResult
             _provision_ref(article_565),
             _provision_ref(article_566),
         ],
-        conditions=service_refund_conditions,
-        condition_groups=[
-            _all_conditions_group(RULE_SERVICE_TERMINATION_REFUND, service_refund_conditions)
+        conditions=[
+            condition_contract_exists,
+            RuleCondition(
+                condition_id=COND_PAYMENT_MADE,
+                label="用户已经支付服务费用",
+                predicate="用户是否已为约定服务付款",
+                evidence_types=["付款凭证", "发票", "会员账户记录"],
+                source_span_ids=[span_566_restitution.span_id],
+            ),
+            RuleCondition(
+                condition_id=COND_UNPERFORMED_BALANCE,
+                label="存在未履行服务或未消费余额",
+                predicate="是否仍有尚未提供的服务或未消费费用",
+                evidence_types=["会员余额", "消费记录", "课时记录"],
+                source_span_ids=[span_566_unperformed.span_id, span_566_restitution.span_id],
+            ),
+            condition_performance_impossible,
+            condition_contract_terminated,
+            condition_alternative_performance,
         ],
-        exceptions=[exception_alternative_performance],
+        condition_groups=[
+            _condition_group(
+                "group.service.termination_refund.core",
+                "一般服务合同解除与费用补救核心条件",
+                [
+                    COND_CONTRACT_EXISTS,
+                    COND_PAYMENT_MADE,
+                    COND_UNPERFORMED_BALANCE,
+                    COND_PERFORMANCE_IMPOSSIBLE,
+                    COND_CONTRACT_TERMINATED,
+                ],
+            ),
+            _condition_group(
+                "group.service.termination_refund.diagnostic",
+                "用于案例比较的替代履行事实",
+                [COND_ALTERNATIVE_PERFORMANCE],
+                role=ConditionGroupRole.DIAGNOSTIC,
+            ),
+        ],
         consequences=[
             LegalConsequence(
                 consequence_id="consequence.service_termination_and_balance_remedy",
                 consequence_type="解除权与解除后的费用补救",
                 description=(
-                    "本规则仅覆盖第563条第一款第四项的违约致使合同目的不能实现路径："
-                    "解除权成立不表示合同自动解除，应依"
+                    "本规则仅覆盖第563条的一般解除路径：解除权成立不表示合同自动解除，应依"
                     "第565条主张并确定生效时点；未先通知而直接起诉或申请仲裁的，须经法院或"
-                    "仲裁机构确认解除主张。存在足以实现合同目的的替代履行时本路径受阻，该"
-                    "事实未知时不得输出确定解除结论。本规则不判断第564条所涉行使期限；有效"
+                    "仲裁机构确认解除主张。替代履行仅用于比较其是否影响合同目的实现，不能"
+                    "被独立当作法定阻却条件。本规则不判断第564条所涉行使期限；有效"
                     "解除后，可依第566条按履行情况和合同性质处理费用。本规则未纳入预付式"
                     "消费专项司法解释，不能单独判断迁店等专项解除事由或计算退款金额。"
                 ),

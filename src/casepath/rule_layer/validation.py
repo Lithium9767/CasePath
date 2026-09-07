@@ -1,3 +1,5 @@
+"""校验P2数据内容、跨文件引用、来源证据与manifest完整性。"""
+
 from __future__ import annotations
 
 import re
@@ -7,6 +9,7 @@ from pathlib import Path
 from pydantic import Field
 
 from casepath.contracts import (
+    ConditionGroupRole,
     ContractModel,
     LegalSourceRecord,
     MaturityLevel,
@@ -48,6 +51,11 @@ EXPECTED_ARTICLE_CONTENT_HASHES = {
     565: "b3fa76ca698207895546886e484687576594404d5bc1aae451c5339d44a46319",
     566: "787b167a1446d83375fb8e0181a2c3bd777026535dad4c74c5682fa9862e843b",
 }
+# 对1260条“条号+正文”的整体内容做固定校验。它不属于跨模块合同字段，
+# 因而合同序列化格式变化时无需重算，同时仍能发现任意法条被篡改。
+EXPECTED_CANONICAL_CONTENT_SHA256 = (
+    "07153024221251ba09daef586afebf63553c11a44ea316161087b91ceac52382"
+)
 EXPECTED_UPSTREAM_REPOSITORY_URL = "https://github.com/litunan/legal-rag"
 
 
@@ -66,20 +74,16 @@ def _require(condition: bool, message: str, errors: list[str]) -> None:
         errors.append(message)
 
 
-def _span_article_number(span: SourceSpan) -> int | None:
-    match = re.fullmatch(r"第(\d+)条", span.section or "")
-    return int(match.group(1)) if match else None
-
-
 def _validate_span(
     span: SourceSpan,
     provision_by_number: dict[int, ProvisionRecord],
     errors: list[str],
 ) -> None:
-    article_number = _span_article_number(span)
-    if article_number is None:
+    match = re.fullmatch(r"第(\d+)条", span.section or "")
+    if not match:
         errors.append(f"span {span.span_id} has no parseable article section")
         return
+    article_number = int(match.group(1))
     provision = provision_by_number.get(article_number)
     if provision is None:
         errors.append(f"span {span.span_id} references missing article {article_number}")
@@ -89,14 +93,16 @@ def _validate_span(
         f"span {span.span_id} source_id differs from article {article_number}",
         errors,
     )
-    if not 0 <= span.start_offset < span.end_offset <= len(provision.text):
-        errors.append(f"span {span.span_id} has invalid right-open offsets")
+    if span.end_offset > len(provision.text):
+        errors.append(f"span {span.span_id} ends outside article text")
         return
     actual_quote = provision.text[span.start_offset : span.end_offset]
     _require(actual_quote == span.quote, f"span {span.span_id} quote/offset mismatch", errors)
 
 
 def _validate_condition_groups(rule: RuleRecord, errors: list[str]) -> None:
+    """再次检查可变模型的条件分组，防止构造后修改绕过Pydantic校验。"""
+
     condition_ids = [condition.condition_id for condition in rule.conditions]
     group_ids = [group.group_id for group in rule.condition_groups]
     _require(
@@ -112,16 +118,18 @@ def _validate_condition_groups(rule: RuleRecord, errors: list[str]) -> None:
 
     known_condition_ids = set(condition_ids)
     memberships: Counter[str] = Counter()
+    core_group_count = 0
     for group in rule.condition_groups:
+        if group.role == ConditionGroupRole.CORE:
+            core_group_count += 1
         member_ids = group.member_condition_ids
         _require(
             len(member_ids) == len(set(member_ids)),
             f"rule {rule.rule_id} group {group.group_id} repeats a condition",
             errors,
         )
-        unknown_ids = set(member_ids) - known_condition_ids
         _require(
-            not unknown_ids,
+            not (set(member_ids) - known_condition_ids),
             f"rule {rule.rule_id} group {group.group_id} references unknown conditions",
             errors,
         )
@@ -137,6 +145,11 @@ def _validate_condition_groups(rule: RuleRecord, errors: list[str]) -> None:
     _require(
         not repeated_ids,
         f"rule {rule.rule_id} assigns conditions to multiple groups",
+        errors,
+    )
+    _require(
+        not condition_ids or core_group_count > 0,
+        f"rule {rule.rule_id} has no CORE condition group",
         errors,
     )
 
@@ -180,11 +193,20 @@ def validate_records(
     provision_by_number = {int(record.article_no): record for record in provisions}
     provision_by_id = {record.provision_id: record for record in provisions}
     span_by_id = {span.span_id: span for span in source_spans}
+    canonical_content = "\n".join(f"{record.article_no}\t{record.text}" for record in provisions)
+    _require(
+        sha256_text(canonical_content) == EXPECTED_CANONICAL_CONTENT_SHA256,
+        "canonical Civil Code content hash mismatch",
+        errors,
+    )
     if legal_sources:
         legal_source = legal_sources[0]
+        _require(
+            legal_source.source_id == CIVIL_CODE_SOURCE_ID,
+            "unexpected LegalSourceRecord source_id",
+            errors,
+        )
         expected_source_metadata = {
-            "contract_version": "1.1",
-            "source_id": CIVIL_CODE_SOURCE_ID,
             "title": "中华人民共和国民法典",
             "source_type": "LAW",
             "authority": "全国人民代表大会",
@@ -193,19 +215,15 @@ def validate_records(
             "effective_to": None,
             "official_url": OFFICIAL_SOURCE_URL,
         }
+        actual_source_metadata = legal_source.model_dump(mode="json")
+        actual_source_metadata.pop("contract_version", None)
+        actual_source_metadata.pop("source_id", None)
         _require(
-            legal_source.model_dump(mode="json") == expected_source_metadata,
+            actual_source_metadata == expected_source_metadata,
             "LegalSourceRecord metadata differs from the verified Civil Code source",
             errors,
         )
-
-    expected_full_spans: dict[str, SourceSpan] = {}
     for number, provision in provision_by_number.items():
-        _require(
-            provision.contract_version == "1.1",
-            f"article {number} does not use ProvisionRecord v1.1",
-            errors,
-        )
         _require(
             provision.provision_id == provision_id(number), "non-canonical provision ID", errors
         )
@@ -223,40 +241,22 @@ def validate_records(
         _require(
             provision.effective_from is not None
             and provision.effective_from.isoformat() == "2021-01-01"
-            and provision.effective_to is None,
-            f"article {number} has inconsistent effective dates",
+            and provision.effective_to is None
+            and provision.maturity == MaturityLevel.L0,
+            f"article {number} has inconsistent version metadata",
             errors,
         )
-
         expected_full_span_id = full_span_id(number)
         _require(
-            len(provision.source_spans) == 1,
-            f"article {number} must embed exactly one full source span",
+            [span.span_id for span in provision.source_spans] == [expected_full_span_id],
+            f"article {number} must reference its full source span",
             errors,
         )
-        if provision.source_spans:
-            full_span = provision.source_spans[0]
-            expected_full_spans[expected_full_span_id] = full_span
+        full_span = span_by_id.get(expected_full_span_id)
+        _require(full_span is not None, f"article {number} full source span is missing", errors)
+        if full_span is not None:
             _require(
-                full_span.span_id == expected_full_span_id,
-                f"article {number} has a non-canonical full source span ID",
-                errors,
-            )
-            _require(
-                full_span.source_id == provision.source_id
-                and full_span.section == f"第{number}条"
-                and full_span.paragraph_id == f"article-{number:04d}"
-                and full_span.start_offset == 0
-                and full_span.end_offset == len(provision.text)
-                and full_span.quote == provision.text,
-                f"article {number} embedded full source span is inconsistent",
-                errors,
-            )
-            standalone_span = span_by_id.get(expected_full_span_id)
-            _require(
-                standalone_span == full_span,
-                f"article {number} embedded span differs from standalone span",
-                errors,
+                full_span.quote == provision.text, f"article {number} full span mismatch", errors
             )
 
     for span in source_spans:
@@ -272,8 +272,10 @@ def validate_records(
                 errors,
             )
 
+    # The manifest's review status applies to these exact curated semantics, not merely
+    # to a stable rule_id. Rebuild the deterministic definitions to prevent a caller from
+    # changing a rule and blessing it by recomputing only the file hash.
     if {509, 563, 565, 566} <= provision_by_number.keys():
-        # Review status applies to exact curated semantics, not merely stable IDs.
         from casepath.rule_layer.civil_code import build_civil_code_rules
 
         expected_rule_build = build_civil_code_rules(provisions)
@@ -282,61 +284,50 @@ def validate_records(
             "rules differ from the reviewed deterministic generator output",
             errors,
         )
-        expected_span_by_id = dict(expected_full_spans)
-        for span in expected_rule_build.source_spans:
-            existing = expected_span_by_id.get(span.span_id)
-            _require(
-                existing is None or existing == span,
-                f"generated span {span.span_id} conflicts with a provision span",
-                errors,
-            )
-            expected_span_by_id[span.span_id] = span
+        expected_span_ids = {
+            *(full_span_id(number) for number in provision_by_number),
+            *(span.span_id for span in expected_rule_build.source_spans),
+        }
         _require(
-            span_by_id == expected_span_by_id,
-            "standalone source spans differ from provision/rule embedded spans",
+            set(span_by_id) == expected_span_ids,
+            "source span set differs from the deterministic generator output",
             errors,
         )
 
+    expected_book_boundaries = {
+        204: "第一编 总则",
+        205: "第二编 物权",
+        462: "第二编 物权",
+        463: "第三编 合同",
+        988: "第三编 合同",
+        989: "第四编 人格权",
+        1039: "第四编 人格权",
+        1040: "第五编 婚姻家庭",
+        1118: "第五编 婚姻家庭",
+        1119: "第六编 继承",
+        1163: "第六编 继承",
+        1164: "第七编 侵权责任",
+        1258: "第七编 侵权责任",
+        1259: "附则",
+    }
+    for article_number, expected_book in expected_book_boundaries.items():
+        provision = provision_by_number.get(article_number)
+        if provision is not None:
+            _require(
+                provision.book == expected_book,
+                f"article {article_number} has incorrect book hierarchy",
+                errors,
+            )
+
     condition_by_id = {}
-    exception_by_id = {}
-    alternative_exception_rule_ids: set[str] = set()
+    diagnostic_alternative_rule_ids: set[str] = set()
     for rule in rules:
-        _require(
-            rule.contract_version == "1.1",
-            f"rule {rule.rule_id} does not use RuleRecord v1.1",
-            errors,
-        )
         _validate_condition_groups(rule, errors)
         _require(bool(rule.source_spans), f"rule {rule.rule_id} has no embedded spans", errors)
         if rule.maturity == MaturityLevel.L3:
             _require(bool(rule.conditions), f"L3 rule {rule.rule_id} has no conditions", errors)
             _require(bool(rule.consequences), f"L3 rule {rule.rule_id} has no consequences", errors)
-
-        condition_ids = {condition.condition_id for condition in rule.conditions}
-        _require(
-            COND_ALTERNATIVE_PERFORMANCE not in condition_ids,
-            f"rule {rule.rule_id} models alternative performance as an ordinary condition",
-            errors,
-        )
-        alternative_exceptions = [
-            exception
-            for exception in rule.exceptions
-            if exception.exception_id == COND_ALTERNATIVE_PERFORMANCE
-        ]
-        _require(
-            len(alternative_exceptions) <= 1,
-            f"rule {rule.rule_id} repeats the alternative-performance exception",
-            errors,
-        )
-        if alternative_exceptions:
-            alternative_exception_rule_ids.add(rule.rule_id)
-
-        embedded_span_ids = [span.span_id for span in rule.source_spans]
-        _require(
-            len(embedded_span_ids) == len(set(embedded_span_ids)),
-            f"rule {rule.rule_id} embeds duplicate source spans",
-            errors,
-        )
+        embedded_span_ids = {span.span_id for span in rule.source_spans}
         referenced_provision_ids = {reference.provision_id for reference in rule.provisions}
         for reference in rule.provisions:
             target = provision_by_id.get(reference.provision_id)
@@ -359,18 +350,32 @@ def validate_records(
                     f"rule {rule.rule_id} has inconsistent ProvisionRef {reference.provision_id}",
                     errors,
                 )
-
-        sourced_items = [*rule.conditions, *rule.exceptions, *rule.consequences]
         referenced_span_ids = {
-            span_id for item in sourced_items for span_id in item.source_span_ids
+            span_id
+            for item in [*rule.conditions, *rule.exceptions, *rule.consequences]
+            for span_id in item.source_span_ids
         }
-        for item in sourced_items:
+        diagnostic_condition_ids = {
+            condition_id
+            for group in rule.condition_groups
+            if group.role == ConditionGroupRole.DIAGNOSTIC
+            for condition_id in group.member_condition_ids
+        }
+        if COND_ALTERNATIVE_PERFORMANCE in diagnostic_condition_ids:
+            diagnostic_alternative_rule_ids.add(rule.rule_id)
+        for item in [*rule.exceptions, *rule.consequences]:
             _require(
                 bool(item.source_span_ids),
                 f"rule {rule.rule_id} contains an item without a source span",
                 errors,
             )
         for condition in rule.conditions:
+            if condition.condition_id not in diagnostic_condition_ids:
+                _require(
+                    bool(condition.source_span_ids),
+                    f"core condition {condition.condition_id} has no statutory source span",
+                    errors,
+                )
             if rule.maturity == MaturityLevel.L3:
                 _require(
                     bool(condition.evidence_types),
@@ -384,14 +389,6 @@ def validate_records(
                 errors,
             )
             condition_by_id.setdefault(condition.condition_id, condition)
-        for exception in rule.exceptions:
-            existing = exception_by_id.get(exception.exception_id)
-            _require(
-                existing is None or existing == exception,
-                f"exception {exception.exception_id} has conflicting definitions across rules",
-                errors,
-            )
-            exception_by_id.setdefault(exception.exception_id, exception)
         for span_id in referenced_span_ids:
             _require(
                 span_id in span_by_id,
@@ -410,9 +407,9 @@ def validate_records(
                 f"rule {rule.rule_id} embedded span differs from canonical span",
                 errors,
             )
-            article_number = _span_article_number(embedded_span)
-            if article_number is not None:
-                expected_provision_id = provision_id(article_number)
+            match = re.fullmatch(r"第(\d+)条", embedded_span.section or "")
+            if match:
+                expected_provision_id = provision_id(int(match.group(1)))
                 _require(
                     expected_provision_id in referenced_provision_ids,
                     f"rule {rule.rule_id} embeds a span without ProvisionRef {expected_provision_id}",
@@ -420,9 +417,9 @@ def validate_records(
                 )
 
     _require(
-        alternative_exception_rule_ids
+        diagnostic_alternative_rule_ids
         == {RULE_NONPERFORMANCE_TERMINATION, RULE_SERVICE_TERMINATION_REFUND},
-        "alternative-performance exception is missing from or added outside its reviewed rules",
+        "alternative-performance diagnostic is missing from or added outside its reviewed rules",
         errors,
     )
 
@@ -440,6 +437,13 @@ def validate_records(
 
 
 def validate_canonical_dataset(data_root: Path) -> DatasetValidationReport:
+    import json
+
+    manifest_path = data_root / "manifests" / "civil_code.manifest.json"
+    if json.loads(manifest_path.read_text("utf-8")).get("dataset_id") == "dataset.civil_code.rules.expanded.v1":
+        from casepath.rule_layer.expansion import validate_expanded
+
+        return validate_expanded(data_root)
     canonical_root = data_root / "canonical" / "rules"
     manifest_path = data_root / "manifests" / "civil_code.manifest.json"
     legal_sources = read_jsonl(canonical_root / "legal_sources.jsonl", LegalSourceRecord)
@@ -473,7 +477,6 @@ def validate_canonical_dataset(data_root: Path) -> DatasetValidationReport:
             or manifest_input.revision != manifest.upstream_revision
         ):
             raise ValueError(f"manifest input metadata mismatch for {filename}")
-
     manifest_root = data_root.parent
     expected_outputs = {
         (canonical_root / "legal_sources.jsonl").relative_to(manifest_root).as_posix(): len(

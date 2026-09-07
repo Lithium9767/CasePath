@@ -2,6 +2,28 @@
 
 ## v1.3 P4工作流与可解释性合同（2026-09-05）
 
+### P3轻量案例合同（2026-09-06）
+
+- 新增`CaseIndexRecord`，版本固定为`"1.3"`，用于校验`cases_l1.jsonl`轻量案例索引。
+- `CaseRecord`仍只接受`"1.1"`。案例深度字段未发生版本化变更，因此不把
+  `CaseRecord.contract_version`搜索替换为`"1.3"`。
+- 司法解释、指导意见等非民法典引用不得写入`related_provision_ids`冒充民法典ID。
+
+### P2规则数据接入（2026-09-06）
+
+- `ProvisionRecord`继续读取v1.1数据，新建记录默认v1.3，并增加可选的编、分编、章、节
+  层级与`maturity`；每条法条仍把全文`SourceSpan`内嵌在`source_spans`中。
+- `RuleRecord`继续读取v1.1数据，新建记录默认v1.3；`ConditionGroup.role`区分参与
+  规则匹配的`CORE`组和只用于检索、比较、追问的`DIAGNOSTIC`组。
+- P2固定`legal-rag`上游提交与输入哈希，修复109条已知层级错位，发布1,260条法条、
+  1,268个原文片段和5条规则；合同记录以外的完整性信息由manifest与校验器维护。
+
+### 正式运行接入（2026-09-06）
+
+- 增加环境变量运行配置、Neo4j只读客户端、OpenAI兼容结构化LLM客户端、
+  `P4ComponentFactory`和`create_live_app()`装配入口。
+- `/v1/capabilities`动态探测Neo4j；LLM只报告配置状态，避免健康检查产生费用。
+
 ### 版本边界
 
 - `QueryState`、`RetrievalBundle`、`ExplanationPlan` 和 `WorkflowSnapshot` 的新建对象
