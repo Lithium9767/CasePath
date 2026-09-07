@@ -31,7 +31,7 @@ from casepath.ports.embedding import EmbeddingModel
 from casepath.workflow import WorkflowDependencies
 
 
-
+# 快捷构造工具函数
 def _capability(
     name: str,
     *,
@@ -50,6 +50,7 @@ def _capability(
 
 
 class HybridCypherP4Factory:
+    # 保存运行时需要的资源
     def __init__(
         self,
         catalog: RetrievalCatalog | None = None,
@@ -67,6 +68,7 @@ class HybridCypherP4Factory:
         self._vector_index = vector_index
         self._calibrator = calibrator
 
+    # 懒加载（需要时加载），catalog磁盘上的"规则/法条/案例"四个 jsonl 文件，定义再retrivel_catalog中
     def _catalog_or_load(self) -> RetrievalCatalog:
         if self._catalog is None:
             self._catalog = load_canonical_catalog(self._data_root)
@@ -78,6 +80,7 @@ class HybridCypherP4Factory:
         graph_gateway: LegalGraphGateway | None,
         language_model: StructuredLanguageModel | None,
     ) -> P4Components:
+        # 取得catalog
         catalog = self._catalog_or_load()
         search = MemoryHybridSearch(catalog)
         vector_enabled = self._embedding_model is not None

@@ -9,6 +9,7 @@ from pydantic import Field, field_validator
 from .base import ContractModel, Identifier
 from .enums import CapabilityMode, ErrorCode
 
+# 追问回答，错误回答，能力不用
 
 class AnswerRequest(ContractModel): # P5向P1提交的一次用户追问回答
     contract_version: Literal["1.1"] = "1.1" # 回答请求合同版本号，只接受1.1

@@ -21,6 +21,7 @@ Identifier = Annotated[str, StringConstraints(strip_whitespace=True, min_length=
 # 数值必须在0到1之间
 Confidence = Annotated[float, Field(ge=0.0, le=1.0)]
 
+# 原文片段，评分因素
 
 class ContractModel(BaseModel):
     """Base class for all values exchanged across team-owned modules."""

@@ -10,11 +10,13 @@ class EmbeddingSpec:
     revision: str
     dimensions: int
 
+    # 是 dataclass 的特殊方法。赋值后自动调用检查是否合法
     def __post_init__(self):
         if not self.model.strip() or not self.revision.strip() or self.dimensions <= 0:
             raise ValueError("embedding 模型、版本和维度必须有效")
 
 
+# 检查模板，当后续函数调用时，必须规定提供spec类和embed函数
 class EmbeddingModel(Protocol):
     spec: EmbeddingSpec
 
