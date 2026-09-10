@@ -1,6 +1,6 @@
 """P4 实现区：用户事实到规则条件的语义投影。
 
-词法只生成候选。区分意愿、事实、否定和条件句。LLM 判定允许替换词法或标记冲突。
+有模型时直接执行受约束 LLM 映射；无模型时才使用独立词法基线。
 quoted_span 必须是用户原文子串。同一事实对同一条件只保留一条证据。
 """
 
@@ -91,6 +91,7 @@ class ConditionLinkBatch(ContractModel):
 
 
 def _fact_from_query(state: QueryState) -> list[UserFact]:
+    # 首轮先把整个原问题登记为来源轮次 0 的事实容器，并非这里已做了逐句事实抽取。
     if any(item.source_turn == 0 for item in state.user_facts):
         return list(state.user_facts)
     return [
@@ -111,6 +112,8 @@ def _longest(text: str, phrases: tuple[str, ...]) -> str | None:
 
 
 def _lexical_candidates(fact: UserFact, condition_id: str) -> list[ConditionEvidence]:
+    # 低成本词法候选：先排除意愿/假设，再匹配该条件自己的肯定与否定短语。
+    # 没有该条件的词法模板就不输出，不拿一个通用“有”字认定所有条件满足。
     # 句号/分号才切断假设范围，避免把“如果……，那么……”后半句当事实。
     sentences = re.split(r"[。！？!?；;\n]+", fact.text)
     factual = [text for text in sentences if not _is_intent_or_conditional(text)]
@@ -161,6 +164,8 @@ def _aggregate(
     supports = [item for item in evidence if item.relation == "SUPPORTS"]
     opposes = [item for item in evidence if item.relation == "OPPOSES"]
     unique = list({item.fact_id: item for item in evidence}.values())
+    # 支持和反对并存标 CONFLICTING；只有一侧则取其状态；仅限定信息仍为 UNKNOWN。
+    # 当前取最高单条置信度而非把分数相加，避免重复证据越多看起来就越可信。
     if conflicting or (supports and opposes):
         status = ConditionStatus.CONFLICTING
         confidence = min(0.7, max((item.confidence for item in unique), default=0.5))
@@ -190,7 +195,7 @@ def _aggregate(
         last_updated_turn=0,
     )
 
-
+# 条件投影
 class SemanticConditionProjector:
     def __init__(
         self,
@@ -200,11 +205,17 @@ class SemanticConditionProjector:
         calibrator=None,
     ) -> None:
         self.catalog = catalog
+        # 使用LLM进行条件投影
         self.language_model = language_model
+        # 默认不使用校准器
         self.calibrator = calibrator
 
+    # 拿到 A 召回的规则，找出这些规则要检查的条件，再根据用户说过的话，为每个条件生成“状态＋依据”。
     def project(self, state: QueryState, rule_refs: list[ScoredReference]) -> QueryState:
+        # 【B 阅读顺序】限定条件 ID → 整理原话 → LLM 或词法映射 → 聚合为条件状态。
+        # 返回新的 QueryState 给 C，不在此检索案例或输出法律结论。
         allowed: list[str] = []
+        # 从前面召回到的规则 rule_refs 里，把这些规则对应的 condition_id 全部收集出来，然后去重。
         for ref in rule_refs:
             rule = self.catalog.rules.get(ref.object_id)
             if rule is not None:
@@ -212,6 +223,9 @@ class SemanticConditionProjector:
         allowed = list(dict.fromkeys(allowed))
         # 没有相关规则不代表应把整个知识库的条件灌给用户。
         # 历史对话引用的条件必须保留，不能因本轮规则排序变化而断链。
+        #     本轮待检查条件
+        # = 新召回规则的条件
+        # ∪ 历史已经记录、且当前目录仍存在的条件
         allowed = list(
             dict.fromkeys(
                 [
@@ -224,23 +238,32 @@ class SemanticConditionProjector:
                 ]
             )
         )
+        # 当前实现会在需要时把本轮用户问题包装成用户事实
         facts = _fact_from_query(state)
+        # 把已有条件状态变成字典，方便后面按条件 ID 查找：
         existing = {item.condition_id: item for item in state.condition_states}
+        # 为本轮创建空容器
         links: dict[str, dict[str, ConditionEvidence]] = {key: {} for key in allowed}
-        for fact in facts:
-            for condition_id in allowed:
-                for evidence in _lexical_candidates(fact, condition_id):
-                    links[condition_id][fact.fact_id] = evidence
+        # 两层字典：links[条件ID][事实ID] = 一条映射证据。
+        # 因而一个事实可支持多个条件，一个条件也能引用多条事实。
         conflicts: set[str] = set()
-        reasons = ["词法仅生成候选；无LLM时采用保守否定/意愿过滤"]
         if self.language_model is not None:
+            # Live 从空证据表开始：模型未输出或未通过校验的映射不能靠词法补成满足。
+            # 模型失败继续抛错，不隐式回退词法；历史已解释回答在下方独立保留。
             self._merge_llm(state, facts, allowed, links, conflicts)
-            reasons = ["词法候选经LLM判定替换或标记冲突"]
+            reasons = ["LLM直接映射，经条件ID、事实归属及原文引句校验"]
             reasons.append(
                 "LLM分数经独立标注集校准:" + self.calibrator.dataset_id
                 if self.calibrator
                 else "LLM分数未校准，不作为正确率解释"
             )
+        else:
+            # 未注入模型时才运行词法基线，与正式 LLM 映射互斥。
+            for fact in facts:
+                for condition_id in allowed:
+                    for evidence in _lexical_candidates(fact, condition_id):
+                        links[condition_id][fact.fact_id] = evidence
+            reasons = ["无LLM：独立词法基线，采用保守否定/意愿过滤"]
         states = []
         for condition_id in allowed:
             prior = existing.get(condition_id)
@@ -257,6 +280,7 @@ class SemanticConditionProjector:
                     conflicting=condition_id in conflicts,
                 )
                 # 同一句原话重复出现不提高置信度；不同事实相反才构成事实冲突。
+                # 聚合条件
                 aggregated.last_updated_turn = max(
                     (f.source_turn for f in facts if f.fact_id in aggregated.supporting_fact_ids),
                     default=0,
@@ -272,11 +296,13 @@ class SemanticConditionProjector:
                     )
                 )
         claims = state.candidate_claims or self._guess_claims(state.initial_query)
+        # 返回更新后的 QueryState
         return state.model_copy(
             update={"user_facts": facts, "candidate_claims": claims, "condition_states": states}
         )
 
     def _guess_claims(self, query: str) -> list[CandidateClaim]:
+        # 当前是领域关键词启发式，不是全法域请求权分类模型；已有 candidate_claims 时不覆盖。
         if any(cue in query for cue in _CLAIM_CUES):
             return [
                 CandidateClaim(
@@ -344,6 +370,7 @@ class SemanticConditionProjector:
         except Exception as exc:
             raise LanguageModelUnavailable("条件映射模型调用失败") from exc
         allowed_set = set(allowed)
+        # 模型返回 JSON 后还要检查 ID 白名单和引句的真实归属，格式合规不等于证据合规。
         fact_texts = {item.fact_id: item.text for item in facts}
         for item in draft.links:
             if item.condition_id not in allowed_set or not item.quoted_span.strip():
@@ -354,6 +381,7 @@ class SemanticConditionProjector:
                 if item.quoted_span in text and (item.fact_id is None or item.fact_id == fact_id)
             ]
             owner = owners[0] if len(owners) == 1 else None
+            # 必须能唯一定位到提供的原话；找不到或归属有歧义就跳过该映射。
             if owner is None or item.relation not in {"SUPPORTS", "OPPOSES", "QUALIFIES"}:
                 continue
             llm_evidence = ConditionEvidence(
@@ -366,5 +394,5 @@ class SemanticConditionProjector:
                 ),
                 reason=item.rationale[:80] or "受约束LLM映射",
             )
-            # LLM 对同一事实的纠正替换词法候选，不把模型之间分歧当成用户事实矛盾。
+            # 仅写入通过校验的模型映射；同一事实对同一条件只保留一条证据。
             links[item.condition_id][owner] = llm_evidence

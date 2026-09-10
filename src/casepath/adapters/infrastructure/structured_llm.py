@@ -21,6 +21,8 @@ ContractT = TypeVar("ContractT", bound=ContractModel)
 
 
 class OpenAICompatibleStructuredLanguageModel:
+    # 【调用链】bootstrap._build_language_model → connect → cls(...) → __init__。
+    # 本类处理模型协议和结构校验；法律提示词、证据选择仍由 P4 调用方负责。
     def __init__(
         self,
         client: Any,
@@ -58,6 +60,8 @@ class OpenAICompatibleStructuredLanguageModel:
             from openai import OpenAI
 
             client = OpenAI(
+                # 创建兼容协议的 SDK 客户端，不是加载模型权重，也不会在这里生成回答。
+                # 实际供应商由 base_url 决定，使用该 SDK 不代表一定调用 OpenAI 的模型。
                 api_key=api_key,
                 base_url=base_url,
                 timeout=timeout_seconds,
@@ -66,6 +70,7 @@ class OpenAICompatibleStructuredLanguageModel:
         except Exception as exc:
             raise LanguageModelUnavailable("无法初始化结构化语言模型客户端") from exc
         return cls(
+            # 包装 SDK 客户端，同时记录默认模型和输出策略，交给 P4 重复使用。
             client,
             model=model,
             default_timeout_seconds=timeout_seconds,
@@ -85,7 +90,11 @@ class OpenAICompatibleStructuredLanguageModel:
         response_model: type[ContractT],
         timeout_seconds: float | None = None,
         stage: str = "default",
+        _retry_token_limit: int | None = None,
     ) -> ContractT:
+        # 【在线模型入口】规则相关性筛选、条件投影、完整解释等阶段按需调用本方法。
+        # response_model 是调用方要求的 Pydantic 类型；返回该类型实例，不是原始文本。
+        # stage 用于选择阶段配置，不能理解为每次都依次执行所有模型阶段。
         policy = self._stage_policies.get(stage)
         timeout = (
             (policy.timeout_seconds if policy else self._default_timeout_seconds)
@@ -93,10 +102,14 @@ class OpenAICompatibleStructuredLanguageModel:
             else timeout_seconds
         )
         limit = policy.max_tokens if policy else self._max_completion_tokens
+        if _retry_token_limit is not None:
+            limit = _retry_token_limit
         if timeout <= 0:
             raise ValueError("timeout_seconds must be positive")
         schema = response_model.model_json_schema()
+        # 从合同生成输出结构要求；格式正确不等于法律内容和引用语义已经正确。
         if self._output_mode == StructuredOutputMode.JSON_SCHEMA:
+            # 供应商支持时使用结构化输出参数；否则下面通过 JSON 模式与提示词约束。
             response_format: dict[str, object] = {
                 "type": "json_schema",
                 "json_schema": {
@@ -123,6 +136,8 @@ class OpenAICompatibleStructuredLanguageModel:
         started = time.monotonic()
         try:
             completion = client.chat.completions.create(
+                # 【真正的网络生成请求】直到这里才把 system/user 提示词发给模型服务。
+                # user_prompt 中的证据包由 P4 组织；本客户端不查询 Neo4j，也不自行检索。
                 model=self._model,
                 messages=[
                     {"role": "system", "content": effective_system_prompt},
@@ -143,6 +158,19 @@ class OpenAICompatibleStructuredLanguageModel:
         try:
             # 不把截断的 JSON 当成随机解析错误；不记录正文、密钥或供应商错误原文。
             if getattr(completion.choices[0], "finish_reason", None) == "length":
+                # 多轮条件映射可能随事实增长超出首次预算。仅明确截断时扩容一次，
+                # 不接受残缺JSON，不对网络/其他校验错误盲目重试，上限8192 tokens。
+                if stage == "projection" and _retry_token_limit is None and limit < 8192:
+                    expanded_limit = min(limit * 2, 8192)
+                    logging.getLogger("uvicorn.error").warning(
+                        "LLM stage=projection reason=output_truncated retry_tokens=%s",
+                        expanded_limit,
+                    )
+                    return self.generate_structured(
+                        system_prompt=system_prompt, user_prompt=user_prompt,
+                        response_model=response_model, timeout_seconds=timeout_seconds,
+                        stage=stage, _retry_token_limit=expanded_limit,
+                    )
                 raise InvalidComponentOutput("结构化模型输出达到长度上限，请调整阶段预算")
             usage = getattr(completion, "usage", None)
             logging.getLogger(__name__).info(
@@ -156,10 +184,12 @@ class OpenAICompatibleStructuredLanguageModel:
             if not isinstance(content, str) or not content.strip():
                 raise ValueError("model returned empty structured content")
             return response_model.model_validate_json(content)
+            # 返回前再次按合同校验 JSON；不符合结构抛异常，不把错误文本当作成功结果。
         except (ValidationError, ValueError, AttributeError, IndexError, TypeError) as exc:
             raise InvalidComponentOutput("结构化语言模型输出不符合目标合同") from exc
 
     def close(self) -> None:
+        # 应用关闭时释放 SDK 的 HTTP 资源；不是在每次生成后销毁客户端。
         if not self._closed:
             close = getattr(self._client, "close", None)
             if callable(close):

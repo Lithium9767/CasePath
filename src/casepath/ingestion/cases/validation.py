@@ -185,7 +185,7 @@ def validate_records(
         status="passed",
     )
 
-
+# 校验案例数据合法性
 def validate_canonical_cases(data_root: Path) -> CaseDatasetValidationReport:
     cases_root = data_root / "canonical" / "cases"
     rules_root = data_root / "canonical" / "rules"

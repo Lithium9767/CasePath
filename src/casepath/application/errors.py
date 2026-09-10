@@ -31,3 +31,7 @@ class GraphUnavailable(Exception):
 
 class LanguageModelUnavailable(Exception):
     """结构化LLM调用超时、失败或没有配置。"""
+
+
+class QuestionGenerationFailed(Exception):
+    """模型可达，但有限次尝试仍未生成可展示的追问；不代表无需澄清。"""

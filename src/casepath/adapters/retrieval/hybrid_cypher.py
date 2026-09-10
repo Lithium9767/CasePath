@@ -58,7 +58,10 @@ class HybridCypherSettings:
     """P4 内部参数，不是公共 API 合同；参数需经开发集检验。"""
 
     rule_top_k: int = 10
-    case_pool_size: int = 100
+    # 三阶段预算独立：每路先召回，再截取重排池，最后按角色少量输出。
+    case_recall_top_k: int = 30
+    case_rerank_pool_size: int = 20
+    case_role_top_k: int = 3
     per_condition_limit: int = 30
     rrf_k: int = 60
     fulltext_weight: float = 1.0
@@ -66,12 +69,13 @@ class HybridCypherSettings:
     claim_weight: float = 0.8
     graph_weight: float = 1.0
     cites_weight: float = 0.5
-    compatibility_weight: float = 0.35
 
     def __post_init__(self) -> None:
         numeric = [
             self.rule_top_k,
-            self.case_pool_size,
+            self.case_recall_top_k,
+            self.case_rerank_pool_size,
+            self.case_role_top_k,
             self.per_condition_limit,
             self.rrf_k,
         ]
@@ -102,6 +106,7 @@ class HybridCandidateSearch(Protocol):
 
 
 def _query_text(state: QueryState) -> str:
+    # 把初始问题、累计原话和候选诉求拼成检索文本；这里不生成新的法律事实。
     parts = [state.initial_query]
     parts.extend(item.text for item in state.user_facts)
     parts.extend(item.claim_type for item in state.candidate_claims)
@@ -110,6 +115,7 @@ def _query_text(state: QueryState) -> str:
 
 
 def _claim_rank(state: QueryState, catalog: RetrievalCatalog) -> list[str]:
+    # 当前是 claim_types 在问题/诉求文本中的包含匹配，按命中个数排序，并非训练的分类模型。
     claims = [item.claim_type for item in state.candidate_claims] + [state.initial_query]
     blob = "\n".join(claims)
     scored: list[tuple[int, str]] = []
@@ -135,6 +141,7 @@ def _valid_path(nodes: tuple[str, ...] | list[str], edges: tuple[str, ...] | lis
     return len(nodes) >= 2 and len(edges) == len(nodes) - 1 and all(nodes) and all(edges)
 
 
+# 先从多个通道召回候选，再用图关系扩展，最后统一融合、重排。
 class HybridCypherRuleRetriever:
     """模块 A：全文＋向量规则召回，叠加请求权匹配和规则图扩展。"""
 
@@ -156,14 +163,22 @@ class HybridCypherRuleRetriever:
         )
 
     def retrieve(self, state: QueryState) -> list[ScoredReference]:
+        # 【A 阅读顺序】搜索规则 → 用结果作图扩展种子 → 各通道排名融合 → 返回 top_k 引用。
+        # catalog 存规则正文等内容；ScoredReference 主要携带 ID、得分及证据/路径引用。
+        # 拿去文本内容
         context = self.catalog.context()
+        # 绑定这轮请求
         bind_context(context)
+        # 固定本轮发布版本，供后续 C 读取；不是把用户上下文写进共享 retriever 实例。
         if context.release_id != self.catalog.release_id:
             raise RetrieverUnavailable("规则索引与本轮图发布不一致")
+        # 从query中提取文本
         query = _query_text(state)
+        # 空拒绝
         if not query.strip():
             raise RetrieverUnavailable("查询文本为空，拒绝返回空成功")
         try:
+            # 第一通道：全文 / 向量搜索 BM25 + 向量余弦
             fulltext = self.search.search(
                 query,
                 target="rule",
@@ -172,10 +187,15 @@ class HybridCypherRuleRetriever:
             )
         except Exception as exc:
             raise RetrieverUnavailable("规则全文通道不可用") from exc
+        # 请求权召回
         claim_ids = _claim_rank(state, self.catalog)
+        # fulltext 是历史变量名：注入 VectorHybridSearch 时里面同时有 BM25 和向量结果。
+        # 作为图搜索种子
         seed_ids = list(dict.fromkeys([item.object_id for item in fulltext] + claim_ids))
         neighbors = self.navigator.neighbor_rules(context, seed_ids)
+        # 图扩展围绕已命中的种子找共享条件的规则，不从全图任意传播，也不使用 PageRank。
         graph_ids = list(dict.fromkeys(item.rule_id for item in neighbors))
+        # 整理成四个召回通道
         ranked = {
             "bm25": [
                 item.object_id for item in fulltext if "vector" not in item.retrieval_channels
@@ -187,15 +207,16 @@ class HybridCypherRuleRetriever:
         fused = weighted_rrf(
             ranked,
             weights={
-                "bm25": self.settings.fulltext_weight,
-                "vector": self.settings.vector_weight,
-                "claim": self.settings.claim_weight,
-                # 邻接通道没有查询相关度，不让按 ID 排序的首位与直接命中平权。
-                "graph": 0.25 * self.settings.graph_weight,
+                "bm25": self.settings.fulltext_weight, # 1.0
+                "vector": self.settings.vector_weight, # 1.0
+                "claim": self.settings.claim_weight, # 0.8
+                # 邻接通道没有查询相关度，不让按 ID 排序的首位与直接命中平权。所有乘以0.25
+                "graph": 0.25 * self.settings.graph_weight, # 1.0
             },
             k=self.settings.rrf_k,
         )
         raw = _raw_scores(fulltext)
+        # 排序用融合分；原始 BM25/余弦分另存为解释字段，不能当成同一量纲直接相加。
         neighbor_paths: dict[str, list[RetrievalPath]] = defaultdict(list)
         for hit in neighbors:
             if not _valid_path(hit.path_nodes, hit.path_edges):
@@ -271,33 +292,48 @@ def _condition_roles(catalog: RetrievalCatalog, condition_id: str, rule_ids: set
     return roles
 
 
-def _compatibility(
+@dataclass(frozen=True)
+class CaseComparison:
+    """同一条件空间上的比较记录，不将差异转换为负分。"""
+
+    same: tuple[str, ...]
+    different: tuple[str, ...]
+    unknown: tuple[str, ...]
+    core_agree: int
+    core_conflict: int
+
+    @property
+    def coverage(self) -> float:
+        total = len(self.same) + len(self.different) + len(self.unknown)
+        return (len(self.same) + len(self.different)) / total if total else 0.0
+
+
+def _compare_conditions(
     case: CaseDocument,
     known: dict[str, ConditionStatus],
     catalog: RetrievalCatalog,
     rule_ids: set[str],
-) -> tuple[float, list[str]]:
-    """UNKNOWN / NOT_APPLICABLE 不按否定过滤；DIAGNOSTIC 不满足不排除核心规则关联案例。"""
-
+) -> CaseComparison:
+    # B 提供用户状态，P3 提供案例认定；只比较候选规则涉及的条件。
+    allowed = {key for rid in rule_ids if rid in catalog.rules
+               for key in catalog.rules[rid].condition_ids}
+    statuses: dict[str, set[ConditionStatus]] = {}
+    for item in case.assessments:
+        if item.span_ids or item.finding_ids:
+            statuses.setdefault(item.condition_id, set()).add(item.status)
+    same, different, unknown = [], [], []
+    for key in sorted(allowed):
+        user = known.get(key, ConditionStatus.UNKNOWN)
+        values = statuses.get(key, set())
+        other = next(iter(values)) if len(values) == 1 else ConditionStatus.UNKNOWN
+        if user not in _DECISIVE or other not in _DECISIVE:
+            unknown.append(key)
+        elif user == other:
+            same.append(key)
+        else:
+            different.append(key)
     agree, conflict = _core_group_comparison(case, known, catalog, rule_ids)
-    score = float(agree - conflict)
-    reasons: list[str] = []
-    by_condition = {item.condition_id: item for item in case.assessments}
-    for condition_id, status in known.items():
-        if status not in _DECISIVE:
-            continue
-        assessment = by_condition.get(condition_id)
-        if assessment is None or assessment.status not in _DECISIVE:
-            continue
-        roles = _condition_roles(catalog, condition_id, rule_ids)
-        diagnostic_only = roles and all(role == "DIAGNOSTIC" for role in roles)
-        if assessment.status == status and diagnostic_only:
-            score += 0.15
-            reasons.append(f"{condition_id} 诊断条件与用户状态一致")
-        elif diagnostic_only:
-            reasons.append(f"{condition_id} 为 DIAGNOSTIC，不一致不排除")
-    reasons.append(f"CORE 条件组：满足一致 {agree}，明确冲突 {conflict}")
-    return score, reasons
+    return CaseComparison(tuple(same), tuple(different), tuple(unknown), agree, conflict)
 
 
 def _core_group_comparison(
@@ -308,6 +344,7 @@ def _core_group_comparison(
 ) -> tuple[int, int]:
     """先按组求值再比较，不将 ANY 中非决定性的单项差异计为冲突。"""
     case_states: dict[str, ConditionStatus] = {}
+    # 同一条件若出现不同案例认定，保留冲突；没有认定/原文引用的条目不进入组比较。
     for item in case.assessments:
         if not (item.span_ids or item.finding_ids):
             continue
@@ -326,6 +363,8 @@ def _core_group_comparison(
             if group.role != "CORE":
                 continue
             user_value = group_truth(
+                # 必须先算 ALL/ANY 的组结果。例如 ANY 中一项否定、另一项满足，整组仍为真。
+                # group_truth 返回 True/False/None，None 表示不足以判断，不是 False。
                 group.operator,
                 [known.get(key, ConditionStatus.UNKNOWN) for key in group.member_ids],
             )
@@ -346,6 +385,7 @@ def _assign_role(
     rule_ids: set[str],
     catalog: RetrievalCatalog,
     user_claims: set[str],
+    comparison: CaseComparison | None = None,
 ) -> tuple[str | None, list[str], list[str]]:
     """支持/限制必须结合目标规则、请求、决定性条件差异和理由依据。
 
@@ -353,6 +393,7 @@ def _assign_role(
     """
 
     if not case.assessments:
+        # 角色判断比召回更严格：文本相似但没有条件认定时，允许召回，但角色保持未定。
         return None, [], []
     case_claims = {item.claim_type for item in case.claims}
     if user_claims and case_claims:
@@ -360,6 +401,7 @@ def _assign_role(
     else:
         claim_aligned = not user_claims
     applied = set(case.applied_rule_ids) & rule_ids
+    # APPLIES 是裁判说理实际适用；INVOKES 只是请求引用，后者不能单独满足支持角色门槛。
     invoked = set(case.invoked_rule_ids) & rule_ids
     rule_linked = bool(applied or invoked)
     aligned_claim_ids = {
@@ -402,8 +444,11 @@ def _assign_role(
             reasons.append(f"{assessment.condition_id} 核心成员状态不同，须按条件组判断")
             spans.extend(assessment.span_ids)
     # 单项比较只保留证据说明，角色的决定性差异由同一套条件组语义计算。
-    core_agree, core_conflict = _core_group_comparison(case, known, catalog, rule_ids)
+    comparison = comparison or _compare_conditions(case, known, catalog, rule_ids)
+    core_agree, core_conflict = comparison.core_agree, comparison.core_conflict
     if core_agree and core_conflict and (rule_linked or claim_aligned) and spans:
+        # 角色是针对当前用户/候选规则的比较结果，不是案例永久的“好案/坏案”标签。
+        # 此处按顺序判定：核心既一致又冲突 → 严格支持 → 核心限制 → 诊断边界 → 未定。
         return "boundary", reasons + ["核心条件组同时存在一致与冲突"], spans
     if (
         rule_linked
@@ -447,19 +492,23 @@ class HybridCypherCaseRetriever:
         state: QueryState,
         rule_refs: list[ScoredReference],
     ) -> RetrievalBundle:
+        # 【C 阅读顺序】文本/向量与三种图路径独立取候选 → 并集融合 → 条件相容性重排。
+        # 最后才分配支持/限制/边界角色；分数高不代表一定有资格进入公共角色列表。
         context = require_context()
         if context.release_id != self.catalog.release_id:
             raise RetrieverUnavailable("案例索引与本轮图发布不一致")
+        # 把 A 阶段找到的规则 ID 拿出来。
         rule_ids = [item.object_id for item in rule_refs if item.object_id in self.catalog.rules]
         if not rule_ids:
             raise RetrieverUnavailable("没有可检索的候选规则，拒绝空成功")
         query = _query_text(state)
         try:
+            # 然后先做文本/向量案例搜索：
             hybrid = self.search.search(
                 query,
                 target="case",
                 context=context,
-                top_k=self.settings.case_pool_size,
+                top_k=self.settings.case_recall_top_k,
             )
         except Exception as exc:
             raise RetrieverUnavailable("案例全文通道不可用") from exc
@@ -468,6 +517,8 @@ class HybridCypherCaseRetriever:
             condition_ids.extend(self.catalog.rules[rule_id].condition_ids)
         condition_ids = list(dict.fromkeys(condition_ids))
         graph_hits = self.navigator.cases_by_conditions(context, condition_ids)
+        # 找同一条件的案例认定；下两路分别找裁判适用关系和相关法条引用。
+        # 这些图候选不要求先被 BM25 命中，因此能补回词面不相似的案例。
         apply_hits = self.navigator.cases_applying_rules(context, rule_ids)
         cite_hits = self.navigator.cases_citing_provisions(context, rule_ids)
         graph_ids = list(dict.fromkeys(item.case_id for item in graph_hits))
@@ -485,14 +536,15 @@ class HybridCypherCaseRetriever:
         fused = weighted_rrf(
             ranked,
             weights={
-                "bm25": self.settings.fulltext_weight,
-                "graph": self.settings.graph_weight,
-                "applies": 0.6,
-                "vector": self.settings.vector_weight,
-                "cites": self.settings.cites_weight,
+                "bm25": self.settings.fulltext_weight, # 1.0
+                "graph": self.settings.graph_weight, # 1.0
+                "applies": 0.6, # 辅助关联
+                "vector": self.settings.vector_weight, # 1.0
+                "cites": self.settings.cites_weight, # 辅助关联 0.5
             },
             k=self.settings.rrf_k,
         )
+
         known = _known_states(state)
         user_claims = {item.claim_type for item in state.candidate_claims}
         assessments_by_case: dict[str, list[CaseAssessment]] = defaultdict(list)
@@ -510,16 +562,32 @@ class HybridCypherCaseRetriever:
                     )
                 )
         scored_cases: list[tuple[float, str, list[str], list[ScoreComponent]]] = []
+        comparisons = {}
+        roles_by_case = {}
         raw_case_scores = _raw_scores(hybrid)
         for case_id, rrf_score in fused.items():
             case = self.catalog.cases.get(case_id)
             if case is None:
                 continue
-            compat, reasons = _compatibility(case, known, self.catalog, set(rule_ids))
-            final = rrf_score + self.settings.compatibility_weight * compat
+            comparison = _compare_conditions(case, known, self.catalog, set(rule_ids))
+            comparisons[case_id] = comparison
+            # 在截断前判断所有已召回候选的角色；不是仅因条件不同就认定限制案例。
+            roles_by_case[case_id] = _assign_role(
+                case, known, set(rule_ids), self.catalog, user_claims, comparison,
+            )
+            final = rrf_score
+            reasons = [f"条件一致：{list(comparison.same)}",
+                       f"条件差异：{list(comparison.different)}",
+                       f"未知或证据不足：{list(comparison.unknown)}"]
+            # 公共 score 保留检索相关性，不再混入正负相容性；角色内部按覆盖度重排。
             components = [
                 ScoreComponent(name="rrf", value=rrf_score, explanation="混合与图通道RRF"),
-                ScoreComponent(name="compatibility", value=compat, explanation="已知条件相容性"),
+                ScoreComponent(name="comparison_coverage", value=comparison.coverage,
+                               explanation="明确且有证据的共同条件占比，非概率"),
+                ScoreComponent(name="same_conditions", value=len(comparison.same),
+                               explanation="明确一致的条件数"),
+                ScoreComponent(name="different_conditions", value=len(comparison.different),
+                               explanation="明确不同的条件数，不作为负分"),
             ]
             for channel in ("bm25", "vector"):
                 if (case_id, channel) in raw_case_scores:
@@ -532,7 +600,28 @@ class HybridCypherCaseRetriever:
                     )
             scored_cases.append((final, case_id, reasons, components))
         scored_cases.sort(key=lambda item: (-item[0], item[1]))
-        pool = scored_cases[: self.settings.case_pool_size]
+        # 各角色独立排序，再轮流保留，防止相近案例占满整个20件池。
+        # 不推断“差异导致判决”：这里只复用原有角色资格，不增加因果证据声明。
+        groups = {role: [] for role in ("support", "limiting", "boundary")}
+        for row in scored_cases:
+            role = roles_by_case[row[1]][0]
+            if role is not None:
+                groups[role].append(row)
+        for rows in groups.values():
+            rows.sort(key=lambda row: (-comparisons[row[1]].coverage, -row[0], row[1]))
+        pool = []
+        for index in range(max((len(rows) for rows in groups.values()), default=0)):
+            for rows in groups.values():
+                if index < len(rows) and len(pool) < self.settings.case_rerank_pool_size:
+                    pool.append(rows[index])
+        selected_ids = {row[1] for row in pool}
+        # 有剩余容量才保留未定候选供追踪，不能挤掉已具备比较角色的案例。
+        for row in scored_cases:
+            if len(pool) >= self.settings.case_rerank_pool_size:
+                break
+            if row[1] not in selected_ids:
+                pool.append(row)
+                selected_ids.add(row[1])
         support: list[ScoredReference] = []
         limiting: list[ScoredReference] = []
         boundary: list[ScoredReference] = []
@@ -544,9 +633,7 @@ class HybridCypherCaseRetriever:
             if case_id in used or case_id in undetermined:
                 continue
             case = self.catalog.cases[case_id]
-            role, role_reasons, spans = _assign_role(
-                case, known, set(rule_ids), self.catalog, user_claims
-            )
+            role, role_reasons, spans = roles_by_case[case_id]
             channels = [name for name, ids in ranked.items() if case_id in ids]
             channels_by_case[case_id] = tuple(channels)
             graph_paths = []
@@ -561,9 +648,15 @@ class HybridCypherCaseRetriever:
                         )
                     )
             if role is None:
+                # 仍记录在本轮融合池/未定集合，不强行凑三类案例；公共输出暂不包含该引用。
                 undetermined.add(case_id)
                 continue
             used.add(case_id)
+            # 先通过角色资格判定，再限制每类数量；不把溢出的支持案例改标成其他角色。
+            # 每类在池中的相对顺序按比较覆盖度、RRF及稳定ID确定。
+            role_refs = {"support": support, "limiting": limiting, "boundary": boundary}[role]
+            if len(role_refs) >= self.settings.case_role_top_k:
+                continue
             ref = scored_reference(
                 case_id,
                 score,
@@ -574,14 +667,11 @@ class HybridCypherCaseRetriever:
                 paths=graph_paths,
             )
             cited.extend(ref.source_span_ids)
-            if role == "support":
-                support.append(ref)
-            elif role == "limiting":
-                limiting.append(ref)
-            else:
-                boundary.append(ref)
+            role_refs.append(ref)
         fused_ids = tuple(case_id for _, case_id, _, _ in pool)
         bind_round(
+            # 把本轮路径和认定交给后续比较器复用，避免再查一套不一致的图结果。
+            # 注意 D/E 使用公共角色候选，不等于对融合池的所有未定案例也进行了模拟。
             RoundEvidence(
                 context=context,
                 assessments_by_case={

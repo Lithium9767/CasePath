@@ -113,6 +113,7 @@ class EvidenceExplanationPlanner:
         comparison: ComparisonBundle,
     ) -> ExplanationPlan:
         if state.status.value == "NEEDS_CLARIFICATION":
+            # 【Live 正常分支】短说明不是模型失效；有待回答问题时有意跳过完整解释生成。
             # 澄清轮只给事实回顾，不等待长解释，也不伪装为生成失败后的成功降级。
             # 问题由 workflow.next_question 返回；完整法律解释留到澄清结束。
             fact = state.user_facts[-1].text if state.user_facts else state.initial_query

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Avatar, Button, Empty, Input, Space, Tag, Typography } from 'antd';
+import { Avatar, Button, Empty, Input, Tag, Typography } from 'antd';
 import {
   RobotOutlined,
   SendOutlined,
@@ -69,7 +69,8 @@ export function ChatPanel({ messages, loading, hasQuestion, onAnswer, onSubmit, 
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }, [messages, loading]);
 
   const lastMsg = messages[messages.length - 1];
@@ -91,14 +92,15 @@ export function ChatPanel({ messages, loading, hasQuestion, onAnswer, onSubmit, 
 
   return (
     <div className="chat-panel">
-      <div className="chat-panel__list" ref={listRef}>
+      <div className="chat-panel__heading"><RobotOutlined /><strong>与 CasePath 对话</strong><span>从你的实际情况开始</span></div>
+      <div className="chat-panel__list" ref={listRef} role="region" aria-label="对话记录" tabIndex={0}>
         {messages.length === 0 ? (
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={
               <span>
                 描述你的民事问题，或点击右上角
-                <Text strong>「预置演示」</Text>查看完整流程
+                <Text strong>「预置问题」</Text>开始体验
               </span>
             }
             style={{ marginTop: 80 }}
@@ -160,17 +162,18 @@ export function ChatPanel({ messages, loading, hasQuestion, onAnswer, onSubmit, 
 
       <div className="chat-panel__input">
         <Input.TextArea
+          aria-label={pendingQuestion ? '补充事实' : '输入你的问题'}
           value={draft}
           autoSize={{ minRows: 1, maxRows: 4 }}
           placeholder={
             pendingQuestion
-              ? '回答当前追问，可输入「不清楚」或否定/假设事实'
+              ? '补充你知道的情况，不确定也可以直接说'
               : '描述你的民事问题，例如：我在健身房办了卡，已经付款……'
           }
           disabled={loading}
           onChange={(e) => setDraft(e.target.value)}
           onPressEnter={(e) => {
-            if (!e.shiftKey) {
+            if (!e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) {
               e.preventDefault();
               handleSend();
             }
@@ -179,17 +182,13 @@ export function ChatPanel({ messages, loading, hasQuestion, onAnswer, onSubmit, 
         <Button
           type="primary"
           icon={<SendOutlined />}
-          disabled={loading}
+          disabled={loading || !draft.trim()}
           onClick={handleSend}
         >
           发送
         </Button>
       </div>
-      <Space size={4} style={{ padding: '4px 12px 0' }}>
-        <Text type="secondary" style={{ fontSize: 12 }}>
-          回车发送，Shift+回车换行
-        </Text>
-      </Space>
+      <div className="chat-panel__hint">Enter 发送 · Shift + Enter 换行 · 请勿填写敏感个人信息</div>
     </div>
   );
 }

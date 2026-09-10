@@ -14,14 +14,15 @@ from casepath.adapters.conditions.semantic_condition_projector import (
 from casepath.adapters.demo import build_demo_workflow
 from casepath.adapters.explanation.evidence_explanation_planner import EvidenceExplanationPlanner
 from casepath.adapters.p4_factory import HybridCypherP4Factory
-from casepath.adapters.questioning.information_gain_policy import (
-    InformationGainPolicy,
+from casepath.adapters.questioning.key_condition_policy import (
+    KeyConditionQuestionPolicy,
     _compatible_rules,
 )
 from casepath.adapters.retrieval.graph_navigator import MemoryGraphNavigator
 from casepath.adapters.retrieval.hybrid_cypher import (
     HybridCypherCaseRetriever,
     HybridCypherRuleRetriever,
+    HybridCypherSettings,
 )
 from casepath.adapters.retrieval.retrieval_catalog import (
     MemoryHybridSearch,
@@ -458,7 +459,7 @@ def components(catalog):
         "cases": HybridCypherCaseRetriever(nav, search, catalog=catalog, navigator=nav),
         "project": SemanticConditionProjector(catalog),
         "compare": ConditionComparator(catalog),
-        "ask": InformationGainPolicy(catalog),
+        "ask": KeyConditionQuestionPolicy(catalog),
         "explain": EvidenceExplanationPlanner(catalog),
         "interpret": SemanticAnswerInterpreter(),
         "search": search,
@@ -472,6 +473,50 @@ def gym_state(session_id="s1") -> QueryState:
     )
 
 
+@pytest.mark.parametrize("bad", [False, True])
+def test_dynamic_question_without_card_and_answer_is_raw(bad):
+    from casepath.adapters.questioning.key_condition_policy import QuestionDraft
+    from casepath.application.errors import QuestionGenerationFailed
+    from casepath.contracts import ComparisonBundle, RetrievalBundle
+
+    key = "cond.inheritance.will"
+    catalog = build_catalog(
+        release_id="question-test",
+        rules=[_rule("rule.will", "遗嘱相关信息", ["民事咨询"],
+                     [_condition(key, "遗嘱", "是否存在书面遗嘱")], [key])],
+        provisions=[_provision("0563", "测试原文")], lightweight=[], deep=[],
+    )
+    class Model:
+        calls = 0
+        def generate_structured(self, **kwargs):
+            self.calls += 1
+            assert kwargs["stage"] == "question"
+            return QuestionDraft(condition_id="invalid" if bad else key, askable=True,
+                                 question="家里有没有找到书面遗嘱？", reason="核实文件")
+    model = Model()
+    policy = KeyConditionQuestionPolicy(catalog, model)
+    state = QueryState(session_id="question", initial_query="想了解遗产问题",
+                       condition_states=[QueryConditionState(condition_id=key)])
+    bundle = RetrievalBundle(rule_refs=[scored_reference("rule.will", 1, channels=[],
+                                                        components=[], reasons=[])])
+    before = state.model_dump()
+    if bad:
+        with pytest.raises(QuestionGenerationFailed):
+            policy.select(state, bundle, ComparisonBundle())
+        assert model.calls == 2
+        return
+    question = policy.select(state, bundle, ComparisonBundle())
+    assert question.condition_id == key
+    assert question.why_asked == "核实文件"
+    assert question.options == ["不清楚", "暂不回答"]
+    assert state.model_dump() == before
+    request = AnswerRequest(question_id=question.question_id, condition_id=key,
+                            answer="有")
+    result = SemanticAnswerInterpreter().interpret(state, question, request)
+    assert not result.condition_updates
+    assert result.new_facts[0].text == "有"
+
+
 def test_same_query_is_stable_and_channels_are_traced():
     catalog = fixture_catalog()
     parts = components(catalog)
@@ -482,6 +527,82 @@ def test_same_query_is_stable_and_channels_are_traced():
     assert len({item.object_id for item in first}) == len(first)
     assert any(item.retrieval_channels for item in first)
     assert all(item.score_components for item in first)
+
+
+@pytest.mark.parametrize("name", [
+    "case_recall_top_k", "case_rerank_pool_size", "case_role_top_k",
+])
+def test_case_budgets_must_be_positive(name):
+    with pytest.raises(ValueError, match="positive"):
+        HybridCypherSettings(**{name: 0})
+
+
+@pytest.mark.parametrize("role", ["support", "limiting", "boundary", None])
+def test_case_budgets_are_independent_and_do_not_fill_roles(monkeypatch, role):
+    """用角色替身隔离预算逻辑；真实角色资格仍由原有回归测试覆盖。"""
+    catalog = fixture_catalog()
+    parts = components(catalog)
+    rules = parts["rules"].retrieve(gym_state())
+    calls = []
+
+    class Search:
+        def search(self, text, *, target, context, top_k):
+            calls.append((target, top_k))
+            return [scored_reference(key, 1.0, channels=["bm25"], components=[], reasons=[])
+                    for key in sorted(catalog.cases)[:top_k]]
+
+    monkeypatch.setattr(
+        "casepath.adapters.retrieval.hybrid_cypher._assign_role",
+        lambda *args: (role, [], []),
+    )
+    settings = HybridCypherSettings(case_recall_top_k=7, case_rerank_pool_size=2,
+                                   case_role_top_k=1)
+    result = HybridCypherCaseRetriever(
+        parts["nav"], Search(), settings, catalog=catalog, navigator=parts["nav"],
+    ).retrieve(gym_state(), rules)
+    assert calls == [("case", 7)]
+    assert len(current_round().fused_case_ids) == 2
+    groups = {"support": result.support_case_refs, "limiting": result.limiting_case_refs,
+              "boundary": result.boundary_case_refs}
+    for name, refs in groups.items():
+        assert len(refs) == (1 if name == role else 0)
+    selected = [ref for refs in groups.values() for ref in refs]
+    assert set(result.cited_span_ids) == {span for ref in selected for span in ref.source_span_ids}
+
+
+def test_default_case_budgets():
+    settings = HybridCypherSettings()
+    assert (settings.case_recall_top_k, settings.case_rerank_pool_size,
+            settings.case_role_top_k) == (30, 20, 3)
+
+
+def test_role_selection_precedes_global_truncation(monkeypatch):
+    """低检索分的合格对照案例不能被同类案例提前挤掉。"""
+    catalog = fixture_catalog()
+    parts = components(catalog)
+    rules = parts["rules"].retrieve(gym_state())
+    ids = sorted(catalog.cases)
+    contrast = ids[-1]
+
+    class Search:
+        def search(self, *args, **kwargs):
+            return [scored_reference(key, 1.0, channels=["bm25"], components=[], reasons=[])
+                    for key in ids]
+
+    monkeypatch.setattr(
+        "casepath.adapters.retrieval.hybrid_cypher._assign_role",
+        lambda case, *args: ("limiting" if case.case_id == contrast else "support", [], []),
+    )
+    settings = HybridCypherSettings(case_rerank_pool_size=2, case_role_top_k=1,
+                                   graph_weight=0, cites_weight=0)
+    result = HybridCypherCaseRetriever(
+        parts["nav"], Search(), settings, catalog=catalog, navigator=parts["nav"],
+    ).retrieve(gym_state(), rules)
+    assert [ref.object_id for ref in result.limiting_case_refs] == [contrast]
+    assert len(result.support_case_refs) == 1
+    assert contrast in current_round().fused_case_ids
+    assert all(component.name != "compatibility" for ref in result.limiting_case_refs
+               for component in ref.score_components)
 
 
 def test_graph_only_case_enters_pool():
@@ -581,7 +702,14 @@ def test_known_conditions_change_ranking_and_unknown_does_not_negate():
                 return item.score
         return None
 
-    assert score(high, "case.gym") != score(low, "case.gym")
+    # 条件改变角色和比较信息，不再直接扣减公共检索分。
+    assert score(high, "case.gym") == score(low, "case.gym")
+    def differences(bundle):
+        refs = [*bundle.support_case_refs, *bundle.limiting_case_refs, *bundle.boundary_case_refs]
+        return next(c.value for ref in refs if ref.object_id == "case.gym"
+                    for c in ref.score_components if c.name == "different_conditions")
+
+    assert differences(high) != differences(low)
     assert score(mid, "case.gym") is not None
 
 
@@ -668,7 +796,7 @@ def test_roles_need_condition_and_span_evidence():
         assert item.reasons
 
 
-def test_comparison_is_reused_and_simulation_does_not_mutate():
+def test_comparison_is_reused_and_selection_does_not_mutate():
     catalog = fixture_catalog()
     parts = components(catalog)
     workflow = CasePathWorkflow(
@@ -899,7 +1027,27 @@ def test_llm_cannot_attach_empty_or_wrong_fact_evidence(quote, fact_id):
             )
 
     state = SemanticConditionProjector(_mapping_catalog(), Model()).project(
-        QueryState(session_id="guard", initial_query="咨询一下"), _mapping_refs()
+        QueryState(session_id="guard", initial_query="咨询一下，已经付款"), _mapping_refs()
+    )
+    assert _status_of(state, "cond.payment_made") is ConditionStatus.UNKNOWN
+
+
+def test_live_projection_does_not_run_lexical_baseline(monkeypatch):
+    """模型省略付款映射时，不能残留词法的肯定判断。"""
+    def forbidden(*args):
+        raise AssertionError("Live must not call lexical mapping")
+
+    monkeypatch.setattr(
+        "casepath.adapters.conditions.semantic_condition_projector._lexical_candidates",
+        forbidden,
+    )
+
+    class Model:
+        def generate_structured(self, **kwargs):
+            return ConditionLinkBatch(links=[])
+
+    state = SemanticConditionProjector(_mapping_catalog(), Model()).project(
+        QueryState(session_id="llm-only", initial_query="已经付款"), _mapping_refs()
     )
     assert _status_of(state, "cond.payment_made") is ConditionStatus.UNKNOWN
 
@@ -949,7 +1097,7 @@ def test_llm_repeated_quote_requires_explicit_fact_id(fact_id, expected):
 
 
 def test_roles_and_ranking_use_group_truth():
-    from casepath.adapters.retrieval.hybrid_cypher import _assign_role, _compatibility
+    from casepath.adapters.retrieval.hybrid_cypher import _assign_role, _compare_conditions
     from casepath.adapters.retrieval.retrieval_catalog import ConditionGroupSpec
 
     catalog = fixture_catalog()
@@ -966,12 +1114,12 @@ def test_roles_and_ranking_use_group_truth():
         rule, groups=(ConditionGroupSpec("any", "CORE", "ANY", rule.core_ids),)
     )
     assert _assign_role(case, known, {rule_id}, catalog, claims)[0] == "support"
-    assert _compatibility(case, known, catalog, {rule_id})[0] == 1.0
+    assert _compare_conditions(case, known, catalog, {rule_id}).core_agree == 1
     catalog.rules[rule_id] = replace(
         rule, groups=(ConditionGroupSpec("all", "CORE", "ALL", rule.core_ids),)
     )
     assert _assign_role(case, known, {rule_id}, catalog, claims)[0] == "limiting"
-    assert _compatibility(case, known, catalog, {rule_id})[0] == -1.0
+    assert _compare_conditions(case, known, catalog, {rule_id}).core_conflict == 1
     catalog.rules[rule_id] = replace(
         rule, groups=tuple(ConditionGroupSpec(key, "CORE", "ALL", (key,)) for key in rule.core_ids)
     )
@@ -1115,32 +1263,6 @@ def test_calibration_requires_labels_and_is_monotone():
     assert 0 < fitted.transform(0.5) <= fitted.transform(0.9) < 0.9
     with pytest.raises(ValueError):
         ConfidenceCalibrator.fit([], dataset_id="empty")
-
-
-def test_simulated_information_gain_is_about_candidate_distinction():
-    from casepath.adapters.questioning.question_simulation import simulate_question
-    from casepath.contracts import RetrievalBundle, ScoredReference
-
-    catalog = fixture_catalog()
-    state = QueryState(
-        session_id="simulation",
-        initial_query="咨询",
-        condition_states=[QueryConditionState(condition_id=key) for key in catalog.conditions],
-    )
-    before = state.model_dump(mode="json")
-    bundle = RetrievalBundle(
-        rule_refs=[ScoredReference(object_id=key, score=0.5) for key in catalog.rules]
-    )
-    gain, movement = simulate_question(
-        catalog, state, bundle, "cond.payment_made", _compatible_rules
-    )
-    assert gain > 0
-    assert 0 <= movement <= 1
-    neutral, _ = simulate_question(
-        catalog, state, bundle, "cond.alternative_performance", _compatible_rules
-    )
-    assert neutral == pytest.approx(0)
-    assert state.model_dump(mode="json") == before
 
 
 def test_returned_paths_exist_in_projection_and_fulltext_has_no_fake_path():

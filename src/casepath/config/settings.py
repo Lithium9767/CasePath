@@ -44,7 +44,7 @@ class RuntimeSettings(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     mode: RuntimeMode = RuntimeMode.DEMO
-    max_question_turns: int = Field(default=3, ge=0, le=20)
+    max_question_turns: int = Field(default=5, ge=0, le=20)
     # 由 P1 向 P4 工厂传入数据位置；P4 不自行读取环境变量。
     data_root: Path = Path("data")
 
@@ -68,9 +68,11 @@ class RuntimeSettings(BaseModel):
     llm_max_completion_tokens: int = Field(default=2048, ge=1)
     llm_structured_output: StructuredOutputMode = StructuredOutputMode.JSON_OBJECT
     # 可按阶段覆盖；未填写的字段由 LLMStagePolicy 的安全默认值补齐。
-    llm_stage_policies: dict[Literal["relevance", "projection", "explanation"], LLMStagePolicy] = (
+    llm_stage_policies: dict[Literal["relevance", "projection", "explanation", "question", "query_expansion"], LLMStagePolicy] = (
         Field(
             default_factory=lambda: {
+                "query_expansion": LLMStagePolicy(max_tokens=400, timeout_seconds=20, max_retries=0),
+                "question": LLMStagePolicy(max_tokens=500, timeout_seconds=30, max_retries=0),
                 "relevance": LLMStagePolicy(max_tokens=1000),
                 "projection": LLMStagePolicy(max_tokens=1400),
                 "explanation": LLMStagePolicy(max_tokens=1800, timeout_seconds=60),

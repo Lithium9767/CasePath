@@ -78,6 +78,8 @@ class ExplanationDraft(ContractModel):
 def evidence_package(catalog, state, bundle, comparison, *, max_chars=18000):
     """预算按完整规则/案例加入，不能截断法条后仍假装获得完整上下文。"""
     package = {
+        # 【解释输入】只整理本轮选中的知识，不把整个图谱/索引塞给模型。
+        # 事实、规则、案例和证据索引分别保存，模型通过 ID 引用，便于输出后校验。
         "release_id": catalog.release_id,
         "workflow_status": state.status.value,
         "query": state.initial_query[:2500],
@@ -126,6 +128,7 @@ def evidence_package(catalog, state, bundle, comparison, *, max_chars=18000):
     package["discriminating_conditions"] = comparison.ranked_condition_ids[:4]
 
     def add(kind, row, spans, owner):
+        # 原文统一登记为 citation.<span_id>；超预算则撤回整条规则/案例及其新增证据。
         additions = {}
         for span in spans:
             key = "citation." + span.span_id
@@ -208,11 +211,17 @@ def evidence_package(catalog, state, bundle, comparison, *, max_chars=18000):
 
 
 def generate_explanation(model, catalog, state, bundle, comparison):
+    # 【d 知识注入】检索结果组织成证据包，以 user_prompt 提供给模型，不传浮点向量。
+    # 不修改模型权重，不做微调；embedding 只服务于前面的语义召回。
+    # 调用方 EvidenceExplanationPlanner：澄清结束且有 LLM 时才走完整生成分支。
+    # 顺序：证据包 → 模型结构化草稿 → ID/分支归属校验 → 公共 ExplanationPlan。
     package = evidence_package(catalog, state, bundle, comparison)
     # 无完整法条证据时不能用模型记忆补上缺口。
     if not package["rules"]:
         return None
     raw = model.generate_structured(
+        # SYSTEM_PROMPT 约束表达/证据边界，package 给规则、事实、案例及引用 ID。
+        # 返回后校验引用白名单与条件归属，但不能据此声称已完成引用语义核验。
         system_prompt=SYSTEM_PROMPT,
         user_prompt=json.dumps(package, ensure_ascii=False),
         response_model=ExplanationDraft,
@@ -228,6 +237,7 @@ def generate_explanation(model, catalog, state, bundle, comparison):
     used = defaultdict(list)
 
     def validate(paragraph):
+        # 段落需引用已提供的事实或证据；ID 校验不能证明原文在语义上支持该句。
         if (
             not paragraph.evidence_ids
             and not paragraph.fact_ids

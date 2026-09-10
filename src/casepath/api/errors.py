@@ -1,5 +1,8 @@
 """统一错误响应；保留 v1.1 错误枚举，通过 details.reason 区分会话错误。"""
 
+import logging
+from contextvars import ContextVar
+from pathlib import PurePath
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
@@ -19,6 +22,47 @@ from casepath.application.errors import (
 )
 from casepath.contracts import ErrorCode, ErrorResponse
 
+# 请求级上下文隔离并发请求；不采用客户端传来的 ID，避免日志注入。
+_request_id: ContextVar[str | None] = ContextVar("diagnostic_request_id", default=None)
+
+
+def log_failure(exc: Exception) -> None:
+    """仅记录异常类型和代码位置，不记录异常正文、局部变量、提示词或密钥。
+
+    业务校验失败通常没有 SDK 警告，因此也必须在 HTTP 异常边界记录。
+    cause 链可以区分网络错误和 Pydantic 校验错误；位置用于定位具体校验分支。
+    """
+    request_id = _request_id.get() or str(uuid4())
+    _request_id.set(request_id)
+    chain = []
+    locations = []
+    stage = "unknown"
+    stage_files = {
+        "query_expansion.py": "query_expansion",
+        "semantic_condition_projector.py": "projection",
+        "semantic_answer_interpreter.py": "answer",
+        "key_condition_policy.py": "question",
+        "grounded_explanation.py": "explanation",
+    }
+    seen = set()
+    current = exc
+    while current is not None and id(current) not in seen and len(chain) < 8:
+        seen.add(id(current))
+        chain.append(type(current).__name__)
+        tb = current.__traceback__
+        while tb is not None:
+            filename = tb.tb_frame.f_code.co_filename
+            stage = stage_files.get(PurePath(filename).name, stage)
+            if "casepath" in filename.lower():
+                locations.append(f"{PurePath(filename).name}:{tb.tb_lineno}")
+            tb = tb.tb_next
+        current = current.__cause__ or current.__context__
+    # 使用 uvicorn.error 的既有控制台处理器，无需另设日志级别即可看到错误。
+    logging.getLogger("uvicorn.error").error(
+        "CasePath request_id=%s stage=%s errors=%s locations=%s",
+        request_id, stage, " <- ".join(chain), " > ".join(locations[-20:]),
+    )
+
 
 def error_response(
     status: int,
@@ -33,13 +77,24 @@ def error_response(
         message=message,
         details={"reason": reason},
         retryable=retryable,
-        request_id=str(uuid4()),
+        request_id=_request_id.get() or str(uuid4()),
     )
     return JSONResponse(status_code=status, content=payload.model_dump(mode="json"))
 
 
 def register_error_handlers(app: FastAPI) -> None:
+    @app.middleware("http")
+    async def diagnostic_context(request: Request, call_next):
+        token = _request_id.set(str(uuid4()))
+        try:
+            response = await call_next(request)
+            response.headers["X-Request-ID"] = _request_id.get() or ""
+            return response
+        finally:
+            _request_id.reset(token)
+
     async def application_error(request: Request, exc: Exception) -> JSONResponse:
+        log_failure(exc)
         if isinstance(exc, SessionNotFound):
             return error_response(404, ErrorCode.SESSION_NOT_FOUND, "会话不存在", "session_missing")
         if isinstance(exc, SessionConflict):
@@ -115,5 +170,6 @@ def register_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def unexpected_error(request: Request, exc: Exception) -> JSONResponse:
+        log_failure(exc)
         # 不暴露堆栈、连接信息或组件异常中的用户原文。
         return error_response(500, ErrorCode.INTERNAL_ERROR, "服务处理失败", "internal_error")

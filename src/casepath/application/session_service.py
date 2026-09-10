@@ -48,9 +48,16 @@ class SessionService:
 
     def create_session(self, request: CreateSessionRequest) -> WorkflowSnapshot:
         """创建正式会话；请求合同由调用边界构造并校验一次。"""
+        # 【首次请求 03：创建状态】来自 api/sessions.py 的 service.create_session(request)。
+        # query 是前端原话；服务器生成 UUID，会话尚未入库。后续算法围绕这个状态计算。
         state = QueryState(session_id=str(uuid4()), initial_query=request.query)
+        # 【首次提问】这里只登记问题与会话 ID；事实抽取和条件映射交给工作流。
+        # 【首次请求 04：进入 _run】跳到本类 _run(state)，不是再次发 HTTP 请求。
         snapshot = self._run(state)
+        # 【首次请求 13：保存结果】_run 已完成 05—12 并返回经过校验的快照，才执行入库。
+        # 默认仓库为内存实现，不是 Neo4j；任何前置算法/校验异常都会使程序跳过本次入库。
         self.repository.create(SessionRecord(session_id=state.session_id, latest_snapshot=snapshot))
+        # 回到 api/sessions.py 的 return service.create_session(request)，继续第 14 步。
         return snapshot
 
     def _get_record(self, session_id: str) -> SessionRecord:
@@ -73,6 +80,8 @@ class SessionService:
         return receipt.snapshot.model_copy(deep=True)
 
     def submit_answer(self, session_id: str, request: AnswerRequest) -> WorkflowSnapshot:
+        # 【补充回答链】核对问题 → 解释回答 → 合并状态 → 重跑工作流 → 成功后保存。
+        # 不直接接受前端传一个条件状态覆盖系统认定，也不绕过来源校验。
         # 重新执行合同校验，防止调用者通过 model_copy(update=...) 绕过字段验证。
         try:
             request = AnswerRequest.model_validate(request.model_dump())
@@ -100,6 +109,8 @@ class SessionService:
         try:
             # 把副本交给算法，防止其意外修改基线；问题原文始终取自服务端。
             interpretation = self.answer_interpreter.interpret(
+                # 【回答 2】默认跳到 adapters/conditions/semantic_answer_interpreter.py。
+                # interpret 返回新增事实/条件更新，不负责保存会话，也不直接生成最终解释。
                 state.model_copy(deep=True),
                 pending.model_copy(deep=True),
                 request.model_copy(deep=True),
@@ -116,7 +127,10 @@ class SessionService:
             raise AnswerInterpreterUnavailable("回答解析失败，原会话未修改") from exc
 
         updated = self._merge_answer(state, pending.question, request, interpretation)
+        # 【回答 3】_merge_answer 在本类中，追加 DialogueTurn 并校验来源，返回新 QueryState。
         snapshot = self._run(updated)
+        # 【回答 4】和首次问题走同一个 _run → workflow.run，重新执行规则到解释的链路。
+        # _run 失败会中断本次保存，仓库仍保留原快照；不是先改库再尝试恢复。
         # 这两个步骤在本方法中确实执行过；旧的单轮工作流不再冒充已解析回答。
         snapshot.trace = ["INTERPRET_ANSWER", "RECORD_ANSWER", *snapshot.trace]
         receipts = {
@@ -132,6 +146,7 @@ class SessionService:
         )
         try:
             self.repository.save(candidate, expected_revision=record.revision)
+            # 【回答返回】版本检查通过才保存；随后 return snapshot 回路由，供前端更新面板。
         except SessionConflict:
             # 两个相同请求并发完成时，后提交者重放胜出者的结果，不新增轮次。
             replay = self._replay(self._get_record(session_id), request)
@@ -192,8 +207,13 @@ class SessionService:
             raise InvalidComponentOutput("回答解析结果不符合合同或证据引用约束") from exc
 
     def _run(self, state: QueryState) -> WorkflowSnapshot:
+        # 【首次请求 05：进入单轮】这是服务层守卫，下一行 workflow.run 才进入 A—E。
+        # 【系统守卫】给算法副本并检查输出，防止算法改写会话身份或既有原话。
         try:
             snapshot = self.workflow.run(state.model_copy(deep=True))
+            # 【首次请求 12：校验返回结果】第 11 步回到这里，先验快照合同，后验身份和证据。
+            # 检查 session_id/初始问题/历史未被改写，新增事实有原话来源，非未知条件有事实引用。
+            # 这些属于会话一致性检查，不等于审核模型的法律判断或证明引文语义正确。
             snapshot = WorkflowSnapshot.model_validate(snapshot.model_dump())
             actual = snapshot.query_state
             # 投影器可以更新条件，但不能改写会话身份、历史对话和已有原始证据。
@@ -230,6 +250,8 @@ class SessionService:
                 }
                 if condition.status != ConditionStatus.UNKNOWN and not referenced_fact_ids:
                     raise ValueError("非 UNKNOWN 条件状态必须引用用户事实")
+            # 校验全部通过才回到 create_session 的 snapshot = self._run(state)，继续第 13 步。
+            # 补充回答也复用本函数，但返回 submit_answer，由其保存回答回执和新版本。
             return snapshot
         except (
             ValidationError,

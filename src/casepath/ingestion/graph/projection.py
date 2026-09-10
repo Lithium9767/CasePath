@@ -116,6 +116,8 @@ def props(model, exclude=()):
 
 
 def project_records(sources, provisions, rules, spans, lightweight, deep, input_hashes):
+    # 【b 建图】合同对象 → 带类型的节点与显式有向边，不调用 embedding。
+    # 此处只生成内存图包，__main__.py 的 --import-neo4j 才调用 writer.publish 落库。
     graph = GraphProjection()
     for source in sources:
         graph.node("LegalSource", source.source_id, props(source))
@@ -146,6 +148,7 @@ def project_records(sources, provisions, rules, spans, lightweight, deep, input_
             ),
         )
         for ref in rule.provisions:
+            # 根据 provision_id 建 BASED_ON，不靠文本相似度猜测法条依据。
             graph.edge(owner, "BASED_ON", node_key("Provision", ref.provision_id))
         graph.evidence(owner, [s.span_id for s in rule.source_spans])
         for condition in rule.conditions:
@@ -205,6 +208,8 @@ def project_records(sources, provisions, rules, spans, lightweight, deep, input_
                 if label == "DecisionItem":
                     graph.edge(key, "DECIDES", node_key("Claim", record.claim_id))
         for assessment in case.condition_findings:
+            # 案例认定通过同一个 condition_id 指向规则条件，这是两层图谱的连接点。
+            # 在线用户事实在 QueryState 中，不作为法院认定写入这份离线图。
             identifier = "assessment." + digest([case.case_id, assessment.condition_id])
             key = graph.node(
                 "ConditionFinding", identifier, dict(props(assessment), case_id=case.case_id)
@@ -220,6 +225,7 @@ def project_records(sources, provisions, rules, spans, lightweight, deep, input_
 
 def load_projection(data_root: Path):
     # 发布校验先行；前后哈希一致才接受，避免读取过程中出现混合版本。
+    # 先把这次要参与发布/投影的数据文件全部找出来
     files = sorted(
         [
             *data_root.glob("canonical/rules/*.jsonl"),
@@ -228,7 +234,9 @@ def load_projection(data_root: Path):
             data_root / "manifests/cases.manifest.json",
         ]
     )
+    # 给每个文件算 SHA256
     before = {p.relative_to(data_root).as_posix(): sha256_file(p) for p in files}
+    # 先验证规则数据和案例数据是否合法
     validate_canonical_dataset(data_root)
     validate_canonical_cases(data_root)
     models = [

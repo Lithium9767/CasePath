@@ -69,6 +69,8 @@ def _longest_hits(text: str, phrases: tuple[str, ...]) -> str | None:
 
 
 def _status(pending: QuestionCandidate, request: AnswerRequest) -> ConditionStatus:
+    # 先用 condition_id + 完整选项解释回答，再处理不知道、裸是/否及条件专用自由文本。
+    # 这是确定性解释器，不调用 LLM；无法识别保留 UNKNOWN，不猜测用户意思。
     selected = (request.selected_option or "").strip()
     answer = request.answer.strip()
     if selected:
@@ -109,6 +111,8 @@ class SemanticAnswerInterpreter:
         pending_question: QuestionCandidate,
         answer_request: AnswerRequest,
     ) -> AnswerInterpretation:
+        # 【用户回答后】产出新事实和条件更新交给 SessionService 合并，自己不改仓库。
+        # 之后重跑 B 时，新增原话还能参与其他候选条件的映射，不限于被问的条件。
         if answer_request.condition_id != pending_question.condition_id:
             raise ValueError("回答解析不能引入未登记的条件 ID")
         known = {item.condition_id for item in state.condition_states}
@@ -118,6 +122,13 @@ class SemanticAnswerInterpreter:
         if quote not in answer_request.answer:
             raise ValueError("新事实必须逐字摘自本轮回答")
         turn_id = max((turn.turn_id for turn in state.dialogue_history), default=0) + 1
+        if pending_question.question_id.startswith("question.fact."):
+            # 动态问题问的是具体事实，“有”不等于目标法律条件满足。
+            # 只保存原话；SessionService保存问题上下文后，B统一解释本轮回答。
+            return AnswerInterpretation(new_facts=[UserFact(
+                fact_id=f"fact.answer.{turn_id}.{pending_question.condition_id}",
+                text=quote, source_turn=turn_id,
+            )])
         existing_texts = {
             (item.condition_id, fact_id)
             for item in state.condition_states
@@ -130,6 +141,7 @@ class SemanticAnswerInterpreter:
             and (pending_question.condition_id, fact.fact_id) in existing_texts
         ]
         if same:
+            # 同条件已经引用相同原话时，不重复增加事实和分数；对话回执仍由服务层负责。
             return AnswerInterpretation()
         status = _status(pending_question, answer_request)
         fact = UserFact(

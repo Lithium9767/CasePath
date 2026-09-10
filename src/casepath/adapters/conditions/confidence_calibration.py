@@ -1,6 +1,11 @@
 """P4 校准器：只用独立标注集的映射正确性标签拟合，不使用法律结果标签。"""
 
 import math
+
+# 【当前配置化 Live 未启用】configured.py 没有加载或拟合本类，工厂默认 calibrator=None。
+# 本文件不是无效实现：fit 供独立标注集离线拟合，transform 供显式注入后的在线映射使用。
+# 测试或其他入口可以调用；仅看到本类存在，不能声称当前 LLM 分数已经校准。
+# 校准的是“条件映射是否正确”，不是胜诉率，也不改变 condition_id 或法条原文。
 from dataclasses import dataclass
 
 

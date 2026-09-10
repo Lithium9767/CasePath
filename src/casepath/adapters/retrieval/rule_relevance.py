@@ -24,10 +24,14 @@ class RelevantRuleRetriever:
         self.retriever, self.catalog, self.model = retriever, catalog, model
 
     def retrieve(self, state):
+        # 【A 的外层包装】先由内部 retriever 完成召回，再让模型判断主题相关性。
+        # 不让模型重新从全库挑 ID，也不因用户尚缺某个事实就把主题相关规则删除。
         refs = self.retriever.retrieve(state)
+        # 如果啥也没有，直接返回
         if not refs:
             return refs
         candidates = []
+        # 准备把候选规则整理成 LLM 容易看的数据。
         for ref in refs:
             rule = self.catalog.rules[ref.object_id]
             candidates.append(
@@ -49,6 +53,17 @@ class RelevantRuleRetriever:
                 "未知法律要件不等于主题无关，不能把未知当成不满足而排除规则。"
                 "每个给定rule_id恰好返回一次，不能添加ID，reason简述相关或不相关的主题依据。"
             ),
+            # DIRECT
+            # → 直接相关
+
+            # GENERAL
+            # → 相关的一般规则
+
+            # UNCERTAIN
+            # → 可能相关，但不确定
+
+            # UNRELATED
+            # → 明显无关
             user_prompt=json.dumps(
                 {
                     "query": state.initial_query,
@@ -65,10 +80,12 @@ class RelevantRuleRetriever:
         except (ValueError, AttributeError) as exc:
             raise InvalidComponentOutput("规则相关性输出格式错误") from exc
         ids = [item.rule_id for item in draft.items]
+        # 输出必须与输入候选一一对应，防止模型漏项、重复或虚构规则。
         if len(ids) != len(set(ids)) or set(ids) != {ref.object_id for ref in refs}:
             raise InvalidComponentOutput("规则相关性筛选遗漏、重复或虚构候选ID")
         by_id = {item.rule_id: item for item in draft.items}
         priority = {"DIRECT": 0, "GENERAL": 1, "UNCERTAIN": 2}
+        # 先按主题类别，再按原检索分排序；只删 UNRELATED，UNCERTAIN 仍保留。
         # 只剔除显式主题无关项，保留不确定边界，避免用未知事实作排除依据。
         kept = [
             ref.model_copy(

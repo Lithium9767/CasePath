@@ -176,6 +176,8 @@ class BM25Index:
     """自建 BM25；k1/b 为工程默认值，需开发集校准后才能当论文超参。"""
 
     def __init__(self, documents: dict[str, str], *, k1: float = 1.2, b: float = 0.75) -> None:
+        # 建立词项统计：少见词的 IDF 更高，长文通过长度归一化避免天然占优。
+        # 此实现把文档分词结果留在内存，search 时遍历文档，并非 Neo4j 的全文索引接口。
         if k1 <= 0 or not 0 <= b <= 1:
             raise ValueError("BM25 parameters must be valid")
         self.k1 = k1
@@ -208,6 +210,7 @@ class BM25Index:
                     continue
                 freq = tf[term]
                 denom = freq + self.k1 * (1.0 - self.b + self.b * dl / self.avgdl)
+                # freq 是词频，dl 是本文长度，avgdl 是平均长度；k1 控制词频饱和，b 控制长度惩罚。
                 score += self.idf.get(term, 0.0) * (freq * (self.k1 + 1.0) / denom)
             if score > 0:
                 scored.append((oid, score))
@@ -226,6 +229,8 @@ def weighted_rrf(
     if k <= 0:
         raise ValueError("RRF k must be positive")
     scores: dict[str, float] = defaultdict(float)
+    # RRF(object) = Σ 通道权重/(k + 该通道名次)，名次从 1 开始；没出现的通道贡献 0。
+    # 例如两个通道都排名靠前会累加得分；k 是平滑常数，不是最终返回的 top_k。
     for channel, ids in ranked.items():
         weight = weights.get(channel, 0.0)
         if weight == 0:
@@ -261,6 +266,8 @@ def scored_reference(
 
 
 def _rule_search_text(rule: RuleRecord, provision_text: dict[str, str]) -> str:
+    # 【c 索引文本】一规则一文本：标题、请求类型、条件、相关法条和原文引句。
+    # BM25 与 embedding 共用 search_text；不是对图中每个节点做图嵌入。
     chunks = [rule.title, *rule.claim_types]
     for condition in rule.conditions:
         chunks.extend([condition.label, condition.predicate])
@@ -273,6 +280,8 @@ def _rule_search_text(rule: RuleRecord, provision_text: dict[str, str]) -> str:
 
 
 def _case_search_text(light: CaseIndexRecord, deep: CaseRecord | None) -> str:
+    # 一案一文本：标题/案由/关键词及提取的查明 predicate，并非整篇案例都参与向量计算。
+    # 完整说理与裁判结果可以在解释证据包使用，和检索文本范围是两回事。
     # 轻量案例不用 facts_text/summary 全文：其中可能混有裁判主文和结果。
     parts = [light.title, light.cause or "", *light.keywords]
     if deep is not None:
@@ -431,13 +440,20 @@ def build_catalog(
 def load_canonical_catalog(data_root: Path, *, embedding_model: str = "none") -> RetrievalCatalog:
     from casepath.ingestion.graph.projection import load_projection
 
+    # 读取发布信息
     bundle = load_projection(data_root)
+    # 拼成内存目录
     return build_catalog(
         release_id=bundle["release_id"],
+        # 规则json
         rules=read_jsonl(data_root / "canonical/rules/rules.jsonl", RuleRecord),
+        # 法条json
         provisions=read_jsonl(data_root / "canonical/rules/provisions.jsonl", ProvisionRecord),
+        # 轻量案例json
         lightweight=read_jsonl(data_root / "canonical/cases/cases_l1.jsonl", CaseIndexRecord),
+        # 深度案例json
         deep=read_jsonl(data_root / "canonical/cases/cases_deep.jsonl", CaseRecord),
+        # 这轮数据声明对应的是哪个 embedding 模型
         embedding_model=embedding_model,
     )
 
