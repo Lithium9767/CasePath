@@ -18,6 +18,9 @@ from .cleaner import CaseCleaner
 from .ids import (
     DATASET_ID,
     EXPECTED_LEXREL_REPOSITORY_URL,
+    EXPECTED_LEXREL_RETRIEVAL_PATH,
+    EXPECTED_LEXREL_RETRIEVAL_RECORD_COUNT,
+    EXPECTED_LEXREL_RETRIEVAL_SHA256,
     EXPECTED_LEXREL_REVISION,
     EXPECTED_LEXREL_SERVICE_PATH,
     EXPECTED_LEXREL_SERVICE_RECORD_COUNT,
@@ -30,7 +33,7 @@ from .ids import (
     GENERATOR,
     REVIEWED_L2_CASE_IDS,
 )
-from .lexrel import load_service_contract_cases
+from .lexrel import load_retrieval_cases, load_service_contract_cases
 from .manifest import CaseDatasetManifest
 from .validation import (
     CaseDatasetValidationReport,
@@ -51,11 +54,11 @@ LIMITATIONS = [
         "related_provision_ids and are not retained as raw citations in this dataset."
     ),
     (
-        "Every legal-rag civil case and every LexRel expert-annotated 服务合同关系 "
-        "sample remains a deep CaseRecord for text retrieval. Refund-rule condition "
+        "Every legal-rag civil case and a balanced subset of LexRel expert-annotated "
+        "civil relations remains a deep CaseRecord for text retrieval. Refund-rule condition "
         "bridges are limited to SERVICE_REFUND_COMPARISON_CASE_IDS. The gym refund "
         "rule is invoked only for prepaid-closure / 解除+返还 cases in that set. "
-        "LexRel train splits are unused."
+        "LexRel train splits are unused; the retrieval subset is capped per relation type."
     ),
     (
         "Holdings, reasoning steps, and court findings are omitted when they cannot "
@@ -150,25 +153,35 @@ def _stage_rules(final_data_root: Path, staged_data_root: Path) -> None:
     shutil.copytree(source_rules, target_rules)
 
 
-def _lexrel_input_path(data_root: Path) -> Path:
-    candidate = data_root / "inputs" / Path(EXPECTED_LEXREL_SERVICE_PATH).name
+def _lexrel_input_path(data_root: Path, expected_path: str) -> Path:
+    candidate = data_root / "inputs" / Path(expected_path).name
     if candidate.is_file():
         return candidate
-    return Path(__file__).resolve().parents[4] / EXPECTED_LEXREL_SERVICE_PATH
+    return Path(__file__).resolve().parents[4] / expected_path
 
 
 def _merge_lexrel_cases(
     lightweight: list[CaseIndexRecord],
     deep: list[CaseRecord],
-    lexrel_path: Path,
+    service_path: Path,
+    retrieval_path: Path,
 ) -> tuple[list[CaseIndexRecord], list[CaseRecord]]:
-    lexrel_digest = sha256_file(lexrel_path)
-    if lexrel_digest != EXPECTED_LEXREL_SERVICE_SHA256:
+    service_digest = sha256_file(service_path)
+    if service_digest != EXPECTED_LEXREL_SERVICE_SHA256:
         raise ValueError(
             "unexpected LexRel service-contract hash: "
-            f"expected {EXPECTED_LEXREL_SERVICE_SHA256}, received {lexrel_digest}"
+            f"expected {EXPECTED_LEXREL_SERVICE_SHA256}, received {service_digest}"
         )
-    lexrel_l1, lexrel_deep = load_service_contract_cases(lexrel_path)
+    retrieval_digest = sha256_file(retrieval_path)
+    if retrieval_digest != EXPECTED_LEXREL_RETRIEVAL_SHA256:
+        raise ValueError(
+            "unexpected LexRel retrieval-subset hash: "
+            f"expected {EXPECTED_LEXREL_RETRIEVAL_SHA256}, received {retrieval_digest}"
+        )
+    service_l1, service_deep = load_service_contract_cases(service_path)
+    retrieval_l1, retrieval_deep = load_retrieval_cases(retrieval_path)
+    lexrel_l1 = [*service_l1, *retrieval_l1]
+    lexrel_deep = [*service_deep, *retrieval_deep]
     seen = {item.case_id for item in lightweight}
     for item in lexrel_l1:
         if item.case_id in seen:
@@ -212,7 +225,8 @@ def build_dataset(
     lightweight, deep = _merge_lexrel_cases(
         lightweight,
         deep,
-        _lexrel_input_path(final_data_root),
+        _lexrel_input_path(final_data_root, EXPECTED_LEXREL_SERVICE_PATH),
+        _lexrel_input_path(final_data_root, EXPECTED_LEXREL_RETRIEVAL_PATH),
     )
     validate_records(lightweight, deep, provisions, rules)
 
@@ -250,6 +264,13 @@ def build_dataset(
                     path=EXPECTED_LEXREL_SERVICE_PATH,
                     sha256=EXPECTED_LEXREL_SERVICE_SHA256,
                     record_count=EXPECTED_LEXREL_SERVICE_RECORD_COUNT,
+                    repository_url=EXPECTED_LEXREL_REPOSITORY_URL,
+                    revision=EXPECTED_LEXREL_REVISION,
+                ),
+                ManifestFile(
+                    path=EXPECTED_LEXREL_RETRIEVAL_PATH,
+                    sha256=EXPECTED_LEXREL_RETRIEVAL_SHA256,
+                    record_count=EXPECTED_LEXREL_RETRIEVAL_RECORD_COUNT,
                     repository_url=EXPECTED_LEXREL_REPOSITORY_URL,
                     revision=EXPECTED_LEXREL_REVISION,
                 ),

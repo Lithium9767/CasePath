@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from pydantic import Field
@@ -29,6 +30,9 @@ from .ids import (
     EXPECTED_CIVIL_CASE_COUNT,
     EXPECTED_DEEP_CASE_COUNT,
     EXPECTED_LEXREL_REPOSITORY_URL,
+    EXPECTED_LEXREL_RETRIEVAL_PATH,
+    EXPECTED_LEXREL_RETRIEVAL_RECORD_COUNT,
+    EXPECTED_LEXREL_RETRIEVAL_SHA256,
     EXPECTED_LEXREL_REVISION,
     EXPECTED_LEXREL_SERVICE_PATH,
     EXPECTED_LEXREL_SERVICE_RECORD_COUNT,
@@ -99,11 +103,26 @@ def validate_records(
     l1_ids = [item.case_id for item in lightweight]
     _require(len(l1_ids) == len(set(l1_ids)), "L1 case_id values must be unique", errors)
     l1_by_id = {item.case_id: item for item in lightweight}
+    normalized_fact_owners: dict[str, str] = {}
 
     child_ids: dict[str, str] = {}
     resolved_citations = 0
     for record in lightweight:
         _require(record.contract_version == "1.3", f"{record.case_id} is not CaseIndexRecord v1.3", errors)
+        _require(
+            len(record.keywords) == len(set(record.keywords)),
+            f"{record.case_id} has duplicate keywords",
+            errors,
+        )
+        normalized_facts = re.sub(r"\s+", "", record.facts_text)
+        _require(bool(normalized_facts), f"{record.case_id} has empty facts_text", errors)
+        duplicate_owner = normalized_fact_owners.get(normalized_facts)
+        _require(
+            duplicate_owner is None,
+            f"{record.case_id} duplicates facts from {duplicate_owner}",
+            errors,
+        )
+        normalized_fact_owners.setdefault(normalized_facts, record.case_id)
         for provision_id in record.related_provision_ids:
             resolved_citations += 1
             _require(
@@ -257,9 +276,14 @@ def _require_manifest_identity(manifest: CaseDatasetManifest) -> None:
 
 
 def _validate_manifest_input(manifest: CaseDatasetManifest, manifest_root: Path) -> None:
-    if len(manifest.inputs) != 2:
-        raise ValueError("manifest must record processed-cases and LexRel service-contract inputs")
-    item = manifest.inputs[0]
+    if len(manifest.inputs) != 3:
+        raise ValueError("manifest must record processed-cases and both pinned LexRel inputs")
+    by_path = {Path(item.path).as_posix(): item for item in manifest.inputs}
+    if len(by_path) != len(manifest.inputs):
+        raise ValueError("manifest input paths must be unique")
+    item = by_path.get(EXPECTED_PROCESSED_CASES_PATH)
+    if item is None:
+        raise ValueError("manifest is missing processed_cases.json")
     if (
         Path(item.path).as_posix() != EXPECTED_PROCESSED_CASES_PATH
         or item.sha256 != EXPECTED_PROCESSED_CASES_SHA256
@@ -271,7 +295,9 @@ def _validate_manifest_input(manifest: CaseDatasetManifest, manifest_root: Path)
     input_path = manifest_root / item.path
     if input_path.is_file() and sha256_file(input_path) != item.sha256:
         raise ValueError(f"manifest hash mismatch for {item.path}")
-    lexrel = manifest.inputs[1]
+    lexrel = by_path.get(EXPECTED_LEXREL_SERVICE_PATH)
+    if lexrel is None:
+        raise ValueError("manifest is missing lexrel_service_contract.json")
     if (
         Path(lexrel.path).as_posix() != EXPECTED_LEXREL_SERVICE_PATH
         or lexrel.sha256 != EXPECTED_LEXREL_SERVICE_SHA256
@@ -283,3 +309,14 @@ def _validate_manifest_input(manifest: CaseDatasetManifest, manifest_root: Path)
     lexrel_path = manifest_root / lexrel.path
     if lexrel_path.is_file() and sha256_file(lexrel_path) != lexrel.sha256:
         raise ValueError(f"manifest hash mismatch for {lexrel.path}")
+    retrieval = by_path.get(EXPECTED_LEXREL_RETRIEVAL_PATH)
+    if retrieval is None or (
+        retrieval.sha256 != EXPECTED_LEXREL_RETRIEVAL_SHA256
+        or retrieval.record_count != EXPECTED_LEXREL_RETRIEVAL_RECORD_COUNT
+        or retrieval.repository_url != EXPECTED_LEXREL_REPOSITORY_URL
+        or retrieval.revision != EXPECTED_LEXREL_REVISION
+    ):
+        raise ValueError("manifest input metadata mismatch for lexrel_retrieval_cases.json")
+    retrieval_path = manifest_root / EXPECTED_LEXREL_RETRIEVAL_PATH
+    if retrieval_path.is_file() and sha256_file(retrieval_path) != retrieval.sha256:
+        raise ValueError(f"manifest hash mismatch for {retrieval.path}")

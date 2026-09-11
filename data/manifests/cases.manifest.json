@@ -2,7 +2,7 @@
   "manifest_version": "1.1",
   "dataset_id": "dataset.civil_cases.v1",
   "generated_on": "2026-09-07",
-  "generator": "casepath.ingestion.cases.build:v5",
+  "generator": "casepath.ingestion.cases.build:v6",
   "upstream_repository_url": "https://github.com/litunan/legal-rag",
   "upstream_revision": "ce7872c7ae343e5ff860d627195ec4e72c7ef7ce",
   "inputs": [
@@ -19,26 +19,33 @@
       "record_count": 9,
       "repository_url": "https://github.com/thunlp/LexRel",
       "revision": "5d04570483da5726d5db99d72633c3ab919b4e4b"
+    },
+    {
+      "path": "data/inputs/lexrel_retrieval_cases.json",
+      "sha256": "3e7ef52e191217816c97b2fbcab075089e165b65b30dcbaef7d05c684aa95d24",
+      "record_count": 96,
+      "repository_url": "https://github.com/thunlp/LexRel",
+      "revision": "5d04570483da5726d5db99d72633c3ab919b4e4b"
     }
   ],
   "outputs": [
     {
       "path": "data/canonical/cases/cases_l1.jsonl",
-      "sha256": "16f5418a9d884033dbc49b56e194771bccb234602bb968816d5bdc4c86a803ad",
-      "record_count": 54,
+      "sha256": "86013cdc1266f821cf74fb9664fe97d1d6c878f8d75d1af3d94e52e1d90323f3",
+      "record_count": 150,
       "repository_url": null,
       "revision": null
     },
     {
       "path": "data/canonical/cases/cases_deep.jsonl",
-      "sha256": "fe7aa68c0df34385965069034e89fa1a79c0a523002ee9553c0e390cdbea7e53",
-      "record_count": 54,
+      "sha256": "26a24b778ff4a589fc42b28b1335d6763cef527ae8dfa407339b31dbd5176017",
+      "record_count": 150,
       "repository_url": null,
       "revision": null
     }
   ],
-  "l1_case_count": 54,
-  "deep_case_count": 54,
+  "l1_case_count": 150,
+  "deep_case_count": 150,
   "contract_versions": {
     "CaseIndexRecord": "1.3",
     "CaseRecord": "1.1"
@@ -49,7 +56,7 @@
   "limitations": [
     "Machine-extracted L1 cases are not human-verified; L2 requires REVIEWED_L2_CASE_IDS.",
     "Citations that are not Civil Code articles 1-1260 are not written to related_provision_ids and are not retained as raw citations in this dataset.",
-    "Every legal-rag civil case and every LexRel expert-annotated 服务合同关系 sample remains a deep CaseRecord for text retrieval. Refund-rule condition bridges are limited to SERVICE_REFUND_COMPARISON_CASE_IDS. The gym refund rule is invoked only for prepaid-closure / 解除+返还 cases in that set. LexRel train splits are unused.",
+    "Every legal-rag civil case and a balanced subset of LexRel expert-annotated civil relations remains a deep CaseRecord for text retrieval. Refund-rule condition bridges are limited to SERVICE_REFUND_COMPARISON_CASE_IDS. The gym refund rule is invoked only for prepaid-closure / 解除+返还 cases in that set. LexRel train splits are unused; the retrieval subset is capped per relation type.",
     "Holdings, reasoning steps, and court findings are omitted when they cannot be anchored in 法院经审理查明/法院认定, 裁判理由, or the judgment 主文. 诉称 and 辩称 are never written as CourtFinding records. UNKNOWN conditions mean the source does not establish the predicate; they are not NOT_SATISFIED.",
     "CourtFinding records are taken from 法院经审理查明/法院认定, never from 诉称 or 辩称.",
     "Condition mapping is conservative machine heuristics and always sets human_verified=false."

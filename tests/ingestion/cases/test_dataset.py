@@ -20,6 +20,7 @@ from casepath.ingestion.cases.ids import (
     EXPECTED_CIVIL_CASE_COUNT,
     EXPECTED_DEEP_CASE_COUNT,
     EXPECTED_LEGAL_RAG_CIVIL_COUNT,
+    EXPECTED_LEXREL_CASE_COUNT,
     EXPECTED_LEXREL_SERVICE_CASE_COUNT,
     GYM_CASE_ID,
     LEXREL_CASE_ID_PREFIX,
@@ -115,9 +116,11 @@ def test_lexrel_service_cases_are_deep_without_invented_holdings(
     lightweight, deep = _read_cases(canonical_data_root)
     lexrel_l1 = [record for record in lightweight if record.case_id.startswith(LEXREL_CASE_ID_PREFIX)]
     lexrel_deep = [record for record in deep if record.case_id.startswith(LEXREL_CASE_ID_PREFIX)]
-    assert len(lexrel_l1) == EXPECTED_LEXREL_SERVICE_CASE_COUNT
+    assert len(lexrel_l1) == EXPECTED_LEXREL_CASE_COUNT
     assert {record.case_id for record in lexrel_l1} == {record.case_id for record in lexrel_deep}
-    assert all(record.cause == "服务合同纠纷" for record in lexrel_l1)
+    service_cases = [record for record in lexrel_l1 if record.cause == "服务合同纠纷"]
+    assert len(service_cases) == EXPECTED_LEXREL_SERVICE_CASE_COUNT
+    assert len({record.keywords[0] for record in lexrel_l1}) == 13
     assert all(record.maturity == MaturityLevel.L1 for record in lexrel_deep)
     for record in lexrel_deep:
         assert record.findings
