@@ -26,7 +26,7 @@ SCHEMA_ROOT = REPOSITORY_ROOT / "contracts" / "schemas"
         ("legal_sources.jsonl", "legal-source-record", 1, None),
         ("provisions.jsonl", "provision-record", 1260, None),
         ("rules.jsonl", "rule-record", 776, None),
-        ("source_spans.jsonl", "provision-record", 3269, "SourceSpan"),
+        ("source_spans.jsonl", "provision-record", 3272, "SourceSpan"),
     ],
 )
 def test_published_records_pass_exported_json_schema(

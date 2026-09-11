@@ -1,8 +1,8 @@
 {
   "manifest_version": "2.0",
   "dataset_id": "dataset.civil_code.rules.expanded.v1",
-  "input_path": "inputs/rules/0de3517f83eb917b316e9579a87be8244ed55b27124127ccef62e3166f60d68a.json",
-  "input_sha256": "0de3517f83eb917b316e9579a87be8244ed55b27124127ccef62e3166f60d68a",
+  "input_path": "inputs/rules/2adc0d2c4c66953e973c4a0c57f576b5134d1a46c7d9f778813164e37dbee750.json",
+  "input_sha256": "2adc0d2c4c66953e973c4a0c57f576b5134d1a46c7d9f778813164e37dbee750",
   "rule_count": 776,
   "new_rule_review": "L1_unreviewed",
   "retained_baseline_review": {
@@ -182,8 +182,8 @@
   "outputs": {
     "legal_sources.jsonl": "10fcb635f59e758b257e83971523e68cb4b1ea364374bb05ca261d2bfd41cc1e",
     "provisions.jsonl": "56dff29fcff3cc669c4a1cbefcf00e638f3a0a9549f000096553179a7d815250",
-    "rules.jsonl": "989a162edc3d504004cacfc722151fb51b8b3ae5d551dc7cf478af5f880b0242",
-    "source_spans.jsonl": "146d125aea1d2e55252ea3825f67b9a0a11579c82ae2c73c75fbdcf0613b1d88"
+    "rules.jsonl": "7cbd7dbb15daf03d542ce1a953e2fbc0eafa1fd96db48a027e6c3dfbee710ba9",
+    "source_spans.jsonl": "372d63b587fafe6f62b7eec9cab83abf61fccfc0524e733d7d46d60e6ec3ed33"
   },
   "coverage": {
     "rule_referenced_articles": 1042,
@@ -505,5 +505,2622 @@
       584
     ],
     "remaining": 0
+  },
+  "data_refinement": {
+    "version": "p2-data-refinement.1",
+    "base_input_path": "inputs/rules/0de3517f83eb917b316e9579a87be8244ed55b27124127ccef62e3166f60d68a.json",
+    "base_input_sha256": "0de3517f83eb917b316e9579a87be8244ed55b27124127ccef62e3166f60d68a",
+    "source_url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+    "checked_on": "2026-09-11",
+    "article_text_sha256": {
+      "570": "4dde11c71c2292083add412a77d8556d6edd48a743b65bf2954063512f463833",
+      "583": "daf5358ef30ff578d3924f05c044d3ccc02056462b5c78638cae060fd6ac10cc",
+      "584": "222cb57fb84a88eb67a169fc22306488665d1f195621491ef9f344039875a682"
+    },
+    "condition_aliases": [
+      {
+        "canonical_id": "cond.contract.nonperformance_or_nonconformity",
+        "alias_ids": [
+          "cond.contract.not_or_badly_performed_583",
+          "cond.contract.not_or_badly_performed_584"
+        ],
+        "reason": "定义逐字段一致，仅合并同一合同违约命题；其他损失与限制条件不合并"
+      }
+    ],
+    "new_source_span_ids": [
+      "span.civil-code.570.deposit-ground",
+      "span.civil-code.583.breach",
+      "span.civil-code.584.breach-loss"
+    ],
+    "changed_rule_ids": [
+      "rule.act.declaration.silence_and_withdrawal.v1",
+      "rule.act.form.and_effectiveness.v1",
+      "rule.adoption.consent_and_registration.v1",
+      "rule.adoption.effect_and_invalid.v1",
+      "rule.agency.corporate_officer.v1",
+      "rule.agency.termination.entrusted.v1",
+      "rule.agency.termination.statutory.v1",
+      "rule.broker.deposit_unclaimed.v1",
+      "rule.broker.direct_rights_and_third_default.v1",
+      "rule.broker.expenses.v1",
+      "rule.broker.fee_and_lien.v1",
+      "rule.broker.keep_and_dispose.v1",
+      "rule.broker.price_instruction.v1",
+      "rule.broker.self_dealing.v1",
+      "rule.construction.completion_acceptance.v1",
+      "rule.construction.concealed_work_inspection.v1",
+      "rule.construction.employer_delay_stop_or_change.v1",
+      "rule.construction.employer_inspection.v1",
+      "rule.construction.invalid_contract_compensation.v1",
+      "rule.construction.major_national_project.v1",
+      "rule.construction.price_priority.v1",
+      "rule.construction.reasonable_use_period_harm.v1",
+      "rule.construction.subcontract_and_split.v1",
+      "rule.construction.supervisor_written_contract.v1",
+      "rule.construction.survey_design_liability.v1",
+      "rule.construction.termination.v1",
+      "rule.construction.workmanship_repair.v1",
+      "rule.construction.written_form.v1",
+      "rule.contract.assignment.accessories_and_defenses.v1",
+      "rule.contract.breach.both_parties_or_contributory.v1",
+      "rule.contract.breach.damages_after_cure.v1",
+      "rule.contract.breach.foreseeable_damages.v1",
+      "rule.contract.breach.nonmoney_specific_performance.v1",
+      "rule.contract.deposit.penalty.v1",
+      "rule.contract.deposit_in_court.formed.v1",
+      "rule.factoring.base_contract_change_after_notice.v1",
+      "rule.factoring.fictitious_receivable.no_defense.v1",
+      "rule.factoring.multiple_priority.v1",
+      "rule.factoring.notice_must_identify.v1",
+      "rule.factoring.recourse_or_nonrecourse.v1",
+      "rule.factoring.written_form.v1",
+      "rule.family.daily_household_agency.v1",
+      "rule.family.divorce.child_custody.v1",
+      "rule.family.divorce.compensation_debt_help.v1",
+      "rule.family.divorce.fault_damages.v1",
+      "rule.family.divorce.property_partition.v1",
+      "rule.family.divorce.remarriage_reregister.v1",
+      "rule.family.divorce.visitation.v1",
+      "rule.family.joint_debt.v1",
+      "rule.family.marital_partition_during_marriage.v1",
+      "rule.family.marital_property.characterize.v1",
+      "rule.family.marriage.formation.v1",
+      "rule.family.marriage.void.v1",
+      "rule.family.marriage.voidable.v1",
+      "rule.family.parental_care.v1",
+      "rule.family.parents_marriage_autonomy.v1",
+      "rule.finlease.accidental_destruction.compensation.v1",
+      "rule.finlease.claim_and_rent.v1",
+      "rule.finlease.destruction_rent_continues.v1",
+      "rule.finlease.end_term_ownership.v1",
+      "rule.finlease.fictitious_object.void.v1",
+      "rule.finlease.invalid_ownership.v1",
+      "rule.finlease.lessee_care_and_repair.v1",
+      "rule.finlease.lessor_claim_failure_liability.v1",
+      "rule.finlease.lessor_license.not_affect_validity.v1",
+      "rule.finlease.lessor_not_liable_for_quality.v1",
+      "rule.finlease.ownership_registration_against.v1",
+      "rule.finlease.quiet_enjoyment.v1",
+      "rule.finlease.rent_determination.v1",
+      "rule.finlease.sale_contract_no_unilateral_change.v1",
+      "rule.finlease.seller_delivery_and_refusal.v1",
+      "rule.finlease.statutory_termination.v1",
+      "rule.finlease.surplus_return_and_nonreturn_compensation.v1",
+      "rule.finlease.termination_after_sale_failure.damages.v1",
+      "rule.finlease.third_party_damage.lessor_not_liable.v1",
+      "rule.finlease.unauthorized_disposition.terminate.v1",
+      "rule.finlease.unpaid_rent.accelerate_or_terminate.v1",
+      "rule.finlease.written_form.v1",
+      "rule.intermediary.fee.v1",
+      "rule.intermediary.true_report.v1",
+      "rule.legal_person.branch.v1",
+      "rule.legal_person.liquidation_obligor.v1",
+      "rule.legal_person.registration.good_faith.v1",
+      "rule.legal_person.related_party.v1",
+      "rule.legal_person.representative.binds.v1",
+      "rule.legal_person.representative.tort.v1",
+      "rule.mandate.expenses.v1",
+      "rule.mandate.fault_liability.v1",
+      "rule.mandate.follow_instructions.v1",
+      "rule.mandate.joint_agents.v1",
+      "rule.mandate.own_name_contract.v1",
+      "rule.mandate.personal_or_subdelegate.v1",
+      "rule.mandate.remuneration.v1",
+      "rule.mandate.report_and_transfer.v1",
+      "rule.mandate.terminate_anytime.v1",
+      "rule.mandate.termination_and_aftermath.v1",
+      "rule.mandate.trustee_loss_and_extra_agent.v1",
+      "rule.partnership.contribution_and_property.v1",
+      "rule.partnership.creditor_no_subrogation.v1",
+      "rule.partnership.decision_and_execution.v1",
+      "rule.partnership.joint_debt.v1",
+      "rule.partnership.no_execution_fee.v1",
+      "rule.partnership.profit_loss_and_liquidation.v1",
+      "rule.partnership.term_and_death.v1",
+      "rule.partnership.transfer_share.v1",
+      "rule.person.capacity.limited_or_none.v1",
+      "rule.person.declared_death.acts_while_alive.v1",
+      "rule.person.declared_death.apply.v1",
+      "rule.person.declared_death.revoke.v1",
+      "rule.person.guardian.default.v1",
+      "rule.person.missing.revoke.v1",
+      "rule.person.parent_child.support.v1",
+      "rule.personality.personal_info.processing_exemption.v1",
+      "rule.personality.personal_info.processing_requirements.v1",
+      "rule.property.advance_notice.v1",
+      "rule.property.co_ownership.default_type_and_share.v1",
+      "rule.property.co_ownership.external_debt.v1",
+      "rule.property.co_ownership.manage_dispose_cost.v1",
+      "rule.property.co_ownership.partition.v1",
+      "rule.property.co_ownership.share_preemption.v1",
+      "rule.property.correction_and_objection.v1",
+      "rule.property.easement.create_and_duties.v1",
+      "rule.property.easement.priority_and_transfer.v1",
+      "rule.property.easement.terminate.v1",
+      "rule.property.exclude_or_restore.v1",
+      "rule.property.immovable.contract_without_registration.v1",
+      "rule.property.land_contract.transfer_and_stability.v1",
+      "rule.property.mortgage.lease_transfer_and_preservation.v1",
+      "rule.property.mortgage.new_building_use_and_limitation.v1",
+      "rule.property.mortgage.priority_change_and_enforce.v1",
+      "rule.property.movable.constitutum.v1",
+      "rule.property.movable.delivery.v1",
+      "rule.property.movable.simple_delivery.v1",
+      "rule.property.pledge.create_and_forfeiture.v1",
+      "rule.property.pledge.waive_enforce_and_timely.v1",
+      "rule.property.register.controls.v1",
+      "rule.property.registration.error.v1",
+      "rule.property.security.extinguish.v1",
+      "rule.property.security.priority_and_accessory.v1",
+      "rule.property.security.subrogation_transfer_and_mix.v1",
+      "rule.property.special_movable.registration_against.v1",
+      "rule.property_svc.dismiss.v1",
+      "rule.property_svc.duties_and_report.v1",
+      "rule.property_svc.fee.v1",
+      "rule.property_svc.form_and_promise.v1",
+      "rule.property_svc.handover_and_holdover.v1",
+      "rule.property_svc.no_total_subcontract.v1",
+      "rule.property_svc.owner_notice.v1",
+      "rule.property_svc.renew_or_indefinite.v1",
+      "rule.sale.quality.purpose_frustrated.v1",
+      "rule.storage.care_no_transfer_no_use.v1",
+      "rule.storage.defect_notice.v1",
+      "rule.storage.fee_due_and_lien.v1",
+      "rule.storage.fee_or_gratuitous.v1",
+      "rule.storage.loss_liability.v1",
+      "rule.storage.retrieve_and_return.v1",
+      "rule.storage.third_party_claim.v1",
+      "rule.succession.accept_or_renounce.heir.v1",
+      "rule.succession.accept_or_renounce.legatee.v1",
+      "rule.succession.debt.mixed_succession.v1",
+      "rule.succession.debt.priority_and_necessary_share.v1",
+      "rule.succession.disqualification.heir.v1",
+      "rule.succession.disqualification.legatee.v1",
+      "rule.succession.estate.administrator.appointment.v1",
+      "rule.succession.estate.administrator.duties.v1",
+      "rule.succession.estate.administrator.liability.v1",
+      "rule.succession.estate.administrator.remuneration.v1",
+      "rule.succession.estate.notify.v1",
+      "rule.succession.heir.limited_liability.v1",
+      "rule.succession.intestate.order.v1",
+      "rule.succession.legacy.not_impair_debts.v1",
+      "rule.succession.legacy_support_agreement.v1",
+      "rule.succession.mode.priority.v1",
+      "rule.succession.partition.method.v1",
+      "rule.succession.transmissibility.v1",
+      "rule.succession.will.compulsory_share.v1",
+      "rule.succession.will.revoke_or_conflict.v1",
+      "rule.support.parent_child.payment.v1",
+      "rule.support.post_divorce_child.v1",
+      "rule.support.spouse.maintenance.v1",
+      "rule.tech.agreed_use_infringes_third_party.v1",
+      "rule.tech.consult_service.new_result_ownership.v1",
+      "rule.tech.consult_service.work_expense.v1",
+      "rule.tech.development_written_form.v1",
+      "rule.tech.insurmountable_risk.v1",
+      "rule.tech.no_restrict_competition.v1",
+      "rule.tech.patent_license_duties.v1",
+      "rule.tech.patent_license_only_during_term.v1",
+      "rule.tech.subject_already_public.terminate.v1",
+      "rule.tech.subsequent_improvement.v1",
+      "rule.tech.transfer_license_breach.v1",
+      "rule.tech.transfer_license_written_form.v1",
+      "rule.tech.warranty_and_confidentiality.v1",
+      "rule.tort.animal.keeper.v1",
+      "rule.tort.animal.third_party.v1",
+      "rule.tort.environment.pollution_or_ecology.v1",
+      "rule.tort.environment.public_compensation_items.v1",
+      "rule.tort.environment.restoration.v1",
+      "rule.tort.environment.third_party.v1",
+      "rule.tort.guardian.delegated.v1",
+      "rule.tort.guardian.ward_harm.v1",
+      "rule.tort.guardian_share_after_abetment.v1",
+      "rule.tort.medical.exemption.v1",
+      "rule.tort.medical.fault.v1",
+      "rule.tort.medical.informed_consent.v1",
+      "rule.tort.medical.presumed_fault.v1",
+      "rule.tort.medical.privacy.v1",
+      "rule.tort.medical.records.access.v1",
+      "rule.tort.medical.unnecessary_exam.v1",
+      "rule.tort.product.internal_recourse.v1",
+      "rule.tort.product.preventive.v1",
+      "rule.tort.product.punitive_damages.v1",
+      "rule.tort.product.recourse_against_handler.v1",
+      "rule.tort.school.limited_capacity_injury.v1",
+      "rule.tort.school.third_party.supplementary.v1",
+      "rule.tort.ultrahazard.dangerous_substance.v1",
+      "rule.tort.ultrahazard.high_activity.v1",
+      "rule.tort.vehicle.affiliation.v1",
+      "rule.tort.vehicle.assembled_or_scrapped.v1",
+      "rule.tort.vehicle.gratuitous_passenger.v1",
+      "rule.tort.vehicle.insurance_priority.v1",
+      "rule.tort.vehicle.lease_or_borrow.v1",
+      "rule.tort.vehicle.stolen_or_robbed.v1",
+      "rule.tort.vehicle.unauthorized_drive.v1",
+      "rule.tort.vehicle.unregistered_transfer.v1",
+      "rule.transport.cargo_damage_and_amount.v1",
+      "rule.transport.carryon_and_checked_luggage.v1",
+      "rule.transport.delay_reroute_refund.v1",
+      "rule.transport.force_majeure_freight.v1",
+      "rule.transport.lien_and_deposit.v1",
+      "rule.transport.luggage_and_dangerous_items.v1",
+      "rule.transport.notify_pickup_and_inspection.v1",
+      "rule.transport.passenger_casualty.v1",
+      "rule.transport.passenger_missed_ride.v1",
+      "rule.transport.rescue_duty.v1",
+      "rule.transport.safety_inform_and_cooperate.v1",
+      "rule.transport.service_standard_change.v1",
+      "rule.transport.shipper_declare_pack_danger.v1",
+      "rule.transport.stop_return_or_redirect.v1",
+      "rule.transport.successive_same_mode.v1",
+      "rule.transport.ticket_ride_and_reissue.v1",
+      "rule.transport.time_route_and_fare.v1",
+      "rule.warehouse.dangerous_goods.v1",
+      "rule.warehouse.deterioration_notice_and_disposal.v1",
+      "rule.warehouse.inspect_or_sample.v1",
+      "rule.warehouse.inspection.v1",
+      "rule.warehouse.loss_liability.v1",
+      "rule.warehouse.receipt_and_transfer.v1",
+      "rule.warehouse.retrieve_fee_and_deposit.v1",
+      "rule.work.confidentiality.v1",
+      "rule.work.custody_liability.v1",
+      "rule.work.delivery_acceptance_quality.v1",
+      "rule.work.joint_contractors.v1",
+      "rule.work.lien_or_refuse_delivery.v1",
+      "rule.work.materials.v1",
+      "rule.work.midcourse_change.damages.v1",
+      "rule.work.orderer_assistance.v1",
+      "rule.work.orderer_terminate_anytime.v1",
+      "rule.work.personally_or_third_party.v1",
+      "rule.work.remuneration_timing.v1",
+      "rule.work.supervision.v1",
+      "rule.work.unreasonable_drawings.notify.v1"
+    ],
+    "added_provision_references": {
+      "rule.act.declaration.silence_and_withdrawal.v1": [
+        "law.prc.civil_code.2021.article_0134"
+      ],
+      "rule.act.form.and_effectiveness.v1": [
+        "law.prc.civil_code.2021.article_0134"
+      ],
+      "rule.adoption.consent_and_registration.v1": [
+        "law.prc.civil_code.2021.article_1111"
+      ],
+      "rule.adoption.effect_and_invalid.v1": [
+        "law.prc.civil_code.2021.article_1105"
+      ],
+      "rule.agency.corporate_officer.v1": [
+        "law.prc.civil_code.2021.article_0171"
+      ],
+      "rule.agency.termination.entrusted.v1": [
+        "law.prc.civil_code.2021.article_0175"
+      ],
+      "rule.agency.termination.statutory.v1": [
+        "law.prc.civil_code.2021.article_0173"
+      ],
+      "rule.broker.deposit_unclaimed.v1": [
+        "law.prc.civil_code.2021.article_0952",
+        "law.prc.civil_code.2021.article_0953",
+        "law.prc.civil_code.2021.article_0955",
+        "law.prc.civil_code.2021.article_0956",
+        "law.prc.civil_code.2021.article_0958",
+        "law.prc.civil_code.2021.article_0959"
+      ],
+      "rule.broker.direct_rights_and_third_default.v1": [
+        "law.prc.civil_code.2021.article_0952",
+        "law.prc.civil_code.2021.article_0953",
+        "law.prc.civil_code.2021.article_0955",
+        "law.prc.civil_code.2021.article_0956",
+        "law.prc.civil_code.2021.article_0957",
+        "law.prc.civil_code.2021.article_0959"
+      ],
+      "rule.broker.expenses.v1": [
+        "law.prc.civil_code.2021.article_0953",
+        "law.prc.civil_code.2021.article_0955",
+        "law.prc.civil_code.2021.article_0956",
+        "law.prc.civil_code.2021.article_0957",
+        "law.prc.civil_code.2021.article_0958",
+        "law.prc.civil_code.2021.article_0959"
+      ],
+      "rule.broker.fee_and_lien.v1": [
+        "law.prc.civil_code.2021.article_0952",
+        "law.prc.civil_code.2021.article_0953",
+        "law.prc.civil_code.2021.article_0955",
+        "law.prc.civil_code.2021.article_0956",
+        "law.prc.civil_code.2021.article_0957",
+        "law.prc.civil_code.2021.article_0958"
+      ],
+      "rule.broker.keep_and_dispose.v1": [
+        "law.prc.civil_code.2021.article_0952",
+        "law.prc.civil_code.2021.article_0955",
+        "law.prc.civil_code.2021.article_0956",
+        "law.prc.civil_code.2021.article_0957",
+        "law.prc.civil_code.2021.article_0958",
+        "law.prc.civil_code.2021.article_0959"
+      ],
+      "rule.broker.price_instruction.v1": [
+        "law.prc.civil_code.2021.article_0952",
+        "law.prc.civil_code.2021.article_0953",
+        "law.prc.civil_code.2021.article_0956",
+        "law.prc.civil_code.2021.article_0957",
+        "law.prc.civil_code.2021.article_0958",
+        "law.prc.civil_code.2021.article_0959"
+      ],
+      "rule.broker.self_dealing.v1": [
+        "law.prc.civil_code.2021.article_0952",
+        "law.prc.civil_code.2021.article_0953",
+        "law.prc.civil_code.2021.article_0955",
+        "law.prc.civil_code.2021.article_0957",
+        "law.prc.civil_code.2021.article_0958",
+        "law.prc.civil_code.2021.article_0959"
+      ],
+      "rule.construction.completion_acceptance.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.concealed_work_inspection.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.employer_delay_stop_or_change.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.employer_inspection.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.invalid_contract_compensation.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.major_national_project.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.price_priority.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806"
+      ],
+      "rule.construction.reasonable_use_period_harm.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.subcontract_and_split.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.supervisor_written_contract.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.survey_design_liability.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.termination.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.workmanship_repair.v1": [
+        "law.prc.civil_code.2021.article_0789",
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.construction.written_form.v1": [
+        "law.prc.civil_code.2021.article_0791",
+        "law.prc.civil_code.2021.article_0792",
+        "law.prc.civil_code.2021.article_0793",
+        "law.prc.civil_code.2021.article_0796",
+        "law.prc.civil_code.2021.article_0797",
+        "law.prc.civil_code.2021.article_0798",
+        "law.prc.civil_code.2021.article_0799",
+        "law.prc.civil_code.2021.article_0800",
+        "law.prc.civil_code.2021.article_0801",
+        "law.prc.civil_code.2021.article_0802",
+        "law.prc.civil_code.2021.article_0803",
+        "law.prc.civil_code.2021.article_0806",
+        "law.prc.civil_code.2021.article_0807"
+      ],
+      "rule.contract.assignment.accessories_and_defenses.v1": [
+        "law.prc.civil_code.2021.article_0545"
+      ],
+      "rule.contract.breach.both_parties_or_contributory.v1": [
+        "law.prc.civil_code.2021.article_0584"
+      ],
+      "rule.contract.breach.damages_after_cure.v1": [
+        "law.prc.civil_code.2021.article_0584"
+      ],
+      "rule.contract.breach.foreseeable_damages.v1": [
+        "law.prc.civil_code.2021.article_0583",
+        "law.prc.civil_code.2021.article_0592"
+      ],
+      "rule.contract.breach.nonmoney_specific_performance.v1": [
+        "law.prc.civil_code.2021.article_0587",
+        "law.prc.civil_code.2021.article_0610"
+      ],
+      "rule.contract.deposit.penalty.v1": [
+        "law.prc.civil_code.2021.article_0580",
+        "law.prc.civil_code.2021.article_0610"
+      ],
+      "rule.factoring.base_contract_change_after_notice.v1": [
+        "law.prc.civil_code.2021.article_0762",
+        "law.prc.civil_code.2021.article_0763",
+        "law.prc.civil_code.2021.article_0764",
+        "law.prc.civil_code.2021.article_0766",
+        "law.prc.civil_code.2021.article_0768"
+      ],
+      "rule.factoring.fictitious_receivable.no_defense.v1": [
+        "law.prc.civil_code.2021.article_0762",
+        "law.prc.civil_code.2021.article_0764",
+        "law.prc.civil_code.2021.article_0765",
+        "law.prc.civil_code.2021.article_0766",
+        "law.prc.civil_code.2021.article_0768"
+      ],
+      "rule.factoring.multiple_priority.v1": [
+        "law.prc.civil_code.2021.article_0762",
+        "law.prc.civil_code.2021.article_0763",
+        "law.prc.civil_code.2021.article_0764",
+        "law.prc.civil_code.2021.article_0765",
+        "law.prc.civil_code.2021.article_0766"
+      ],
+      "rule.factoring.notice_must_identify.v1": [
+        "law.prc.civil_code.2021.article_0762",
+        "law.prc.civil_code.2021.article_0763",
+        "law.prc.civil_code.2021.article_0765",
+        "law.prc.civil_code.2021.article_0766",
+        "law.prc.civil_code.2021.article_0768"
+      ],
+      "rule.factoring.recourse_or_nonrecourse.v1": [
+        "law.prc.civil_code.2021.article_0762",
+        "law.prc.civil_code.2021.article_0763",
+        "law.prc.civil_code.2021.article_0764",
+        "law.prc.civil_code.2021.article_0765",
+        "law.prc.civil_code.2021.article_0768"
+      ],
+      "rule.factoring.written_form.v1": [
+        "law.prc.civil_code.2021.article_0763",
+        "law.prc.civil_code.2021.article_0764",
+        "law.prc.civil_code.2021.article_0765",
+        "law.prc.civil_code.2021.article_0766",
+        "law.prc.civil_code.2021.article_0768"
+      ],
+      "rule.family.daily_household_agency.v1": [
+        "law.prc.civil_code.2021.article_1059",
+        "law.prc.civil_code.2021.article_1062",
+        "law.prc.civil_code.2021.article_1064",
+        "law.prc.civil_code.2021.article_1066"
+      ],
+      "rule.family.divorce.child_custody.v1": [
+        "law.prc.civil_code.2021.article_1083",
+        "law.prc.civil_code.2021.article_1085",
+        "law.prc.civil_code.2021.article_1086",
+        "law.prc.civil_code.2021.article_1091"
+      ],
+      "rule.family.divorce.compensation_debt_help.v1": [
+        "law.prc.civil_code.2021.article_1087"
+      ],
+      "rule.family.divorce.fault_damages.v1": [
+        "law.prc.civil_code.2021.article_1083",
+        "law.prc.civil_code.2021.article_1084",
+        "law.prc.civil_code.2021.article_1085",
+        "law.prc.civil_code.2021.article_1086"
+      ],
+      "rule.family.divorce.property_partition.v1": [
+        "law.prc.civil_code.2021.article_1088"
+      ],
+      "rule.family.divorce.remarriage_reregister.v1": [
+        "law.prc.civil_code.2021.article_1084",
+        "law.prc.civil_code.2021.article_1085",
+        "law.prc.civil_code.2021.article_1086",
+        "law.prc.civil_code.2021.article_1091"
+      ],
+      "rule.family.divorce.visitation.v1": [
+        "law.prc.civil_code.2021.article_1083",
+        "law.prc.civil_code.2021.article_1084",
+        "law.prc.civil_code.2021.article_1085",
+        "law.prc.civil_code.2021.article_1091"
+      ],
+      "rule.family.joint_debt.v1": [
+        "law.prc.civil_code.2021.article_1059",
+        "law.prc.civil_code.2021.article_1060",
+        "law.prc.civil_code.2021.article_1062",
+        "law.prc.civil_code.2021.article_1066"
+      ],
+      "rule.family.marital_partition_during_marriage.v1": [
+        "law.prc.civil_code.2021.article_1059",
+        "law.prc.civil_code.2021.article_1060",
+        "law.prc.civil_code.2021.article_1062",
+        "law.prc.civil_code.2021.article_1064"
+      ],
+      "rule.family.marital_property.characterize.v1": [
+        "law.prc.civil_code.2021.article_1059",
+        "law.prc.civil_code.2021.article_1060",
+        "law.prc.civil_code.2021.article_1064",
+        "law.prc.civil_code.2021.article_1066"
+      ],
+      "rule.family.marriage.formation.v1": [
+        "law.prc.civil_code.2021.article_1051",
+        "law.prc.civil_code.2021.article_1052"
+      ],
+      "rule.family.marriage.void.v1": [
+        "law.prc.civil_code.2021.article_1049",
+        "law.prc.civil_code.2021.article_1052"
+      ],
+      "rule.family.marriage.voidable.v1": [
+        "law.prc.civil_code.2021.article_1049",
+        "law.prc.civil_code.2021.article_1051"
+      ],
+      "rule.family.parental_care.v1": [
+        "law.prc.civil_code.2021.article_1067",
+        "law.prc.civil_code.2021.article_1069"
+      ],
+      "rule.family.parents_marriage_autonomy.v1": [
+        "law.prc.civil_code.2021.article_1058",
+        "law.prc.civil_code.2021.article_1067",
+        "law.prc.civil_code.2021.article_1068"
+      ],
+      "rule.finlease.accidental_destruction.compensation.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.claim_and_rent.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.destruction_rent_continues.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.end_term_ownership.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.fictitious_object.void.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.invalid_ownership.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758"
+      ],
+      "rule.finlease.lessee_care_and_repair.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.lessor_claim_failure_liability.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.lessor_license.not_affect_validity.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.lessor_not_liable_for_quality.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.ownership_registration_against.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.quiet_enjoyment.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.rent_determination.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.sale_contract_no_unilateral_change.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.seller_delivery_and_refusal.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.statutory_termination.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.surplus_return_and_nonreturn_compensation.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.termination_after_sale_failure.damages.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.third_party_damage.lessor_not_liable.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.unauthorized_disposition.terminate.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.unpaid_rent.accelerate_or_terminate.v1": [
+        "law.prc.civil_code.2021.article_0736",
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.finlease.written_form.v1": [
+        "law.prc.civil_code.2021.article_0737",
+        "law.prc.civil_code.2021.article_0738",
+        "law.prc.civil_code.2021.article_0739",
+        "law.prc.civil_code.2021.article_0742",
+        "law.prc.civil_code.2021.article_0743",
+        "law.prc.civil_code.2021.article_0744",
+        "law.prc.civil_code.2021.article_0745",
+        "law.prc.civil_code.2021.article_0746",
+        "law.prc.civil_code.2021.article_0747",
+        "law.prc.civil_code.2021.article_0748",
+        "law.prc.civil_code.2021.article_0749",
+        "law.prc.civil_code.2021.article_0750",
+        "law.prc.civil_code.2021.article_0751",
+        "law.prc.civil_code.2021.article_0752",
+        "law.prc.civil_code.2021.article_0753",
+        "law.prc.civil_code.2021.article_0754",
+        "law.prc.civil_code.2021.article_0755",
+        "law.prc.civil_code.2021.article_0756",
+        "law.prc.civil_code.2021.article_0757",
+        "law.prc.civil_code.2021.article_0758",
+        "law.prc.civil_code.2021.article_0760"
+      ],
+      "rule.intermediary.fee.v1": [
+        "law.prc.civil_code.2021.article_0962"
+      ],
+      "rule.intermediary.true_report.v1": [
+        "law.prc.civil_code.2021.article_0963"
+      ],
+      "rule.legal_person.branch.v1": [
+        "law.prc.civil_code.2021.article_0059"
+      ],
+      "rule.legal_person.liquidation_obligor.v1": [
+        "law.prc.civil_code.2021.article_0069"
+      ],
+      "rule.legal_person.registration.good_faith.v1": [
+        "law.prc.civil_code.2021.article_0059",
+        "law.prc.civil_code.2021.article_0061"
+      ],
+      "rule.legal_person.related_party.v1": [
+        "law.prc.civil_code.2021.article_1165"
+      ],
+      "rule.legal_person.representative.binds.v1": [
+        "law.prc.civil_code.2021.article_0065"
+      ],
+      "rule.legal_person.representative.tort.v1": [
+        "law.prc.civil_code.2021.article_0061"
+      ],
+      "rule.mandate.expenses.v1": [
+        "law.prc.civil_code.2021.article_0922",
+        "law.prc.civil_code.2021.article_0923",
+        "law.prc.civil_code.2021.article_0924",
+        "law.prc.civil_code.2021.article_0925",
+        "law.prc.civil_code.2021.article_0928",
+        "law.prc.civil_code.2021.article_0929",
+        "law.prc.civil_code.2021.article_0930",
+        "law.prc.civil_code.2021.article_0932",
+        "law.prc.civil_code.2021.article_0933",
+        "law.prc.civil_code.2021.article_0934"
+      ],
+      "rule.mandate.fault_liability.v1": [
+        "law.prc.civil_code.2021.article_0921",
+        "law.prc.civil_code.2021.article_0922",
+        "law.prc.civil_code.2021.article_0923",
+        "law.prc.civil_code.2021.article_0924",
+        "law.prc.civil_code.2021.article_0925",
+        "law.prc.civil_code.2021.article_0928",
+        "law.prc.civil_code.2021.article_0930",
+        "law.prc.civil_code.2021.article_0932",
+        "law.prc.civil_code.2021.article_0933",
+        "law.prc.civil_code.2021.article_0934"
+      ],
+      "rule.mandate.follow_instructions.v1": [
+        "law.prc.civil_code.2021.article_0921",
+        "law.prc.civil_code.2021.article_0923",
+        "law.prc.civil_code.2021.article_0924",
+        "law.prc.civil_code.2021.article_0925",
+        "law.prc.civil_code.2021.article_0928",
+        "law.prc.civil_code.2021.article_0929",
+        "law.prc.civil_code.2021.article_0930",
+        "law.prc.civil_code.2021.article_0932",
+        "law.prc.civil_code.2021.article_0933",
+        "law.prc.civil_code.2021.article_0934"
+      ],
+      "rule.mandate.joint_agents.v1": [
+        "law.prc.civil_code.2021.article_0921",
+        "law.prc.civil_code.2021.article_0922",
+        "law.prc.civil_code.2021.article_0923",
+        "law.prc.civil_code.2021.article_0924",
+        "law.prc.civil_code.2021.article_0925",
+        "law.prc.civil_code.2021.article_0928",
+        "law.prc.civil_code.2021.article_0929",
+        "law.prc.civil_code.2021.article_0930",
+        "law.prc.civil_code.2021.article_0933",
+        "law.prc.civil_code.2021.article_0934"
+      ],
+      "rule.mandate.own_name_contract.v1": [
+        "law.prc.civil_code.2021.article_0921",
+        "law.prc.civil_code.2021.article_0922",
+        "law.prc.civil_code.2021.article_0923",
+        "law.prc.civil_code.2021.article_0924",
+        "law.prc.civil_code.2021.article_0928",
+        "law.prc.civil_code.2021.article_0929",
+        "law.prc.civil_code.2021.article_0930",
+        "law.prc.civil_code.2021.article_0932",
+        "law.prc.civil_code.2021.article_0933",
+        "law.prc.civil_code.2021.article_0934"
+      ],
+      "rule.mandate.personal_or_subdelegate.v1": [
+        "law.prc.civil_code.2021.article_0921",
+        "law.prc.civil_code.2021.article_0922",
+        "law.prc.civil_code.2021.article_0924",
+        "law.prc.civil_code.2021.article_0925",
+        "law.prc.civil_code.2021.article_0928",
+        "law.prc.civil_code.2021.article_0929",
+        "law.prc.civil_code.2021.article_0930",
+        "law.prc.civil_code.2021.article_0932",
+        "law.prc.civil_code.2021.article_0933",
+        "law.prc.civil_code.2021.article_0934"
+      ],
+      "rule.mandate.remuneration.v1": [
+        "law.prc.civil_code.2021.article_0921",
+        "law.prc.civil_code.2021.article_0922",
+        "law.prc.civil_code.2021.article_0923",
+        "law.prc.civil_code.2021.article_0924",
+        "law.prc.civil_code.2021.article_0925",
+        "law.prc.civil_code.2021.article_0929",
+        "law.prc.civil_code.2021.article_0930",
+        "law.prc.civil_code.2021.article_0932",
+        "law.prc.civil_code.2021.article_0933",
+        "law.prc.civil_code.2021.article_0934"
+      ],
+      "rule.mandate.report_and_transfer.v1": [
+        "law.prc.civil_code.2021.article_0921",
+        "law.prc.civil_code.2021.article_0922",
+        "law.prc.civil_code.2021.article_0923",
+        "law.prc.civil_code.2021.article_0925",
+        "law.prc.civil_code.2021.article_0928",
+        "law.prc.civil_code.2021.article_0929",
+        "law.prc.civil_code.2021.article_0930",
+        "law.prc.civil_code.2021.article_0932",
+        "law.prc.civil_code.2021.article_0933",
+        "law.prc.civil_code.2021.article_0934"
+      ],
+      "rule.mandate.terminate_anytime.v1": [
+        "law.prc.civil_code.2021.article_0921",
+        "law.prc.civil_code.2021.article_0922",
+        "law.prc.civil_code.2021.article_0923",
+        "law.prc.civil_code.2021.article_0924",
+        "law.prc.civil_code.2021.article_0925",
+        "law.prc.civil_code.2021.article_0928",
+        "law.prc.civil_code.2021.article_0929",
+        "law.prc.civil_code.2021.article_0930",
+        "law.prc.civil_code.2021.article_0932",
+        "law.prc.civil_code.2021.article_0934"
+      ],
+      "rule.mandate.termination_and_aftermath.v1": [
+        "law.prc.civil_code.2021.article_0921",
+        "law.prc.civil_code.2021.article_0922",
+        "law.prc.civil_code.2021.article_0923",
+        "law.prc.civil_code.2021.article_0924",
+        "law.prc.civil_code.2021.article_0925",
+        "law.prc.civil_code.2021.article_0928",
+        "law.prc.civil_code.2021.article_0929",
+        "law.prc.civil_code.2021.article_0930",
+        "law.prc.civil_code.2021.article_0932",
+        "law.prc.civil_code.2021.article_0933"
+      ],
+      "rule.mandate.trustee_loss_and_extra_agent.v1": [
+        "law.prc.civil_code.2021.article_0921",
+        "law.prc.civil_code.2021.article_0922",
+        "law.prc.civil_code.2021.article_0923",
+        "law.prc.civil_code.2021.article_0924",
+        "law.prc.civil_code.2021.article_0925",
+        "law.prc.civil_code.2021.article_0928",
+        "law.prc.civil_code.2021.article_0929",
+        "law.prc.civil_code.2021.article_0932",
+        "law.prc.civil_code.2021.article_0933",
+        "law.prc.civil_code.2021.article_0934"
+      ],
+      "rule.partnership.contribution_and_property.v1": [
+        "law.prc.civil_code.2021.article_0970",
+        "law.prc.civil_code.2021.article_0971",
+        "law.prc.civil_code.2021.article_0972",
+        "law.prc.civil_code.2021.article_0973",
+        "law.prc.civil_code.2021.article_0974",
+        "law.prc.civil_code.2021.article_0975",
+        "law.prc.civil_code.2021.article_0976"
+      ],
+      "rule.partnership.creditor_no_subrogation.v1": [
+        "law.prc.civil_code.2021.article_0968",
+        "law.prc.civil_code.2021.article_0970",
+        "law.prc.civil_code.2021.article_0971",
+        "law.prc.civil_code.2021.article_0972",
+        "law.prc.civil_code.2021.article_0973",
+        "law.prc.civil_code.2021.article_0974",
+        "law.prc.civil_code.2021.article_0976"
+      ],
+      "rule.partnership.decision_and_execution.v1": [
+        "law.prc.civil_code.2021.article_0968",
+        "law.prc.civil_code.2021.article_0971",
+        "law.prc.civil_code.2021.article_0972",
+        "law.prc.civil_code.2021.article_0973",
+        "law.prc.civil_code.2021.article_0974",
+        "law.prc.civil_code.2021.article_0975",
+        "law.prc.civil_code.2021.article_0976"
+      ],
+      "rule.partnership.joint_debt.v1": [
+        "law.prc.civil_code.2021.article_0968",
+        "law.prc.civil_code.2021.article_0970",
+        "law.prc.civil_code.2021.article_0971",
+        "law.prc.civil_code.2021.article_0972",
+        "law.prc.civil_code.2021.article_0974",
+        "law.prc.civil_code.2021.article_0975",
+        "law.prc.civil_code.2021.article_0976"
+      ],
+      "rule.partnership.no_execution_fee.v1": [
+        "law.prc.civil_code.2021.article_0968",
+        "law.prc.civil_code.2021.article_0970",
+        "law.prc.civil_code.2021.article_0972",
+        "law.prc.civil_code.2021.article_0973",
+        "law.prc.civil_code.2021.article_0974",
+        "law.prc.civil_code.2021.article_0975",
+        "law.prc.civil_code.2021.article_0976"
+      ],
+      "rule.partnership.profit_loss_and_liquidation.v1": [
+        "law.prc.civil_code.2021.article_0968",
+        "law.prc.civil_code.2021.article_0970",
+        "law.prc.civil_code.2021.article_0971",
+        "law.prc.civil_code.2021.article_0973",
+        "law.prc.civil_code.2021.article_0974",
+        "law.prc.civil_code.2021.article_0975",
+        "law.prc.civil_code.2021.article_0976"
+      ],
+      "rule.partnership.term_and_death.v1": [
+        "law.prc.civil_code.2021.article_0968",
+        "law.prc.civil_code.2021.article_0970",
+        "law.prc.civil_code.2021.article_0971",
+        "law.prc.civil_code.2021.article_0972",
+        "law.prc.civil_code.2021.article_0973",
+        "law.prc.civil_code.2021.article_0974",
+        "law.prc.civil_code.2021.article_0975"
+      ],
+      "rule.partnership.transfer_share.v1": [
+        "law.prc.civil_code.2021.article_0968",
+        "law.prc.civil_code.2021.article_0970",
+        "law.prc.civil_code.2021.article_0971",
+        "law.prc.civil_code.2021.article_0972",
+        "law.prc.civil_code.2021.article_0973",
+        "law.prc.civil_code.2021.article_0975",
+        "law.prc.civil_code.2021.article_0976"
+      ],
+      "rule.person.capacity.limited_or_none.v1": [
+        "law.prc.civil_code.2021.article_0134"
+      ],
+      "rule.person.declared_death.acts_while_alive.v1": [
+        "law.prc.civil_code.2021.article_0134"
+      ],
+      "rule.person.declared_death.apply.v1": [
+        "law.prc.civil_code.2021.article_0040"
+      ],
+      "rule.person.declared_death.revoke.v1": [
+        "law.prc.civil_code.2021.article_0045",
+        "law.prc.civil_code.2021.article_0048"
+      ],
+      "rule.person.guardian.default.v1": [
+        "law.prc.civil_code.2021.article_0026",
+        "law.prc.civil_code.2021.article_0144",
+        "law.prc.civil_code.2021.article_0145"
+      ],
+      "rule.person.missing.revoke.v1": [
+        "law.prc.civil_code.2021.article_0042",
+        "law.prc.civil_code.2021.article_0050"
+      ],
+      "rule.person.parent_child.support.v1": [
+        "law.prc.civil_code.2021.article_0018"
+      ],
+      "rule.personality.personal_info.processing_exemption.v1": [
+        "law.prc.civil_code.2021.article_1035"
+      ],
+      "rule.personality.personal_info.processing_requirements.v1": [
+        "law.prc.civil_code.2021.article_1036"
+      ],
+      "rule.property.advance_notice.v1": [
+        "law.prc.civil_code.2021.article_0215"
+      ],
+      "rule.property.co_ownership.default_type_and_share.v1": [
+        "law.prc.civil_code.2021.article_0300",
+        "law.prc.civil_code.2021.article_0303",
+        "law.prc.civil_code.2021.article_0307"
+      ],
+      "rule.property.co_ownership.external_debt.v1": [
+        "law.prc.civil_code.2021.article_0300",
+        "law.prc.civil_code.2021.article_0303",
+        "law.prc.civil_code.2021.article_0308"
+      ],
+      "rule.property.co_ownership.manage_dispose_cost.v1": [
+        "law.prc.civil_code.2021.article_0303",
+        "law.prc.civil_code.2021.article_0307",
+        "law.prc.civil_code.2021.article_0308"
+      ],
+      "rule.property.co_ownership.partition.v1": [
+        "law.prc.civil_code.2021.article_0300",
+        "law.prc.civil_code.2021.article_0305",
+        "law.prc.civil_code.2021.article_0307",
+        "law.prc.civil_code.2021.article_0308"
+      ],
+      "rule.property.co_ownership.share_preemption.v1": [
+        "law.prc.civil_code.2021.article_0303"
+      ],
+      "rule.property.correction_and_objection.v1": [
+        "law.prc.civil_code.2021.article_0217",
+        "law.prc.civil_code.2021.article_1165"
+      ],
+      "rule.property.easement.create_and_duties.v1": [
+        "law.prc.civil_code.2021.article_0225",
+        "law.prc.civil_code.2021.article_0335"
+      ],
+      "rule.property.easement.priority_and_transfer.v1": [
+        "law.prc.civil_code.2021.article_0384"
+      ],
+      "rule.property.easement.terminate.v1": [
+        "law.prc.civil_code.2021.article_0378"
+      ],
+      "rule.property.exclude_or_restore.v1": [
+        "law.prc.civil_code.2021.article_1165"
+      ],
+      "rule.property.immovable.contract_without_registration.v1": [
+        "law.prc.civil_code.2021.article_0483",
+        "law.prc.civil_code.2021.article_0502"
+      ],
+      "rule.property.land_contract.transfer_and_stability.v1": [
+        "law.prc.civil_code.2021.article_0225",
+        "law.prc.civil_code.2021.article_0374"
+      ],
+      "rule.property.mortgage.lease_transfer_and_preservation.v1": [
+        "law.prc.civil_code.2021.article_0410",
+        "law.prc.civil_code.2021.article_0417"
+      ],
+      "rule.property.mortgage.new_building_use_and_limitation.v1": [
+        "law.prc.civil_code.2021.article_0405",
+        "law.prc.civil_code.2021.article_0410"
+      ],
+      "rule.property.mortgage.priority_change_and_enforce.v1": [
+        "law.prc.civil_code.2021.article_0405",
+        "law.prc.civil_code.2021.article_0417"
+      ],
+      "rule.property.movable.constitutum.v1": [
+        "law.prc.civil_code.2021.article_0134"
+      ],
+      "rule.property.movable.delivery.v1": [
+        "law.prc.civil_code.2021.article_0225",
+        "law.prc.civil_code.2021.article_0429"
+      ],
+      "rule.property.movable.simple_delivery.v1": [
+        "law.prc.civil_code.2021.article_0134"
+      ],
+      "rule.property.pledge.create_and_forfeiture.v1": [
+        "law.prc.civil_code.2021.article_0224"
+      ],
+      "rule.property.pledge.waive_enforce_and_timely.v1": [
+        "law.prc.civil_code.2021.article_0430"
+      ],
+      "rule.property.register.controls.v1": [
+        "law.prc.civil_code.2021.article_0209",
+        "law.prc.civil_code.2021.article_0220"
+      ],
+      "rule.property.registration.error.v1": [
+        "law.prc.civil_code.2021.article_1165"
+      ],
+      "rule.property.security.extinguish.v1": [
+        "law.prc.civil_code.2021.article_0386",
+        "law.prc.civil_code.2021.article_0390"
+      ],
+      "rule.property.security.priority_and_accessory.v1": [
+        "law.prc.civil_code.2021.article_0390",
+        "law.prc.civil_code.2021.article_0393"
+      ],
+      "rule.property.security.subrogation_transfer_and_mix.v1": [
+        "law.prc.civil_code.2021.article_0386",
+        "law.prc.civil_code.2021.article_0393"
+      ],
+      "rule.property.special_movable.registration_against.v1": [
+        "law.prc.civil_code.2021.article_0335",
+        "law.prc.civil_code.2021.article_0374"
+      ],
+      "rule.property_svc.dismiss.v1": [
+        "law.prc.civil_code.2021.article_0938",
+        "law.prc.civil_code.2021.article_0941",
+        "law.prc.civil_code.2021.article_0942",
+        "law.prc.civil_code.2021.article_0944",
+        "law.prc.civil_code.2021.article_0945",
+        "law.prc.civil_code.2021.article_0947",
+        "law.prc.civil_code.2021.article_0949"
+      ],
+      "rule.property_svc.duties_and_report.v1": [
+        "law.prc.civil_code.2021.article_0938",
+        "law.prc.civil_code.2021.article_0941",
+        "law.prc.civil_code.2021.article_0944",
+        "law.prc.civil_code.2021.article_0945",
+        "law.prc.civil_code.2021.article_0946",
+        "law.prc.civil_code.2021.article_0947",
+        "law.prc.civil_code.2021.article_0949"
+      ],
+      "rule.property_svc.fee.v1": [
+        "law.prc.civil_code.2021.article_0938",
+        "law.prc.civil_code.2021.article_0941",
+        "law.prc.civil_code.2021.article_0942",
+        "law.prc.civil_code.2021.article_0945",
+        "law.prc.civil_code.2021.article_0946",
+        "law.prc.civil_code.2021.article_0947",
+        "law.prc.civil_code.2021.article_0949"
+      ],
+      "rule.property_svc.form_and_promise.v1": [
+        "law.prc.civil_code.2021.article_0941",
+        "law.prc.civil_code.2021.article_0942",
+        "law.prc.civil_code.2021.article_0944",
+        "law.prc.civil_code.2021.article_0945",
+        "law.prc.civil_code.2021.article_0946",
+        "law.prc.civil_code.2021.article_0947",
+        "law.prc.civil_code.2021.article_0949"
+      ],
+      "rule.property_svc.handover_and_holdover.v1": [
+        "law.prc.civil_code.2021.article_0938",
+        "law.prc.civil_code.2021.article_0941",
+        "law.prc.civil_code.2021.article_0942",
+        "law.prc.civil_code.2021.article_0944",
+        "law.prc.civil_code.2021.article_0945",
+        "law.prc.civil_code.2021.article_0946",
+        "law.prc.civil_code.2021.article_0947"
+      ],
+      "rule.property_svc.no_total_subcontract.v1": [
+        "law.prc.civil_code.2021.article_0938",
+        "law.prc.civil_code.2021.article_0942",
+        "law.prc.civil_code.2021.article_0944",
+        "law.prc.civil_code.2021.article_0945",
+        "law.prc.civil_code.2021.article_0946",
+        "law.prc.civil_code.2021.article_0947",
+        "law.prc.civil_code.2021.article_0949"
+      ],
+      "rule.property_svc.owner_notice.v1": [
+        "law.prc.civil_code.2021.article_0938",
+        "law.prc.civil_code.2021.article_0941",
+        "law.prc.civil_code.2021.article_0942",
+        "law.prc.civil_code.2021.article_0944",
+        "law.prc.civil_code.2021.article_0946",
+        "law.prc.civil_code.2021.article_0947",
+        "law.prc.civil_code.2021.article_0949"
+      ],
+      "rule.property_svc.renew_or_indefinite.v1": [
+        "law.prc.civil_code.2021.article_0938",
+        "law.prc.civil_code.2021.article_0941",
+        "law.prc.civil_code.2021.article_0942",
+        "law.prc.civil_code.2021.article_0944",
+        "law.prc.civil_code.2021.article_0945",
+        "law.prc.civil_code.2021.article_0946",
+        "law.prc.civil_code.2021.article_0949"
+      ],
+      "rule.sale.quality.purpose_frustrated.v1": [
+        "law.prc.civil_code.2021.article_0580",
+        "law.prc.civil_code.2021.article_0587"
+      ],
+      "rule.storage.care_no_transfer_no_use.v1": [
+        "law.prc.civil_code.2021.article_0889",
+        "law.prc.civil_code.2021.article_0893",
+        "law.prc.civil_code.2021.article_0896",
+        "law.prc.civil_code.2021.article_0897",
+        "law.prc.civil_code.2021.article_0899",
+        "law.prc.civil_code.2021.article_0902"
+      ],
+      "rule.storage.defect_notice.v1": [
+        "law.prc.civil_code.2021.article_0889",
+        "law.prc.civil_code.2021.article_0892",
+        "law.prc.civil_code.2021.article_0896",
+        "law.prc.civil_code.2021.article_0897",
+        "law.prc.civil_code.2021.article_0899",
+        "law.prc.civil_code.2021.article_0902"
+      ],
+      "rule.storage.fee_due_and_lien.v1": [
+        "law.prc.civil_code.2021.article_0889",
+        "law.prc.civil_code.2021.article_0892",
+        "law.prc.civil_code.2021.article_0893",
+        "law.prc.civil_code.2021.article_0896",
+        "law.prc.civil_code.2021.article_0897",
+        "law.prc.civil_code.2021.article_0899"
+      ],
+      "rule.storage.fee_or_gratuitous.v1": [
+        "law.prc.civil_code.2021.article_0892",
+        "law.prc.civil_code.2021.article_0893",
+        "law.prc.civil_code.2021.article_0896",
+        "law.prc.civil_code.2021.article_0897",
+        "law.prc.civil_code.2021.article_0899",
+        "law.prc.civil_code.2021.article_0902"
+      ],
+      "rule.storage.loss_liability.v1": [
+        "law.prc.civil_code.2021.article_0889",
+        "law.prc.civil_code.2021.article_0892",
+        "law.prc.civil_code.2021.article_0893",
+        "law.prc.civil_code.2021.article_0896",
+        "law.prc.civil_code.2021.article_0899",
+        "law.prc.civil_code.2021.article_0902"
+      ],
+      "rule.storage.retrieve_and_return.v1": [
+        "law.prc.civil_code.2021.article_0889",
+        "law.prc.civil_code.2021.article_0892",
+        "law.prc.civil_code.2021.article_0893",
+        "law.prc.civil_code.2021.article_0896",
+        "law.prc.civil_code.2021.article_0897",
+        "law.prc.civil_code.2021.article_0902"
+      ],
+      "rule.storage.third_party_claim.v1": [
+        "law.prc.civil_code.2021.article_0889",
+        "law.prc.civil_code.2021.article_0892",
+        "law.prc.civil_code.2021.article_0893",
+        "law.prc.civil_code.2021.article_0897",
+        "law.prc.civil_code.2021.article_0899",
+        "law.prc.civil_code.2021.article_0902"
+      ],
+      "rule.succession.accept_or_renounce.heir.v1": [
+        "law.prc.civil_code.2021.article_1123",
+        "law.prc.civil_code.2021.article_1125",
+        "law.prc.civil_code.2021.article_1127",
+        "law.prc.civil_code.2021.article_1145",
+        "law.prc.civil_code.2021.article_1150",
+        "law.prc.civil_code.2021.article_1152",
+        "law.prc.civil_code.2021.article_1161"
+      ],
+      "rule.succession.accept_or_renounce.legatee.v1": [
+        "law.prc.civil_code.2021.article_1125"
+      ],
+      "rule.succession.debt.mixed_succession.v1": [
+        "law.prc.civil_code.2021.article_1159",
+        "law.prc.civil_code.2021.article_1161",
+        "law.prc.civil_code.2021.article_1162"
+      ],
+      "rule.succession.debt.priority_and_necessary_share.v1": [
+        "law.prc.civil_code.2021.article_1141",
+        "law.prc.civil_code.2021.article_1156",
+        "law.prc.civil_code.2021.article_1161",
+        "law.prc.civil_code.2021.article_1162",
+        "law.prc.civil_code.2021.article_1163"
+      ],
+      "rule.succession.disqualification.heir.v1": [
+        "law.prc.civil_code.2021.article_1124",
+        "law.prc.civil_code.2021.article_1161"
+      ],
+      "rule.succession.disqualification.legatee.v1": [
+        "law.prc.civil_code.2021.article_1124"
+      ],
+      "rule.succession.estate.administrator.appointment.v1": [
+        "law.prc.civil_code.2021.article_1123",
+        "law.prc.civil_code.2021.article_1124",
+        "law.prc.civil_code.2021.article_1127",
+        "law.prc.civil_code.2021.article_1150",
+        "law.prc.civil_code.2021.article_1152"
+      ],
+      "rule.succession.estate.administrator.duties.v1": [
+        "law.prc.civil_code.2021.article_1148",
+        "law.prc.civil_code.2021.article_1149"
+      ],
+      "rule.succession.estate.administrator.liability.v1": [
+        "law.prc.civil_code.2021.article_1147",
+        "law.prc.civil_code.2021.article_1149"
+      ],
+      "rule.succession.estate.administrator.remuneration.v1": [
+        "law.prc.civil_code.2021.article_1147",
+        "law.prc.civil_code.2021.article_1148"
+      ],
+      "rule.succession.estate.notify.v1": [
+        "law.prc.civil_code.2021.article_1123",
+        "law.prc.civil_code.2021.article_1124",
+        "law.prc.civil_code.2021.article_1127",
+        "law.prc.civil_code.2021.article_1145",
+        "law.prc.civil_code.2021.article_1152"
+      ],
+      "rule.succession.heir.limited_liability.v1": [
+        "law.prc.civil_code.2021.article_1124",
+        "law.prc.civil_code.2021.article_1125",
+        "law.prc.civil_code.2021.article_1159",
+        "law.prc.civil_code.2021.article_1162",
+        "law.prc.civil_code.2021.article_1163"
+      ],
+      "rule.succession.intestate.order.v1": [
+        "law.prc.civil_code.2021.article_1123",
+        "law.prc.civil_code.2021.article_1124",
+        "law.prc.civil_code.2021.article_1145",
+        "law.prc.civil_code.2021.article_1150",
+        "law.prc.civil_code.2021.article_1152"
+      ],
+      "rule.succession.legacy.not_impair_debts.v1": [
+        "law.prc.civil_code.2021.article_1159",
+        "law.prc.civil_code.2021.article_1161",
+        "law.prc.civil_code.2021.article_1163"
+      ],
+      "rule.succession.legacy_support_agreement.v1": [
+        "law.prc.civil_code.2021.article_1123"
+      ],
+      "rule.succession.mode.priority.v1": [
+        "law.prc.civil_code.2021.article_1124",
+        "law.prc.civil_code.2021.article_1127",
+        "law.prc.civil_code.2021.article_1141",
+        "law.prc.civil_code.2021.article_1142",
+        "law.prc.civil_code.2021.article_1145",
+        "law.prc.civil_code.2021.article_1150",
+        "law.prc.civil_code.2021.article_1152",
+        "law.prc.civil_code.2021.article_1158"
+      ],
+      "rule.succession.partition.method.v1": [
+        "law.prc.civil_code.2021.article_1159"
+      ],
+      "rule.succession.transmissibility.v1": [
+        "law.prc.civil_code.2021.article_1123",
+        "law.prc.civil_code.2021.article_1124",
+        "law.prc.civil_code.2021.article_1127",
+        "law.prc.civil_code.2021.article_1145",
+        "law.prc.civil_code.2021.article_1150"
+      ],
+      "rule.succession.will.compulsory_share.v1": [
+        "law.prc.civil_code.2021.article_1123",
+        "law.prc.civil_code.2021.article_1142",
+        "law.prc.civil_code.2021.article_1159"
+      ],
+      "rule.succession.will.revoke_or_conflict.v1": [
+        "law.prc.civil_code.2021.article_1123",
+        "law.prc.civil_code.2021.article_1141"
+      ],
+      "rule.support.parent_child.payment.v1": [
+        "law.prc.civil_code.2021.article_1058",
+        "law.prc.civil_code.2021.article_1068",
+        "law.prc.civil_code.2021.article_1069"
+      ],
+      "rule.support.post_divorce_child.v1": [
+        "law.prc.civil_code.2021.article_1083",
+        "law.prc.civil_code.2021.article_1084",
+        "law.prc.civil_code.2021.article_1086",
+        "law.prc.civil_code.2021.article_1091"
+      ],
+      "rule.support.spouse.maintenance.v1": [
+        "law.prc.civil_code.2021.article_1060",
+        "law.prc.civil_code.2021.article_1062",
+        "law.prc.civil_code.2021.article_1064",
+        "law.prc.civil_code.2021.article_1066"
+      ],
+      "rule.tech.agreed_use_infringes_third_party.v1": [
+        "law.prc.civil_code.2021.article_0863",
+        "law.prc.civil_code.2021.article_0864",
+        "law.prc.civil_code.2021.article_0870",
+        "law.prc.civil_code.2021.article_0872",
+        "law.prc.civil_code.2021.article_0875"
+      ],
+      "rule.tech.consult_service.new_result_ownership.v1": [
+        "law.prc.civil_code.2021.article_0886"
+      ],
+      "rule.tech.consult_service.work_expense.v1": [
+        "law.prc.civil_code.2021.article_0885"
+      ],
+      "rule.tech.development_written_form.v1": [
+        "law.prc.civil_code.2021.article_0857",
+        "law.prc.civil_code.2021.article_0858"
+      ],
+      "rule.tech.insurmountable_risk.v1": [
+        "law.prc.civil_code.2021.article_0851",
+        "law.prc.civil_code.2021.article_0857"
+      ],
+      "rule.tech.no_restrict_competition.v1": [
+        "law.prc.civil_code.2021.article_0863",
+        "law.prc.civil_code.2021.article_0870",
+        "law.prc.civil_code.2021.article_0872",
+        "law.prc.civil_code.2021.article_0874",
+        "law.prc.civil_code.2021.article_0875"
+      ],
+      "rule.tech.patent_license_duties.v1": [
+        "law.prc.civil_code.2021.article_0865"
+      ],
+      "rule.tech.patent_license_only_during_term.v1": [
+        "law.prc.civil_code.2021.article_0866"
+      ],
+      "rule.tech.subject_already_public.terminate.v1": [
+        "law.prc.civil_code.2021.article_0851",
+        "law.prc.civil_code.2021.article_0858"
+      ],
+      "rule.tech.subsequent_improvement.v1": [
+        "law.prc.civil_code.2021.article_0863",
+        "law.prc.civil_code.2021.article_0864",
+        "law.prc.civil_code.2021.article_0870",
+        "law.prc.civil_code.2021.article_0872",
+        "law.prc.civil_code.2021.article_0874"
+      ],
+      "rule.tech.transfer_license_breach.v1": [
+        "law.prc.civil_code.2021.article_0863",
+        "law.prc.civil_code.2021.article_0864",
+        "law.prc.civil_code.2021.article_0870",
+        "law.prc.civil_code.2021.article_0874",
+        "law.prc.civil_code.2021.article_0875"
+      ],
+      "rule.tech.transfer_license_written_form.v1": [
+        "law.prc.civil_code.2021.article_0864",
+        "law.prc.civil_code.2021.article_0870",
+        "law.prc.civil_code.2021.article_0872",
+        "law.prc.civil_code.2021.article_0874",
+        "law.prc.civil_code.2021.article_0875"
+      ],
+      "rule.tech.warranty_and_confidentiality.v1": [
+        "law.prc.civil_code.2021.article_0863",
+        "law.prc.civil_code.2021.article_0864",
+        "law.prc.civil_code.2021.article_0872",
+        "law.prc.civil_code.2021.article_0874",
+        "law.prc.civil_code.2021.article_0875"
+      ],
+      "rule.tort.animal.keeper.v1": [
+        "law.prc.civil_code.2021.article_1250"
+      ],
+      "rule.tort.animal.third_party.v1": [
+        "law.prc.civil_code.2021.article_1245"
+      ],
+      "rule.tort.environment.pollution_or_ecology.v1": [
+        "law.prc.civil_code.2021.article_1233"
+      ],
+      "rule.tort.environment.public_compensation_items.v1": [
+        "law.prc.civil_code.2021.article_1234"
+      ],
+      "rule.tort.environment.restoration.v1": [
+        "law.prc.civil_code.2021.article_1235"
+      ],
+      "rule.tort.environment.third_party.v1": [
+        "law.prc.civil_code.2021.article_1229"
+      ],
+      "rule.tort.guardian.delegated.v1": [
+        "law.prc.civil_code.2021.article_1188"
+      ],
+      "rule.tort.guardian.ward_harm.v1": [
+        "law.prc.civil_code.2021.article_1189"
+      ],
+      "rule.tort.guardian_share_after_abetment.v1": [
+        "law.prc.civil_code.2021.article_1165"
+      ],
+      "rule.tort.medical.exemption.v1": [
+        "law.prc.civil_code.2021.article_1218",
+        "law.prc.civil_code.2021.article_1219",
+        "law.prc.civil_code.2021.article_1221",
+        "law.prc.civil_code.2021.article_1222"
+      ],
+      "rule.tort.medical.fault.v1": [
+        "law.prc.civil_code.2021.article_1219",
+        "law.prc.civil_code.2021.article_1222",
+        "law.prc.civil_code.2021.article_1224"
+      ],
+      "rule.tort.medical.informed_consent.v1": [
+        "law.prc.civil_code.2021.article_1218",
+        "law.prc.civil_code.2021.article_1221",
+        "law.prc.civil_code.2021.article_1222",
+        "law.prc.civil_code.2021.article_1224"
+      ],
+      "rule.tort.medical.presumed_fault.v1": [
+        "law.prc.civil_code.2021.article_1218",
+        "law.prc.civil_code.2021.article_1219",
+        "law.prc.civil_code.2021.article_1221",
+        "law.prc.civil_code.2021.article_1224"
+      ],
+      "rule.tort.medical.privacy.v1": [
+        "law.prc.civil_code.2021.article_1225",
+        "law.prc.civil_code.2021.article_1227"
+      ],
+      "rule.tort.medical.records.access.v1": [
+        "law.prc.civil_code.2021.article_1226",
+        "law.prc.civil_code.2021.article_1227"
+      ],
+      "rule.tort.medical.unnecessary_exam.v1": [
+        "law.prc.civil_code.2021.article_1225",
+        "law.prc.civil_code.2021.article_1226"
+      ],
+      "rule.tort.product.internal_recourse.v1": [
+        "law.prc.civil_code.2021.article_1202"
+      ],
+      "rule.tort.product.preventive.v1": [
+        "law.prc.civil_code.2021.article_1202"
+      ],
+      "rule.tort.product.punitive_damages.v1": [
+        "law.prc.civil_code.2021.article_1202"
+      ],
+      "rule.tort.product.recourse_against_handler.v1": [
+        "law.prc.civil_code.2021.article_1165",
+        "law.prc.civil_code.2021.article_1202"
+      ],
+      "rule.tort.school.limited_capacity_injury.v1": [
+        "law.prc.civil_code.2021.article_1199"
+      ],
+      "rule.tort.school.third_party.supplementary.v1": [
+        "law.prc.civil_code.2021.article_1199",
+        "law.prc.civil_code.2021.article_1200"
+      ],
+      "rule.tort.ultrahazard.dangerous_substance.v1": [
+        "law.prc.civil_code.2021.article_1240"
+      ],
+      "rule.tort.ultrahazard.high_activity.v1": [
+        "law.prc.civil_code.2021.article_1239"
+      ],
+      "rule.tort.vehicle.affiliation.v1": [
+        "law.prc.civil_code.2021.article_1209",
+        "law.prc.civil_code.2021.article_1210",
+        "law.prc.civil_code.2021.article_1212",
+        "law.prc.civil_code.2021.article_1213",
+        "law.prc.civil_code.2021.article_1214",
+        "law.prc.civil_code.2021.article_1215",
+        "law.prc.civil_code.2021.article_1217"
+      ],
+      "rule.tort.vehicle.assembled_or_scrapped.v1": [
+        "law.prc.civil_code.2021.article_1209",
+        "law.prc.civil_code.2021.article_1210",
+        "law.prc.civil_code.2021.article_1211",
+        "law.prc.civil_code.2021.article_1212",
+        "law.prc.civil_code.2021.article_1213",
+        "law.prc.civil_code.2021.article_1215"
+      ],
+      "rule.tort.vehicle.gratuitous_passenger.v1": [
+        "law.prc.civil_code.2021.article_1209",
+        "law.prc.civil_code.2021.article_1210",
+        "law.prc.civil_code.2021.article_1211",
+        "law.prc.civil_code.2021.article_1212",
+        "law.prc.civil_code.2021.article_1213"
+      ],
+      "rule.tort.vehicle.insurance_priority.v1": [
+        "law.prc.civil_code.2021.article_1209",
+        "law.prc.civil_code.2021.article_1210",
+        "law.prc.civil_code.2021.article_1211",
+        "law.prc.civil_code.2021.article_1212",
+        "law.prc.civil_code.2021.article_1214",
+        "law.prc.civil_code.2021.article_1215",
+        "law.prc.civil_code.2021.article_1217"
+      ],
+      "rule.tort.vehicle.lease_or_borrow.v1": [
+        "law.prc.civil_code.2021.article_1210",
+        "law.prc.civil_code.2021.article_1211",
+        "law.prc.civil_code.2021.article_1212",
+        "law.prc.civil_code.2021.article_1213",
+        "law.prc.civil_code.2021.article_1214",
+        "law.prc.civil_code.2021.article_1215",
+        "law.prc.civil_code.2021.article_1217"
+      ],
+      "rule.tort.vehicle.stolen_or_robbed.v1": [
+        "law.prc.civil_code.2021.article_1209",
+        "law.prc.civil_code.2021.article_1210",
+        "law.prc.civil_code.2021.article_1211",
+        "law.prc.civil_code.2021.article_1212",
+        "law.prc.civil_code.2021.article_1213",
+        "law.prc.civil_code.2021.article_1214"
+      ],
+      "rule.tort.vehicle.unauthorized_drive.v1": [
+        "law.prc.civil_code.2021.article_1209",
+        "law.prc.civil_code.2021.article_1210",
+        "law.prc.civil_code.2021.article_1211",
+        "law.prc.civil_code.2021.article_1213",
+        "law.prc.civil_code.2021.article_1214",
+        "law.prc.civil_code.2021.article_1215",
+        "law.prc.civil_code.2021.article_1217"
+      ],
+      "rule.tort.vehicle.unregistered_transfer.v1": [
+        "law.prc.civil_code.2021.article_1209",
+        "law.prc.civil_code.2021.article_1211",
+        "law.prc.civil_code.2021.article_1212",
+        "law.prc.civil_code.2021.article_1213",
+        "law.prc.civil_code.2021.article_1214",
+        "law.prc.civil_code.2021.article_1215",
+        "law.prc.civil_code.2021.article_1217"
+      ],
+      "rule.transport.cargo_damage_and_amount.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.carryon_and_checked_luggage.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.delay_reroute_refund.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.force_majeure_freight.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.lien_and_deposit.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835"
+      ],
+      "rule.transport.luggage_and_dangerous_items.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.notify_pickup_and_inspection.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.passenger_casualty.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.passenger_missed_ride.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.rescue_duty.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.safety_inform_and_cooperate.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.service_standard_change.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.shipper_declare_pack_danger.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.stop_return_or_redirect.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.successive_same_mode.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.ticket_ride_and_reissue.v1": [
+        "law.prc.civil_code.2021.article_0811",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.transport.time_route_and_fare.v1": [
+        "law.prc.civil_code.2021.article_0815",
+        "law.prc.civil_code.2021.article_0816",
+        "law.prc.civil_code.2021.article_0817",
+        "law.prc.civil_code.2021.article_0819",
+        "law.prc.civil_code.2021.article_0820",
+        "law.prc.civil_code.2021.article_0821",
+        "law.prc.civil_code.2021.article_0822",
+        "law.prc.civil_code.2021.article_0823",
+        "law.prc.civil_code.2021.article_0824",
+        "law.prc.civil_code.2021.article_0825",
+        "law.prc.civil_code.2021.article_0829",
+        "law.prc.civil_code.2021.article_0830",
+        "law.prc.civil_code.2021.article_0832",
+        "law.prc.civil_code.2021.article_0834",
+        "law.prc.civil_code.2021.article_0835",
+        "law.prc.civil_code.2021.article_0836"
+      ],
+      "rule.warehouse.dangerous_goods.v1": [
+        "law.prc.civil_code.2021.article_0907",
+        "law.prc.civil_code.2021.article_0908",
+        "law.prc.civil_code.2021.article_0911",
+        "law.prc.civil_code.2021.article_0912",
+        "law.prc.civil_code.2021.article_0914",
+        "law.prc.civil_code.2021.article_0917"
+      ],
+      "rule.warehouse.deterioration_notice_and_disposal.v1": [
+        "law.prc.civil_code.2021.article_0906",
+        "law.prc.civil_code.2021.article_0907",
+        "law.prc.civil_code.2021.article_0908",
+        "law.prc.civil_code.2021.article_0911",
+        "law.prc.civil_code.2021.article_0914",
+        "law.prc.civil_code.2021.article_0917"
+      ],
+      "rule.warehouse.inspect_or_sample.v1": [
+        "law.prc.civil_code.2021.article_0906",
+        "law.prc.civil_code.2021.article_0907",
+        "law.prc.civil_code.2021.article_0908",
+        "law.prc.civil_code.2021.article_0912",
+        "law.prc.civil_code.2021.article_0914",
+        "law.prc.civil_code.2021.article_0917"
+      ],
+      "rule.warehouse.inspection.v1": [
+        "law.prc.civil_code.2021.article_0906",
+        "law.prc.civil_code.2021.article_0908",
+        "law.prc.civil_code.2021.article_0911",
+        "law.prc.civil_code.2021.article_0912",
+        "law.prc.civil_code.2021.article_0914",
+        "law.prc.civil_code.2021.article_0917"
+      ],
+      "rule.warehouse.loss_liability.v1": [
+        "law.prc.civil_code.2021.article_0906",
+        "law.prc.civil_code.2021.article_0907",
+        "law.prc.civil_code.2021.article_0908",
+        "law.prc.civil_code.2021.article_0911",
+        "law.prc.civil_code.2021.article_0912",
+        "law.prc.civil_code.2021.article_0914"
+      ],
+      "rule.warehouse.receipt_and_transfer.v1": [
+        "law.prc.civil_code.2021.article_0906",
+        "law.prc.civil_code.2021.article_0907",
+        "law.prc.civil_code.2021.article_0911",
+        "law.prc.civil_code.2021.article_0912",
+        "law.prc.civil_code.2021.article_0914",
+        "law.prc.civil_code.2021.article_0917"
+      ],
+      "rule.warehouse.retrieve_fee_and_deposit.v1": [
+        "law.prc.civil_code.2021.article_0906",
+        "law.prc.civil_code.2021.article_0907",
+        "law.prc.civil_code.2021.article_0908",
+        "law.prc.civil_code.2021.article_0911",
+        "law.prc.civil_code.2021.article_0912",
+        "law.prc.civil_code.2021.article_0917"
+      ],
+      "rule.work.confidentiality.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.custody_liability.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.delivery_acceptance_quality.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.joint_contractors.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.lien_or_refuse_delivery.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.materials.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.midcourse_change.damages.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.orderer_assistance.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.orderer_terminate_anytime.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786"
+      ],
+      "rule.work.personally_or_third_party.v1": [
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.remuneration_timing.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.supervision.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0776",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ],
+      "rule.work.unreasonable_drawings.notify.v1": [
+        "law.prc.civil_code.2021.article_0772",
+        "law.prc.civil_code.2021.article_0774",
+        "law.prc.civil_code.2021.article_0777",
+        "law.prc.civil_code.2021.article_0778",
+        "law.prc.civil_code.2021.article_0779",
+        "law.prc.civil_code.2021.article_0780",
+        "law.prc.civil_code.2021.article_0782",
+        "law.prc.civil_code.2021.article_0783",
+        "law.prc.civil_code.2021.article_0784",
+        "law.prc.civil_code.2021.article_0785",
+        "law.prc.civil_code.2021.article_0786",
+        "law.prc.civil_code.2021.article_0787"
+      ]
+    },
+    "rule_count_before": 776,
+    "rule_count_after": 776,
+    "unique_conditions_before": 1929,
+    "unique_conditions_after": 1928,
+    "maturity_upgraded": false,
+    "deep_human_review": false,
+    "semantic_exhaustiveness": "not_claimed"
   }
 }

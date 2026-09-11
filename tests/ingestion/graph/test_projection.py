@@ -23,7 +23,7 @@ def test_canonical_two_layer_paths():
     assert first == load_projection(root)
     nodes = {n["key"]: n for n in first["nodes"]}
     assert sum(n["label"] == "Case" for n in nodes.values()) == EXPECTED_CIVIL_CASE_COUNT
-    assert sum(n["label"] == "RuleCondition" for n in nodes.values()) == 1929
+    assert sum(n["label"] == "RuleCondition" for n in nodes.values()) == 1928
     assert sum(n["label"] == "LegalRule" for n in nodes.values()) == 776
     assert sum(n["label"] == "Provision" for n in nodes.values()) == 1260
     assert sum(e["type"] == "CITES_PROVISION" for e in first["edges"]) == 70

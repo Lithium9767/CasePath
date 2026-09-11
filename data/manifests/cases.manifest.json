@@ -1,8 +1,8 @@
 {
   "manifest_version": "1.1",
   "dataset_id": "dataset.civil_cases.v1",
-  "generated_on": "2026-09-07",
-  "generator": "casepath.ingestion.cases.build:v5",
+  "generated_on": "2026-09-11",
+  "generator": "casepath.ingestion.cases.build:v6",
   "upstream_repository_url": "https://github.com/litunan/legal-rag",
   "upstream_revision": "ce7872c7ae343e5ff860d627195ec4e72c7ef7ce",
   "inputs": [
@@ -24,14 +24,14 @@
   "outputs": [
     {
       "path": "data/canonical/cases/cases_l1.jsonl",
-      "sha256": "16f5418a9d884033dbc49b56e194771bccb234602bb968816d5bdc4c86a803ad",
+      "sha256": "3bf2855db6362083b660f08c38aa431e785aa01850aaf9e987b2b85ae9d0a96e",
       "record_count": 54,
       "repository_url": null,
       "revision": null
     },
     {
       "path": "data/canonical/cases/cases_deep.jsonl",
-      "sha256": "fe7aa68c0df34385965069034e89fa1a79c0a523002ee9553c0e390cdbea7e53",
+      "sha256": "f451cf59f603dfeabd15bdae8c93103fbbdb03ccb46c3e14ff6e22a98ba76f4c",
       "record_count": 54,
       "repository_url": null,
       "revision": null
@@ -47,6 +47,8 @@
   "review_date": null,
   "reviews": [],
   "limitations": [
+    "Stage 2 v6 corrects explicit demand amounts, decimal/grouped/unit amounts, current dispositions and source-span boundaries. A source-only correction does not upgrade maturity or establish complete legal review.",
+    "Separate explicit disposition sections are retained verbatim in facts_text because CaseIndexRecord has no disposition-text field. Indexed text is source material, not a claim that every sentence is a court finding. Affirmances without a restated amount and complex multi-claim outcomes remain limited. Interest subtotals, competing demands and periodic payments are not treated as a single case total; ambiguous amounts stay null.",
     "Machine-extracted L1 cases are not human-verified; L2 requires REVIEWED_L2_CASE_IDS.",
     "Citations that are not Civil Code articles 1-1260 are not written to related_provision_ids and are not retained as raw citations in this dataset.",
     "Every legal-rag civil case and every LexRel expert-annotated 服务合同关系 sample remains a deep CaseRecord for text retrieval. Refund-rule condition bridges are limited to SERVICE_REFUND_COMPARISON_CASE_IDS. The gym refund rule is invoked only for prepaid-closure / 解除+返还 cases in that set. LexRel train splits are unused.",

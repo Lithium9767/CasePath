@@ -49,8 +49,14 @@ _UNPERFORMED_RE = re.compile(r"剩余|未消费|未履行|未使用|未开始上
 _ALTERNATIVE_RE = re.compile(r"转让|安置|另一.{0,8}(会所|门店)|替代")
 _ALTERNATIVE_FAIL_RE = re.compile(r"距离较远|不便于|未经.{0,8}同意")
 _TERMINATED_RE = re.compile(r"解除.{0,20}(协议|合同)")
-_REJECT_ALL_RE = re.compile(r"驳回原告.{0,20}诉讼请求")
-_REJECT_OTHER_RE = re.compile(r"驳回.{0,8}其他诉讼请求")
+_REJECT_ALL_RE = re.compile(r"驳回[^。；\n]{0,60}诉讼请求")
+_REJECT_OTHER_RE = re.compile(
+    r"驳回[^。；\n]{0,60}(?:其他|其余)诉讼请求|"
+    r"(?:其他|其余)诉讼请求[^。；\n]{0,20}不予支持"
+)
+_PARTY_ASSERTION_RE = re.compile(
+    r"诉称|辩称|^(?:\d+\.\s*)?(?:原告|被告)[^。；\n]{0,100}(?:主张|认为)"
+)
 _APPLIES_TERMINATION_REFUND_RE = re.compile(
     r"(解除.{0,30}符合法律规定)|"
     r"(根据《中华人民共和国民法典》第五百六十三.{0,40}解除)|"
@@ -177,6 +183,8 @@ def extract_findings(
     findings: list[CourtFinding] = []
     region = _region_of(facts_text, partitions.court)
     for sentence in court_finding_sentences(partitions.court):
+        if _PARTY_ASSERTION_RE.search(sentence):
+            continue
         try:
             span = book.add("基本案情", facts_text, sentence, region)
         except ValueError:
@@ -207,6 +215,10 @@ def extract_findings_from_facts(
         items = [compact]
     findings: list[CourtFinding] = []
     for sentence in items:
+        # Numbering does not turn a quoted demand or contested allegation into
+        # an affirmative court finding (for example LexRel's refund demand).
+        if _PARTY_ASSERTION_RE.search(sentence):
+            continue
         try:
             span = book.add("基本案情", facts_text, sentence)
         except ValueError:
@@ -303,7 +315,7 @@ def extract_decision(
             document, section = reasoning_text, "裁判理由"
         else:
             return None
-    span = book.add(section, document, quote)
+    span = book.add(section, document, quote, _region_of(document, holding))
     granted = parse_granted_amount(holding)
     status = decide_status(claim.amount, granted, holding, claim.requested_remedy)
     return DecisionItem(
@@ -324,7 +336,7 @@ def decide_status(
 ) -> DecisionStatus:
     if not holding.strip():
         return DecisionStatus.UNKNOWN
-    if _REJECT_ALL_RE.search(holding) and granted is None:
+    if _REJECT_ALL_RE.search(holding) and not _REJECT_OTHER_RE.search(holding) and granted is None:
         return DecisionStatus.REJECTED
     if requested is not None and granted is not None:
         if granted + 0.009 >= requested:
@@ -340,6 +352,8 @@ def decide_status(
             return DecisionStatus.PARTIALLY_GRANTED
         return DecisionStatus.GRANTED
     if granted is not None and granted > 0 and requested is None:
+        if _REJECT_OTHER_RE.search(holding):
+            return DecisionStatus.PARTIALLY_GRANTED
         return DecisionStatus.GRANTED
     return DecisionStatus.UNKNOWN
 
@@ -583,12 +597,9 @@ def _key_reasoning_sentence(reasoning_text: str) -> str:
 
 
 def _holding_quote(holding: str) -> str:
-    if not holding:
-        return ""
-    match = re.search(r"判决[：:].+", holding)
-    if match:
-        return match.group(0).strip()[:240]
-    return holding.strip()[:240]
+    # Preserve the entire selected disposition: the monetary award or another
+    # operative item can occur beyond the former 240-character cutoff.
+    return holding.strip()
 
 
 def _region_of(document: str, fragment: str) -> tuple[int, int] | None:

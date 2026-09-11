@@ -38,13 +38,26 @@ from .validation import (
     validate_records,
 )
 
-PINNED_GENERATED_ON = date(2026, 9, 7)
+PINNED_GENERATED_ON = date(2026, 9, 11)
 GENERATED_PATHS = (
     Path("canonical/cases/cases_l1.jsonl"),
     Path("canonical/cases/cases_deep.jsonl"),
     Path("manifests/cases.manifest.json"),
 )
 LIMITATIONS = [
+    (
+        "Stage 2 v6 corrects explicit demand amounts, decimal/grouped/unit amounts, "
+        "current dispositions and source-span boundaries. A source-only correction "
+        "does not upgrade maturity or establish complete legal review."
+    ),
+    (
+        "Separate explicit disposition sections are retained verbatim in facts_text "
+        "because CaseIndexRecord has no disposition-text field. Indexed text is source "
+        "material, not a claim that every sentence is a court finding. Affirmances "
+        "without a restated amount and complex multi-claim outcomes remain limited. "
+        "Interest subtotals, competing demands and periodic payments are not treated "
+        "as a single case total; ambiguous amounts stay null."
+    ),
     "Machine-extracted L1 cases are not human-verified; L2 requires REVIEWED_L2_CASE_IDS.",
     (
         "Citations that are not Civil Code articles 1-1260 are not written to "

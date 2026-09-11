@@ -1,0 +1,913 @@
+{
+  "report_version": "1.0",
+  "generated_on": "2026-09-11",
+  "status": "passed",
+  "scope": "canonical structural and reference audit; no upstream inputs or live services",
+  "limitations": [
+    "Article coverage measures presence and provision references, not semantic completeness.",
+    "Warnings are review candidates, not proven legal errors or automatic merge decisions.",
+    "This report does not grant maturity or replace the release manifest validators."
+  ],
+  "sha256_convention": "UTF-8 file bytes with CRLF and CR normalized to LF",
+  "files": {
+    "canonical/cases/cases_deep.jsonl": {
+      "sha256": "f451cf59f603dfeabd15bdae8c93103fbbdb03ccb46c3e14ff6e22a98ba76f4c"
+    },
+    "canonical/cases/cases_l1.jsonl": {
+      "sha256": "3bf2855db6362083b660f08c38aa431e785aa01850aaf9e987b2b85ae9d0a96e"
+    },
+    "canonical/rules/legal_sources.jsonl": {
+      "sha256": "10fcb635f59e758b257e83971523e68cb4b1ea364374bb05ca261d2bfd41cc1e"
+    },
+    "canonical/rules/provisions.jsonl": {
+      "sha256": "56dff29fcff3cc669c4a1cbefcf00e638f3a0a9549f000096553179a7d815250"
+    },
+    "canonical/rules/rules.jsonl": {
+      "sha256": "7cbd7dbb15daf03d542ce1a953e2fbc0eafa1fd96db48a027e6c3dfbee710ba9"
+    },
+    "canonical/rules/source_spans.jsonl": {
+      "sha256": "372d63b587fafe6f62b7eec9cab83abf61fccfc0524e733d7d46d60e6ec3ed33"
+    },
+    "manifests/cases.manifest.json": {
+      "sha256": "1bd449c3560b2b6af5f29026cafd3f6d30464ce525492531233a7521885279f8"
+    },
+    "manifests/civil_code.manifest.json": {
+      "sha256": "d56838677ee32cc88ed948c76f207f2cd8cde206dc469837b0993a0e130347c0"
+    }
+  },
+  "counts": {
+    "legal_sources": 1,
+    "provisions": 1260,
+    "rules": 776,
+    "law_source_spans": 3272,
+    "cases_l1": 54,
+    "cases_deep": 54,
+    "condition_occurrences": 2327,
+    "unique_condition_ids": 1928,
+    "unique_condition_predicates": 1922,
+    "parent_reference_omissions": 0
+  },
+  "maturities": {
+    "provisions": {
+      "L0": 1260
+    },
+    "rules": {
+      "L1": 771,
+      "L2": 1,
+      "L3": 4
+    },
+    "cases_l1": {
+      "L1": 54
+    },
+    "cases_deep": {
+      "L1": 54
+    }
+  },
+  "checks": [
+    {
+      "name": "formal_files_and_record_contracts",
+      "status": "passed"
+    },
+    {
+      "name": "identities_article_sequence_and_text",
+      "status": "passed"
+    },
+    {
+      "name": "law_span_registry_and_exact_offsets",
+      "status": "passed"
+    },
+    {
+      "name": "rule_shared_definitions_evidence_and_parent_provisions",
+      "status": "passed"
+    },
+    {
+      "name": "case_contracts_bridges_and_exact_offsets",
+      "status": "passed"
+    },
+    {
+      "name": "stable_file_snapshot",
+      "status": "passed"
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    {
+      "code": "diagnostic_source_contains_prerequisite_or_exception_cue",
+      "count": 89,
+      "method": "Source contains 除外/方可/须经/必须/未经; contextual legal review required."
+    },
+    {
+      "code": "same_predicate_different_condition_ids",
+      "count": 6
+    }
+  ],
+  "parent_reference_omissions": [],
+  "diagnostic_conditions_without_source": [
+    {
+      "rule_id": "rule.contract.gap.fill.v1",
+      "condition_id": "cond.contract.gap_is_quality_price_place_time_method_or_cost"
+    },
+    {
+      "rule_id": "rule.contract.privity.v1",
+      "condition_id": "cond.contract.claim_against_nonparty"
+    },
+    {
+      "rule_id": "rule.contract.termination.nonperformance.v1",
+      "condition_id": "cond.alternative_performance"
+    },
+    {
+      "rule_id": "rule.limitation.ordinary_three_year_defense.v1",
+      "condition_id": "cond.limitation_tolling_or_restart_issue"
+    },
+    {
+      "rule_id": "rule.personal_info.illegal_processing.v1",
+      "condition_id": "cond.personal_info_lawful_acquisition_issue"
+    },
+    {
+      "rule_id": "rule.service_contract.termination_refund.v1",
+      "condition_id": "cond.alternative_performance"
+    }
+  ],
+  "diagnostic_legal_premise_review_candidates": [
+    {
+      "rule_id": "rule.act.form.and_effectiveness.v1",
+      "condition_id": "cond.law_or_agreement_delays_act_effectiveness",
+      "span_ids": [
+        "span.civil-code.136.effective"
+      ]
+    },
+    {
+      "rule_id": "rule.act.void.illegal_or_collusion.v1",
+      "condition_id": "cond.mandatory_provision_does_not_void_act",
+      "span_ids": [
+        "span.civil-code.153.mandatory"
+      ]
+    },
+    {
+      "rule_id": "rule.adoption.post_dissolution_support.v1",
+      "condition_id": "cond.adoption.parents_abused_or_abandoned_child",
+      "span_ids": [
+        "span.civil-code.1118.except-abuse"
+      ]
+    },
+    {
+      "rule_id": "rule.agency.duties_conflict_and_illegality.v1",
+      "condition_id": "cond.principal_consented_or_ratified_conflict",
+      "span_ids": [
+        "span.civil-code.168.dual",
+        "span.civil-code.168.self-deal"
+      ]
+    },
+    {
+      "rule_id": "rule.agency.subdelegation.v1",
+      "condition_id": "cond.emergency_subdelegation_for_principal",
+      "span_ids": [
+        "span.civil-code.169.without-consent"
+      ]
+    },
+    {
+      "rule_id": "rule.agency.unauthorized.v1",
+      "condition_id": "cond.principal_ratified_unauthorized_act",
+      "span_ids": [
+        "span.civil-code.171.no-effect"
+      ]
+    },
+    {
+      "rule_id": "rule.construction.subcontract_and_split.v1",
+      "condition_id": "cond.construction.subcontractor_unqualified_or_resub",
+      "span_ids": [
+        "span.civil-code.791.main-structure"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.assignment.accessories_and_defenses.v1",
+      "condition_id": "cond.accessory_right_exclusive_to_assignor",
+      "span_ids": [
+        "span.civil-code.547.accessories"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.assignment.notice.v1",
+      "condition_id": "cond.assignment_notice_revoked",
+      "span_ids": [
+        "span.civil-code.546.irrevocable"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.assignment.notice.v1",
+      "condition_id": "cond.assignee_agreed_to_revoke_notice",
+      "span_ids": [
+        "span.civil-code.546.irrevocable"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.breach.choose_liquidated_damages_or_deposit.v1",
+      "condition_id": "cond.deposit_insufficient_for_loss",
+      "span_ids": [
+        "span.civil-code.588.excess-loss"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.confusion.merge.v1",
+      "condition_id": "cond.contract.confusion_harms_third",
+      "span_ids": [
+        "span.civil-code.576.third"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.delegation.defenses_and_accessories.v1",
+      "condition_id": "cond.accessory_debt_exclusive_to_original_debtor",
+      "span_ids": [
+        "span.civil-code.554.accessory-debts"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.effectiveness.from_formation.v1",
+      "condition_id": "cond.acceptance_became_effective",
+      "span_ids": [
+        "span.civil-code.483.formed"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.effectiveness.from_formation.v1",
+      "condition_id": "cond.law_or_agreement_delays_effectiveness",
+      "span_ids": [
+        "span.civil-code.502.effective-on-formation"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.late_acceptance.new_offer.v1",
+      "condition_id": "cond.offeror_timely_treated_late_acceptance_valid",
+      "span_ids": [
+        "span.civil-code.486.late-new-offer"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.negotiation.confidentiality.v1",
+      "condition_id": "cond.acceptance_became_effective",
+      "span_ids": [
+        "span.civil-code.483.formed"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.performance.early.v1",
+      "condition_id": "cond.early_performance_does_not_harm_creditor",
+      "span_ids": [
+        "span.civil-code.530.early-refuse"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.performance.partial.v1",
+      "condition_id": "cond.partial_performance_does_not_harm_creditor",
+      "span_ids": [
+        "span.civil-code.531.partial-refuse"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.preservation.subrogation.v1",
+      "condition_id": "cond.right_is_exclusive_to_debtor",
+      "span_ids": [
+        "span.civil-code.535.subrogation"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.release.debt.v1",
+      "condition_id": "cond.contract.debtor_refused_release",
+      "span_ids": [
+        "span.civil-code.575.refuse"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.third_party.performance_with_interest.v1",
+      "condition_id": "cond.debt_must_be_performed_by_debtor",
+      "span_ids": [
+        "span.civil-code.524.personal-only"
+      ]
+    },
+    {
+      "rule_id": "rule.contract.third_party.performance_with_interest.v1",
+      "condition_id": "cond.creditor_accepted_third_party_performance",
+      "span_ids": [
+        "span.civil-code.524.assignment"
+      ]
+    },
+    {
+      "rule_id": "rule.factoring.fictitious_receivable.no_defense.v1",
+      "condition_id": "cond.factoring.factor_knew_fictitious",
+      "span_ids": [
+        "span.civil-code.763.factor-knew"
+      ]
+    },
+    {
+      "rule_id": "rule.family.daily_household_agency.v1",
+      "condition_id": "cond.family.counterparty_is_good_faith",
+      "span_ids": [
+        "span.civil-code.1060.good-faith"
+      ]
+    },
+    {
+      "rule_id": "rule.family.divorce.litigation.v1",
+      "condition_id": "cond.family.soldier_spouse_without_consent",
+      "span_ids": [
+        "span.civil-code.1081.soldier"
+      ]
+    },
+    {
+      "rule_id": "rule.family.divorce.property_partition.v1",
+      "condition_id": "cond.family.spouse_concealed_or_dissipated_property",
+      "span_ids": [
+        "span.civil-code.1092.less-or-none"
+      ]
+    },
+    {
+      "rule_id": "rule.family.marital_property.characterize.v1",
+      "condition_id": "cond.family.asset_is_community_type",
+      "span_ids": [
+        "span.civil-code.1062.inherit-gift"
+      ]
+    },
+    {
+      "rule_id": "rule.family.marital_property.characterize.v1",
+      "condition_id": "cond.family.written_property_agreement",
+      "span_ids": [
+        "span.civil-code.1065.written"
+      ]
+    },
+    {
+      "rule_id": "rule.finlease.claim_and_rent.v1",
+      "condition_id": "cond.finlease.lessee_relied_on_lessor_skill_or_intervention",
+      "span_ids": [
+        "span.civil-code.747.skill-except"
+      ]
+    },
+    {
+      "rule_id": "rule.finlease.lessor_not_liable_for_quality.v1",
+      "condition_id": "cond.finlease.lessee_relied_on_lessor_skill_or_intervention",
+      "span_ids": [
+        "span.civil-code.747.skill-except"
+      ]
+    },
+    {
+      "rule_id": "rule.finlease.ownership_registration_against.v1",
+      "condition_id": "cond.finlease.third_party_is_bona_fide",
+      "span_ids": [
+        "span.civil-code.745.unregistered"
+      ]
+    },
+    {
+      "rule_id": "rule.finlease.sale_contract_no_unilateral_change.v1",
+      "condition_id": "cond.finlease.lessee_consented_to_sale_change",
+      "span_ids": [
+        "span.civil-code.744.no-change"
+      ]
+    },
+    {
+      "rule_id": "rule.finlease.termination_after_sale_failure.damages.v1",
+      "condition_id": "cond.finlease.sale_failed_due_to_lessor",
+      "span_ids": [
+        "span.civil-code.755.lessor-cause"
+      ]
+    },
+    {
+      "rule_id": "rule.guarantee.assignment.of_claim.v1",
+      "condition_id": "cond.guarantee.anti_assignment_without_consent",
+      "span_ids": [
+        "span.civil-code.696.forbid"
+      ]
+    },
+    {
+      "rule_id": "rule.guarantee.capacity.forbidden_guarantor.v1",
+      "condition_id": "cond.guarantee.state_approved_onlending",
+      "span_ids": [
+        "span.civil-code.683.except"
+      ]
+    },
+    {
+      "rule_id": "rule.guarantee.principal_modified.v1",
+      "condition_id": "cond.guarantee.term_changed",
+      "span_ids": [
+        "span.civil-code.695.term"
+      ]
+    },
+    {
+      "rule_id": "rule.lease.improvement.consent.v1",
+      "condition_id": "cond.lease.no_lessor_consent_to_improve",
+      "span_ids": [
+        "span.civil-code.715.no"
+      ]
+    },
+    {
+      "rule_id": "rule.lease.preemption.house.v1",
+      "condition_id": "cond.lease.coowner_or_relative_sale",
+      "span_ids": [
+        "span.civil-code.726.except"
+      ]
+    },
+    {
+      "rule_id": "rule.lease.sublease.consent.v1",
+      "condition_id": "cond.lease.sublease_without_consent",
+      "span_ids": [
+        "span.civil-code.716.no"
+      ]
+    },
+    {
+      "rule_id": "rule.legal_person.merger_or_split.v1",
+      "condition_id": "cond.creditor_or_debtor_agreed_split_allocation",
+      "span_ids": [
+        "span.civil-code.67.split"
+      ]
+    },
+    {
+      "rule_id": "rule.loan.form.writing.v1",
+      "condition_id": "cond.loan.between_natural_persons_agreed_otherwise",
+      "span_ids": [
+        "span.civil-code.668.writing"
+      ]
+    },
+    {
+      "rule_id": "rule.partnership.transfer_share.v1",
+      "condition_id": "cond.partnership.others_unanimous",
+      "span_ids": [
+        "span.civil-code.974.transfer"
+      ]
+    },
+    {
+      "rule_id": "rule.person.declared_death.revoke.v1",
+      "condition_id": "cond.spouse_remarried_or_refused_restore",
+      "span_ids": [
+        "span.civil-code.51.marriage"
+      ]
+    },
+    {
+      "rule_id": "rule.person.declared_death.revoke.v1",
+      "condition_id": "cond.child_adopted_during_declared_death",
+      "span_ids": [
+        "span.civil-code.52.adoption"
+      ]
+    },
+    {
+      "rule_id": "rule.personality.personal_info.processing_requirements.v1",
+      "condition_id": "cond.personality.personal_info_consent_or_statutory_exception",
+      "span_ids": [
+        "span.civil-code.1035.consent"
+      ]
+    },
+    {
+      "rule_id": "rule.property.accessory_fruits_accession.v1",
+      "condition_id": "cond.property.parties_agreed_accessory_fruits_or_accession",
+      "span_ids": [
+        "span.civil-code.320.follow"
+      ]
+    },
+    {
+      "rule_id": "rule.property.advance_notice.v1",
+      "condition_id": "cond.immovable_disposed_without_advance_notice_consent",
+      "span_ids": [
+        "span.civil-code.221.advance"
+      ]
+    },
+    {
+      "rule_id": "rule.property.bona_fide_acquisition.v1",
+      "condition_id": "cond.property.transferee_knew_prior_right_on_movable",
+      "span_ids": [
+        "span.civil-code.313.except"
+      ]
+    },
+    {
+      "rule_id": "rule.property.co_ownership.external_debt.v1",
+      "condition_id": "cond.property.third_party_knew_no_joint_liability",
+      "span_ids": [
+        "span.civil-code.307.external"
+      ]
+    },
+    {
+      "rule_id": "rule.property.co_ownership.manage_dispose_cost.v1",
+      "condition_id": "cond.property.co_owned_thing_disposed_or_materially_altered",
+      "span_ids": [
+        "span.civil-code.301.dispose"
+      ]
+    },
+    {
+      "rule_id": "rule.property.co_ownership.manage_dispose_cost.v1",
+      "condition_id": "cond.property.co_owner_consent_threshold_met",
+      "span_ids": [
+        "span.civil-code.301.dispose"
+      ]
+    },
+    {
+      "rule_id": "rule.property.condo.common_areas.v1",
+      "condition_id": "cond.property.area_is_town_public_or_expressly_private",
+      "span_ids": [
+        "span.civil-code.274.green",
+        "span.civil-code.274.road"
+      ]
+    },
+    {
+      "rule_id": "rule.property.construction_land.use_and_buildings.v1",
+      "condition_id": "cond.property.contrary_evidence_on_building_owner",
+      "span_ids": [
+        "span.civil-code.352.build"
+      ]
+    },
+    {
+      "rule_id": "rule.property.easement.create_and_duties.v1",
+      "condition_id": "cond.property.easement_registered",
+      "span_ids": [
+        "span.civil-code.374.reg"
+      ]
+    },
+    {
+      "rule_id": "rule.property.easement.create_and_duties.v1",
+      "condition_id": "cond.good_faith_third_party_asserts_right",
+      "span_ids": [
+        "span.civil-code.225.special",
+        "span.civil-code.335.reg",
+        "span.civil-code.374.reg"
+      ]
+    },
+    {
+      "rule_id": "rule.property.easement.priority_and_transfer.v1",
+      "condition_id": "cond.property.usufruct_already_exists_on_land",
+      "span_ids": [
+        "span.civil-code.379.consent"
+      ]
+    },
+    {
+      "rule_id": "rule.property.habitation.create_and_limits.v1",
+      "condition_id": "cond.property.habitation_transferred_inherited_or_rented",
+      "span_ids": [
+        "span.civil-code.369.no-rent"
+      ]
+    },
+    {
+      "rule_id": "rule.property.immovable.contract_without_registration.v1",
+      "condition_id": "cond.immovable_change_registered",
+      "span_ids": [
+        "span.civil-code.209.effective"
+      ]
+    },
+    {
+      "rule_id": "rule.property.immovable.registration.v1",
+      "condition_id": "cond.immovable_change_registered",
+      "span_ids": [
+        "span.civil-code.209.effective"
+      ]
+    },
+    {
+      "rule_id": "rule.property.land_contract.transfer_and_stability.v1",
+      "condition_id": "cond.property.land_contract_change_registered",
+      "span_ids": [
+        "span.civil-code.335.reg"
+      ]
+    },
+    {
+      "rule_id": "rule.property.land_contract.transfer_and_stability.v1",
+      "condition_id": "cond.good_faith_third_party_asserts_right",
+      "span_ids": [
+        "span.civil-code.225.special",
+        "span.civil-code.335.reg",
+        "span.civil-code.374.reg"
+      ]
+    },
+    {
+      "rule_id": "rule.property.land_management_right.v1",
+      "condition_id": "cond.property.land_management_registered",
+      "span_ids": [
+        "span.civil-code.341.reg"
+      ]
+    },
+    {
+      "rule_id": "rule.property.lien.create.v1",
+      "condition_id": "cond.property.lien_same_legal_relation_or_between_enterprises",
+      "span_ids": [
+        "span.civil-code.448.same"
+      ]
+    },
+    {
+      "rule_id": "rule.property.lien.enforce_and_priority.v1",
+      "condition_id": "cond.property.lien_grace_expired_or_perishable",
+      "span_ids": [
+        "span.civil-code.453.period"
+      ]
+    },
+    {
+      "rule_id": "rule.property.max_mortgage.v1",
+      "condition_id": "cond.property.max_mortgage_claim_not_yet_determined",
+      "span_ids": [
+        "span.civil-code.421.assign"
+      ]
+    },
+    {
+      "rule_id": "rule.property.mortgage.new_building_use_and_limitation.v1",
+      "condition_id": "cond.property.collective_land_use_right_mortgaged",
+      "span_ids": [
+        "span.civil-code.418.use"
+      ]
+    },
+    {
+      "rule_id": "rule.property.mortgage.priority_change_and_enforce.v1",
+      "condition_id": "cond.property.mortgaged_property_seized_by_court",
+      "span_ids": [
+        "span.civil-code.412.fruit"
+      ]
+    },
+    {
+      "rule_id": "rule.property.mortgage.priority_change_and_enforce.v1",
+      "condition_id": "cond.property.mortgagee_waived_or_changed_priority",
+      "span_ids": [
+        "span.civil-code.409.change"
+      ]
+    },
+    {
+      "rule_id": "rule.property.mortgage.registration_and_buyer.v1",
+      "condition_id": "cond.property.movable_mortgage_registered",
+      "span_ids": [
+        "span.civil-code.403.move"
+      ]
+    },
+    {
+      "rule_id": "rule.property.movable.delivery.v1",
+      "condition_id": "cond.object_is_ship_aircraft_or_vehicle",
+      "span_ids": [
+        "span.civil-code.225.special"
+      ]
+    },
+    {
+      "rule_id": "rule.property.nonconsensual.change.v1",
+      "condition_id": "cond.nonconsensual_immovable_later_disposed",
+      "span_ids": [
+        "span.civil-code.232.later-reg"
+      ]
+    },
+    {
+      "rule_id": "rule.property.nonconsensual.change.v1",
+      "condition_id": "cond.immovable_change_registered",
+      "span_ids": [
+        "span.civil-code.209.effective"
+      ]
+    },
+    {
+      "rule_id": "rule.property.pledge.create_and_forfeiture.v1",
+      "condition_id": "cond.movable_was_delivered",
+      "span_ids": [
+        "span.civil-code.224.delivery"
+      ]
+    },
+    {
+      "rule_id": "rule.property.pledge.custody_use_and_repledge.v1",
+      "condition_id": "cond.property.pledgee_used_or_disposed_without_consent",
+      "span_ids": [
+        "span.civil-code.431.use"
+      ]
+    },
+    {
+      "rule_id": "rule.property.pledge.custody_use_and_repledge.v1",
+      "condition_id": "cond.property.pledgee_failed_to_keep_or_repledged",
+      "span_ids": [
+        "span.civil-code.434.repledge"
+      ]
+    },
+    {
+      "rule_id": "rule.property.right_pledge.registered_rights.v1",
+      "condition_id": "cond.property.pledged_right_transferred_or_licensed_without_consent",
+      "span_ids": [
+        "span.civil-code.443.no-sell",
+        "span.civil-code.444.no-license",
+        "span.civil-code.445.no-assign"
+      ]
+    },
+    {
+      "rule_id": "rule.property.security.priority_and_accessory.v1",
+      "condition_id": "cond.property.principal_contract_invalid",
+      "span_ids": [
+        "span.civil-code.388.from"
+      ]
+    },
+    {
+      "rule_id": "rule.property.security.subrogation_transfer_and_mix.v1",
+      "condition_id": "cond.property.debt_transferred_without_third_guarantor_writing",
+      "span_ids": [
+        "span.civil-code.391.transfer"
+      ]
+    },
+    {
+      "rule_id": "rule.property.special_movable.registration_against.v1",
+      "condition_id": "cond.special_movable_change_registered",
+      "span_ids": [
+        "span.civil-code.225.special"
+      ]
+    },
+    {
+      "rule_id": "rule.property.special_movable.registration_against.v1",
+      "condition_id": "cond.good_faith_third_party_asserts_right",
+      "span_ids": [
+        "span.civil-code.225.special",
+        "span.civil-code.335.reg",
+        "span.civil-code.374.reg"
+      ]
+    },
+    {
+      "rule_id": "rule.sale.retention_of_title.v1",
+      "condition_id": "cond.sale.retention_not_registered",
+      "span_ids": [
+        "span.civil-code.641.register"
+      ]
+    },
+    {
+      "rule_id": "rule.sale.withhold.price_for_third_right.v1",
+      "condition_id": "cond.sale.seller_gave_adequate_security",
+      "span_ids": [
+        "span.civil-code.614.security"
+      ]
+    },
+    {
+      "rule_id": "rule.tort.assumption_of_risk.v1",
+      "condition_id": "cond.other_participant_intent_or_gross_negligence",
+      "span_ids": [
+        "span.civil-code.1176.intent-or-gross-negligence"
+      ]
+    },
+    {
+      "rule_id": "rule.tort.death.claimant.v1",
+      "condition_id": "cond.tort.infringer_already_paid_those_costs",
+      "span_ids": [
+        "span.civil-code.1181.already-paid"
+      ]
+    },
+    {
+      "rule_id": "rule.tort.ultrahazard.compensation_cap.v1",
+      "condition_id": "cond.tort.ultrahazard_actor_intent_or_gross_negligence",
+      "span_ids": [
+        "span.civil-code.1244.ex"
+      ]
+    },
+    {
+      "rule_id": "rule.tort.ultrahazard.unauthorized_entry.v1",
+      "condition_id": "cond.tort.manager_proved_safety_and_warning",
+      "span_ids": [
+        "span.civil-code.1243.entry"
+      ]
+    },
+    {
+      "rule_id": "rule.tort.vehicle.gratuitous_passenger.v1",
+      "condition_id": "cond.tort.vehicle_user_intent_or_gross_negligence",
+      "span_ids": [
+        "span.civil-code.1217.intent"
+      ]
+    },
+    {
+      "rule_id": "rule.work.personally_or_third_party.v1",
+      "condition_id": "cond.work.orderer_consented_main_to_third",
+      "span_ids": [
+        "span.civil-code.772.no-consent"
+      ]
+    }
+  ],
+  "duplicate_condition_predicates": [
+    {
+      "definition_sha256": "5d4790e446ad47db8300e035cbd7e4985b1274a2eb342ff83ab2644073dd2a99",
+      "condition_ids": [
+        "cond.guarantee.principal_contract_invalid",
+        "cond.property.principal_contract_invalid"
+      ],
+      "rule_ids": [
+        "rule.guarantee.accessory_and_invalidity.v1",
+        "rule.property.security.priority_and_accessory.v1"
+      ]
+    },
+    {
+      "definition_sha256": "98128cad78753839cd2949c67f6686d9ff306492267e72363a4501c5b1163a5d",
+      "condition_ids": [
+        "cond.debtor_has_defense_against_creditor",
+        "cond.guarantee.debtor_has_defense"
+      ],
+      "rule_ids": [
+        "rule.contract.third_party.direct_claim.v1",
+        "rule.guarantee.defenses.of_debtor.v1"
+      ]
+    },
+    {
+      "definition_sha256": "3a01390076aa918ea6da8e171a0e9927927b53329bad6900c80496dee7ab9df1",
+      "condition_ids": [
+        "cond.contract.creditor_refused_without_cause",
+        "cond.creditor_refused_acceptance_without_cause"
+      ],
+      "rule_ids": [
+        "rule.contract.breach.creditor_refusal.v1",
+        "rule.contract.deposit_in_court.formed.v1"
+      ]
+    },
+    {
+      "definition_sha256": "5042e5d50535198c4ca0cce0d8091e046adaad01b6ea00fa66b344f750f734c3",
+      "condition_ids": [
+        "cond.contract.claim_and_debt_merged",
+        "cond.contract.claim_debt_same_person"
+      ],
+      "rule_ids": [
+        "rule.contract.confusion.merge.v1",
+        "rule.contract.obligation.extinguish.v1"
+      ]
+    },
+    {
+      "definition_sha256": "3aed8a5b0f21592d2a79047f2fc9c24c32155abf601e910d91d1963e44f9bee4",
+      "condition_ids": [
+        "cond.tech.coop_stalled_delayed_or_failed",
+        "cond.tech.development_stalled_delayed_or_failed"
+      ],
+      "rule_ids": [
+        "rule.tech.commissioned_development.duties.v1",
+        "rule.tech.cooperative_development.duties.v1"
+      ]
+    },
+    {
+      "definition_sha256": "52f0a72e34cb2b1a381e22998f434faa95ecce38ee2c07d0cca3f75bcb63874f",
+      "condition_ids": [
+        "cond.gift.obligation_attached_for_defect",
+        "cond.gift.with_obligation"
+      ],
+      "rule_ids": [
+        "rule.gift.conditional.duty.v1",
+        "rule.gift.defect.liability.v1"
+      ]
+    }
+  ],
+  "duplicate_condition_definitions": [
+    {
+      "definition_sha256": "cd755dca84cbbea7f8b570efaaa03c363df00ac320fe44492c3e3508b60d7ca1",
+      "condition_ids": [
+        "cond.tech.coop_stalled_delayed_or_failed",
+        "cond.tech.development_stalled_delayed_or_failed"
+      ],
+      "rule_ids": [
+        "rule.tech.commissioned_development.duties.v1",
+        "rule.tech.cooperative_development.duties.v1"
+      ]
+    }
+  ],
+  "article_coverage": [
+    {
+      "book": "第一编 总则",
+      "first_article": 1,
+      "last_article": 204,
+      "expected_articles": 204,
+      "present_articles": 204,
+      "rule_referenced_articles": 139
+    },
+    {
+      "book": "第二编 物权",
+      "first_article": 205,
+      "last_article": 462,
+      "expected_articles": 258,
+      "present_articles": 258,
+      "rule_referenced_articles": 202
+    },
+    {
+      "book": "第三编 合同",
+      "first_article": 463,
+      "last_article": 988,
+      "expected_articles": 526,
+      "present_articles": 526,
+      "rule_referenced_articles": 461
+    },
+    {
+      "book": "第四编 人格权",
+      "first_article": 989,
+      "last_article": 1039,
+      "expected_articles": 51,
+      "present_articles": 51,
+      "rule_referenced_articles": 46
+    },
+    {
+      "book": "第五编 婚姻家庭",
+      "first_article": 1040,
+      "last_article": 1118,
+      "expected_articles": 79,
+      "present_articles": 79,
+      "rule_referenced_articles": 64
+    },
+    {
+      "book": "第六编 继承",
+      "first_article": 1119,
+      "last_article": 1163,
+      "expected_articles": 45,
+      "present_articles": 45,
+      "rule_referenced_articles": 40
+    },
+    {
+      "book": "第七编 侵权责任",
+      "first_article": 1164,
+      "last_article": 1258,
+      "expected_articles": 95,
+      "present_articles": 95,
+      "rule_referenced_articles": 90
+    },
+    {
+      "book": "附则",
+      "first_article": 1259,
+      "last_article": 1260,
+      "expected_articles": 2,
+      "present_articles": 2,
+      "rule_referenced_articles": 0
+    }
+  ]
+}
