@@ -28,6 +28,9 @@ RETURN DISTINCT other.object_id AS rule_id, c.object_id AS condition_id,
        og.object_id AS group_id
 """
 
+# 上面的两次 MATCH 通过同一个 c 寻找共享条件的其他规则；返回真实 ConditionGroup ID。
+# 下方是固定查询模板，不是让 LLM 在线拼 Cypher；release_id 用于隔离发布版本。
+
 CASES_BY_CONDITION = """
 MATCH (c:RuleCondition {release_id:$release_id})<-[:ABOUT]-(a:ConditionFinding)
       <-[:HAS_ASSESSMENT]-(case:Case {release_id:$release_id})
@@ -40,6 +43,9 @@ RETURN case.object_id AS case_id, c.object_id AS condition_id,
        collect(DISTINCT s.object_id) AS span_ids
 """
 
+# 按条件反向找到案例认定，再找案例；OPTIONAL MATCH 允许原文/查明关联缺失，
+# 但缺失时不能补造证据，是否有资格成为支持案例由 hybrid_cypher._assign_role 决定。
+
 CASES_APPLYING_RULE = """
 MATCH (case:Case {release_id:$release_id})-[:HAS_REASONING]->(step:ReasoningStep)
       -[:APPLIES]->(rule:LegalRule {release_id:$release_id})
@@ -47,6 +53,8 @@ WHERE rule.object_id IN $rule_ids
 RETURN DISTINCT case.object_id AS case_id, rule.object_id AS rule_id,
        step.object_id AS reasoning_id
 """
+
+# APPLIES 必须经过 ReasoningStep，不能把“案例引用法条”直接当作“法院适用规则”。
 
 CASES_CITING_PROVISION = """
 MATCH (rule:LegalRule {release_id:$release_id})-[:BASED_ON]->(p:Provision)

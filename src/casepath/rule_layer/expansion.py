@@ -32,6 +32,8 @@ RULES_ROOT = Path("canonical/rules")
 def normalize(batch: dict, provisions: list[ProvisionRecord]):
     """只合并相同定义的证据列表；定义差异、断链和非法原文一律阻止发布。"""
     base = build_civil_code_rules(provisions)
+    # 【a 规则来源】基线由 civil_code.py 构造，扩展从 batch['rules'] 读取并校验。
+    # 此处不调用 LLM/embedding 抽取三元组；批次 JSON 的上游生成方式需查交付记录。
     additions = [RuleRecord.model_validate(item) for item in batch["rules"]]
     if any(r.contract_version != "1.3" or r.maturity.value != "L1" for r in additions):
         raise ValueError("新增规则必须保持 v1.3 / L1")
@@ -62,6 +64,7 @@ def normalize(batch: dict, provisions: list[ProvisionRecord]):
         ):
             raise ValueError(f"原文无法锚定: {span.span_id}")
     shared = {}
+    # 同一 condition_id 必须有一致定义，后续据此共享图节点，不按向量相似度合并实体。
     for rule in rules:
         for attr in ("conditions", "exceptions", "consequences"):
             field = {

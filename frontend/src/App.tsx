@@ -108,7 +108,7 @@ export default function App() {
             onViewExplanation={session.viewExplanationNow}
           />
         </aside>
-        <section className="app-right">
+        <section className="app-right" role="region" aria-label="分析与证据" tabIndex={0}>
           <RightPanel snapshot={session.snapshot} />
         </section>
       </div>

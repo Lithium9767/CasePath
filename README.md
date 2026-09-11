@@ -75,7 +75,7 @@ copy .env.example .env
 | --- | --- | --- |
 | 模式 | `CASEPATH_MODE=live` | 只有显式 `live` 才进正式装配；否则 Demo |
 | 数据 | `CASEPATH_DATA_ROOT=data` | canonical / derived 数据根目录 |
-| 追问 | `CASEPATH_MAX_QUESTION_TURNS` | 最多追问轮次，默认 3 |
+| 追问 | `CASEPATH_MAX_QUESTION_TURNS` | 最多追问轮次，默认 5 |
 | LLM | `CASEPATH_LLM_API_KEY` | 也可改用 `DASHSCOPE_API_KEY` |
 | LLM | `CASEPATH_LLM_BASE_URL` / `CASEPATH_LLM_MODEL` | OpenAI 兼容地址与模型名 |
 | LLM | `CASEPATH_LLM_REQUIRED` | `true`：缺 Key 拒绝启动；`false`：允许词法降级 |
@@ -290,7 +290,7 @@ RuleRetriever
 - 初始问题保存在 `QueryState.initial_query`，完整回答保存在 `DialogueTurn.answer`；
   P4 提取的事实片段使用 `UserFact.text + source_turn`。本次不扩展用户 SourceSpan 合同，
   也不提供文档原文的字符偏移核验。
-- 当前最多追问 3 轮；P4 策略负责过滤已问条件。若策略仍选中已回答问题，
+- 当前最多追问 5 轮；P4 策略负责过滤已问条件。若策略仍选中已回答问题，
   Workflow 将其作为组件输出错误拒绝，不会把策略错误伪装成正常停止。
 - 条件投影在案例检索前执行；案例检索器必须使用同一轮投影后的状态。
 - 仅单进程、单 worker 联调；重启或热重载会清空会话。未提供磁盘持久化、

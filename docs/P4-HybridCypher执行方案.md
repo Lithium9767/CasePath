@@ -30,7 +30,7 @@ KG 已有离线投影与写入器，但真实 Neo4j 入库仍需本机写账号�
 |B|adapters/conditions/semantic_condition_projector.py|QueryState＋rule_refs → QueryState|候选条件获取、语义判定、多事实聚合|
 |C|adapters/retrieval/hybrid_cypher.py|投影后的 QueryState＋rule_refs → RetrievalBundle|案例混合召回、独立条件图召回、重排与角色组织|
 |D|adapters/conditions/condition_comparator.py|QueryState＋RetrievalBundle → ComparisonBundle|计算一次共享分化指标|
-|E|adapters/questioning/information_gain_policy.py|状态＋检索＋比较 → QuestionCandidate或None|回答模拟、收益/成本、停止策略|
+|E|adapters/questioning/key_condition_policy.py|状态＋检索＋比较 → QuestionCandidate或None|关键未知条件选择、LLM事实追问、预算与防重|
 |回答解释|adapters/conditions/semantic_answer_interpreter.py|状态＋问题＋回答 → AnswerInterpretation|仅摘取回答原话、条件增量|
 |解释|adapters/explanation/evidence_explanation_planner.py|状态＋检索＋比较 → ExplanationPlan|有引用的条件化解释|
 

@@ -26,6 +26,7 @@ def native_properties(properties):
 
 
 def publish(driver, database, bundle, *, batch_size=500, timeout=120):
+    # 【b 落库】消费投影包，用 Cypher 写属性图；和在线只读 gateway、embedding 建库独立。
     if batch_size <= 0 or timeout <= 0:
         raise ValueError("batch size and timeout must be positive")
     payload = {k: v for k, v in bundle.items() if k != "release_id"}
@@ -51,6 +52,7 @@ def publish(driver, database, bundle, *, batch_size=500, timeout=120):
 
     # 标签及关系类型仅允许代码内白名单；所有数据值使用参数。
     with driver.session(database=database) as session:
+        # 此处只建唯一性约束及其支撑索引，不创建 Neo4j 全文/向量索引。
         for query in [
             (
                 "CREATE CONSTRAINT casepath_entity IF NOT EXISTS FOR (n:CasePathEntity) "
@@ -75,6 +77,7 @@ def publish(driver, database, bundle, *, batch_size=500, timeout=120):
                 "SET c.lock_version=coalesce(c.lock_version,0)+1"
             ).consume()
             for label, rows in sorted(nodes.items()):
+                # UNWIND 展开参数批次；MERGE 按发布版本+key 创建或匹配节点。
                 for start in range(0, len(rows), batch_size):
                     tx.run(
                         f"UNWIND $rows AS row MERGE (n:CasePathEntity:{label} "
@@ -83,6 +86,7 @@ def publish(driver, database, bundle, *, batch_size=500, timeout=120):
                         release=release,
                     ).consume()
             for relation, rows in sorted(edges.items()):
+                # 根据 source/target key 找到两端，再建立明确关系，不需要计算向量。
                 for start in range(0, len(rows), batch_size):
                     tx.run(
                         "UNWIND $rows AS row "

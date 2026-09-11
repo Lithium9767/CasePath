@@ -14,6 +14,7 @@ class EmbeddingClient:
         self.timeout_seconds, self.batch_size = timeout_seconds, batch_size
 
     def embed(self, texts):
+        # 【c 嵌入计算】字符串列表交给远端模型，返回对应向量；本地只负责传输与校验。
         output = []
         try:
             for start in range(0, len(texts), self.batch_size):
@@ -21,11 +22,13 @@ class EmbeddingClient:
                 if any(not text.strip() for text in chunk):
                     raise ValueError("不接受空文本")
                 response = self.client.embeddings.create(
+                    # 独立 embeddings 接口，不是聊天接口，也不返回实体/关系三元组。
                     input=chunk,
                     model=self.spec.model,
                     timeout=self.timeout_seconds,
                 )
                 records = sorted(response.data, key=lambda item: item.index)
+                # 恢复输入顺序，避免文档 ID 和返回向量错配。
                 if [item.index for item in records] != list(range(len(chunk))):
                     raise ValueError("embedding 返回索引不完整")
                 for item in records:

@@ -224,6 +224,8 @@ def test_concurrent_answers_commit_once(service, initial, answer, same_answer):
 
 
 def test_three_turns_budget_and_old_replay_never_roll_back_latest(service):
+    # 本测试验证三轮预算，不依赖产品默认追问轮数（当前为五轮）。
+    service.workflow.max_question_turns = 3
     """合成的多问题策略用于验证基础设施，不表示真实追问的价值排序。"""
     from casepath.contracts import QuestionCandidate
 

@@ -119,6 +119,8 @@ class CaseCleaner:
         sections = split_sections(document)
         facts = sections.get("基本案情", case.get("case_facts") or "")
         reasoning = sections.get("裁判理由", case.get("judgment_reasoning") or "")
+        # 【a 案例抽取】先分文书章节，再用 extract.py 的领域规则/短语匹配抽取结构。
+        # 输入已有上游字段；这里不是通用 NER，不调用 embedding 判定实体关系。
         result_section = sections.get("裁判结果", "")
         partitions = split_fact_partitions(facts)
         holding = result_section or partitions.holding
@@ -130,6 +132,8 @@ class CaseCleaner:
         claim = extract_claim(case_id, case, partitions, str(case.get("title") or ""))
         findings = extract_findings(case_id, partitions, facts, book)
         condition_findings = (
+            # 仅指定对比集套用退费条件桥接；condition_id 及证据引用供之后建 ABOUT 边。
+            # 请求、法院查明、说理、结果分别抽取，不能把诉称当作法院认定。
             extract_condition_findings(
                 findings,
                 facts,

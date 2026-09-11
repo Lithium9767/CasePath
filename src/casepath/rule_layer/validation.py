@@ -435,7 +435,7 @@ def validate_records(
         status="passed",
     )
 
-
+# 校验规则数据合法性
 def validate_canonical_dataset(data_root: Path) -> DatasetValidationReport:
     import json
 

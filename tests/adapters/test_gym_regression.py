@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from casepath.adapters.conditions.semantic_condition_projector import SemanticConditionProjector
-from casepath.adapters.questioning.information_gain_policy import InformationGainPolicy
+from casepath.adapters.questioning.key_condition_policy import KeyConditionQuestionPolicy
 from casepath.adapters.retrieval.graph_navigator import MemoryGraphNavigator
 from casepath.adapters.retrieval.hybrid_cypher import HybridCypherRuleRetriever
 from casepath.adapters.retrieval.retrieval_catalog import load_canonical_catalog, scored_reference
@@ -92,7 +92,7 @@ def test_gym_closure_keeps_question_and_does_not_promote_graph_only_rule():
     statuses = {item.condition_id: item.status for item in state.condition_states}
     assert statuses["cond.unperformed_balance"] == ConditionStatus.SATISFIED
     assert statuses["cond.performance_impossible"] == ConditionStatus.UNKNOWN
-    question = InformationGainPolicy(catalog).select(
+    question = KeyConditionQuestionPolicy(catalog).select(
         state, RetrievalBundle(rule_refs=refs), ComparisonBundle()
     )
     assert question is not None
@@ -119,8 +119,9 @@ def test_single_rule_without_cases_still_clarifies_key_fact():
         ),
         refs,
     )
-    question = InformationGainPolicy(catalog).select(
+    question = KeyConditionQuestionPolicy(catalog).select(
         state, RetrievalBundle(rule_refs=refs), ComparisonBundle()
     )
     assert question is not None
-    assert question.condition_id == "cond.performance_impossible"
+    # 新策略同级按规则排名、条件ID排序，不再绑定旧模拟的最高分条件。
+    assert question.condition_id in {"cond.performance_impossible", "cond.contract_terminated"}
