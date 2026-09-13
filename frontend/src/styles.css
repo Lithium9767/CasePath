@@ -601,3 +601,65 @@ body {
   .chat-panel__list { padding: 12px; }
   .app-footer { font-size: 10px; padding: 4px 8px; }
 }
+
+/* ---- 知识图谱 ---- */
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.graph-focus {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--cp-text-secondary);
+}
+
+/* ---- 对话历史 ---- */
+.chat-history {
+  padding: 4px 4px 12px;
+  border-bottom: 1px dashed var(--cp-border, #e8ecf1);
+  margin-bottom: 10px;
+}
+
+.chat-history__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cp-primary);
+  margin-bottom: 10px;
+}
+
+.chat-history__item {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.chat-history__q {
+  color: var(--cp-text);
+  margin-bottom: 2px;
+}
+
+.chat-history__a {
+  color: var(--cp-text-secondary);
+  margin-bottom: 6px;
+}
+
+.chat-history__changes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 4px;
+}
+
+.chat-history__change {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.chat-history__change-name {
+  color: var(--cp-text-secondary);
+  margin-right: 4px;
+}

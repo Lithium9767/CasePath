@@ -1,7 +1,8 @@
-import { Empty, Steps } from 'antd';
-import type { ResolvedSnapshot } from '@/types';
+import { Alert, Button, Empty, Steps } from 'antd';
+import type { ResolvedSnapshot, TurnSnapshot } from '@/types';
 import { conditionLabels } from '@/utils/contracts';
 import { UnderstandingPanel } from './UnderstandingPanel';
+import { KnowledgeGraphPanel } from './KnowledgeGraphPanel';
 import { ProjectionMatrix } from './ProjectionMatrix';
 import { ComparisonPanel } from './ComparisonPanel';
 import { QuestionUtilityPanel } from './QuestionUtilityPanel';
@@ -11,6 +12,9 @@ import { EvidencePanel } from './EvidencePanel';
 
 interface Props {
   snapshot: ResolvedSnapshot | null;
+  history: TurnSnapshot[];
+  viewingTurn: number | null;
+  onViewTurn: (turn: number | null) => void;
 }
 
 const FLOW_STEPS = [
@@ -28,13 +32,13 @@ const EmptyOverview = () => (
     <Steps direction="vertical" size="small" current={-1} items={FLOW_STEPS} />
     <Empty
       image={Empty.PRESENTED_IMAGE_SIMPLE}
-      description="输入问题后，此处将实时展示系统理解、条件投影矩阵、追问价值与最终解释"
+      description="输入问题后，此处将实时展示系统理解、知识图谱、条件投影矩阵、追问价值与最终解释"
       style={{ marginTop: 24 }}
     />
   </div>
 );
 
-export function RightPanel({ snapshot }: Props) {
+export function RightPanel({ snapshot, history, viewingTurn, onViewTurn }: Props) {
   if (!snapshot) {
     return (
       <div className="right-panel">
@@ -43,19 +47,35 @@ export function RightPanel({ snapshot }: Props) {
     );
   }
 
-  const explaining = !snapshot.next_question;
+  const viewed =
+    viewingTurn !== null ? history.find((h) => h.turn === viewingTurn)?.snapshot : undefined;
+  const effective = viewed ?? snapshot;
+  const explaining = !effective.next_question;
 
   return (
     <div className="right-panel">
-      <UnderstandingPanel snapshot={snapshot} />
-      <ProjectionMatrix snapshot={snapshot} />
-      {snapshot.comparison_bundle && <ComparisonPanel snapshot={snapshot} />}
-      {snapshot.next_question && (
-        <QuestionUtilityPanel question={snapshot.next_question} labels={conditionLabels(snapshot)} />
+      {viewingTurn !== null && (
+        <Alert
+          type="info"
+          showIcon
+          message={`正在回看第 ${viewingTurn} 轮的状态`}
+          action={
+            <Button size="small" onClick={() => onViewTurn(null)}>
+              返回最新
+            </Button>
+          }
+        />
       )}
-      <CasePanel snapshot={snapshot} />
-      {explaining && <ExplanationPanel snapshot={snapshot} />}
-      {explaining && <EvidencePanel snapshot={snapshot} />}
+      <UnderstandingPanel snapshot={effective} />
+      <KnowledgeGraphPanel snapshot={effective} />
+      <ProjectionMatrix snapshot={effective} />
+      {effective.comparison_bundle && <ComparisonPanel snapshot={effective} />}
+      {effective.next_question && (
+        <QuestionUtilityPanel question={effective.next_question} labels={conditionLabels(effective)} />
+      )}
+      <CasePanel snapshot={effective} />
+      {explaining && <ExplanationPanel snapshot={effective} />}
+      {explaining && <EvidencePanel snapshot={effective} />}
     </div>
   );
 }

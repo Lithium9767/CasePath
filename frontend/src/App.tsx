@@ -101,6 +101,9 @@ export default function App() {
         <aside className="app-left">
           <ChatPanel
             messages={session.messages}
+            history={session.history}
+            viewingTurn={session.viewingTurn}
+            onView={session.setViewingTurn}
             loading={session.loading}
             hasQuestion={!!session.snapshot?.next_question}
             onAnswer={session.answerQuestion}
@@ -109,7 +112,12 @@ export default function App() {
           />
         </aside>
         <section className="app-right" role="region" aria-label="分析与证据" tabIndex={0}>
-          <RightPanel snapshot={session.snapshot} />
+          <RightPanel
+            snapshot={session.snapshot}
+            history={session.history}
+            viewingTurn={session.viewingTurn}
+            onViewTurn={session.setViewingTurn}
+          />
         </section>
       </div>
 
