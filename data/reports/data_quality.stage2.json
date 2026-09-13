@@ -1,6 +1,6 @@
 {
   "report_version": "1.0",
-  "generated_on": "2026-09-11",
+  "generated_on": "2026-09-13",
   "status": "passed",
   "scope": "canonical structural and reference audit; no upstream inputs or live services",
   "limitations": [
@@ -11,10 +11,10 @@
   "sha256_convention": "UTF-8 file bytes with CRLF and CR normalized to LF",
   "files": {
     "canonical/cases/cases_deep.jsonl": {
-      "sha256": "f451cf59f603dfeabd15bdae8c93103fbbdb03ccb46c3e14ff6e22a98ba76f4c"
+      "sha256": "bbe6a9639ef027bcb97c006f7ec1f55ec78573ba2836dc9487f109c936299662"
     },
     "canonical/cases/cases_l1.jsonl": {
-      "sha256": "3bf2855db6362083b660f08c38aa431e785aa01850aaf9e987b2b85ae9d0a96e"
+      "sha256": "d78d1ff747652db2de5d7e0e316d1fee81449af76ca72aa62b697354bd57adef"
     },
     "canonical/rules/legal_sources.jsonl": {
       "sha256": "10fcb635f59e758b257e83971523e68cb4b1ea364374bb05ca261d2bfd41cc1e"
@@ -29,7 +29,7 @@
       "sha256": "372d63b587fafe6f62b7eec9cab83abf61fccfc0524e733d7d46d60e6ec3ed33"
     },
     "manifests/cases.manifest.json": {
-      "sha256": "1bd449c3560b2b6af5f29026cafd3f6d30464ce525492531233a7521885279f8"
+      "sha256": "2e408e151d11073997ad3677d748c8037daabf37f99e1612a7876d74e6a4c699"
     },
     "manifests/civil_code.manifest.json": {
       "sha256": "d56838677ee32cc88ed948c76f207f2cd8cde206dc469837b0993a0e130347c0"
@@ -40,7 +40,7 @@
     "provisions": 1260,
     "rules": 776,
     "law_source_spans": 3272,
-    "cases_l1": 54,
+    "cases_l1": 60,
     "cases_deep": 54,
     "condition_occurrences": 2327,
     "unique_condition_ids": 1928,
@@ -57,7 +57,7 @@
       "L3": 4
     },
     "cases_l1": {
-      "L1": 54
+      "L1": 60
     },
     "cases_deep": {
       "L1": 54

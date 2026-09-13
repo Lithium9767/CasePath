@@ -206,7 +206,7 @@ def test_cli_binds_all_files_and_fails_for_incomplete_article_sequence(tmp_path,
     }
     assert data_quality.main(["--data-root", str(root), "--output", str(output)]) == 1
     report = json.loads(output.read_text("utf-8"))
-    assert report["generated_on"] == "2026-09-11"
+    assert report["generated_on"] == "2026-09-13"
     assert "article_sequence" in codes(report)
     assert {name: item["sha256"] for name, item in report["files"].items()} == before
     assert before == {name: sha256_file(root / name) for name in before}

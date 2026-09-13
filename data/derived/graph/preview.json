@@ -1,13 +1,13 @@
 {
   "projection_version": "1.0",
   "input_hashes": {
-    "canonical/cases/cases_deep.jsonl": "f451cf59f603dfeabd15bdae8c93103fbbdb03ccb46c3e14ff6e22a98ba76f4c",
-    "canonical/cases/cases_l1.jsonl": "3bf2855db6362083b660f08c38aa431e785aa01850aaf9e987b2b85ae9d0a96e",
+    "canonical/cases/cases_deep.jsonl": "bbe6a9639ef027bcb97c006f7ec1f55ec78573ba2836dc9487f109c936299662",
+    "canonical/cases/cases_l1.jsonl": "d78d1ff747652db2de5d7e0e316d1fee81449af76ca72aa62b697354bd57adef",
     "canonical/rules/legal_sources.jsonl": "10fcb635f59e758b257e83971523e68cb4b1ea364374bb05ca261d2bfd41cc1e",
     "canonical/rules/provisions.jsonl": "56dff29fcff3cc669c4a1cbefcf00e638f3a0a9549f000096553179a7d815250",
     "canonical/rules/rules.jsonl": "7cbd7dbb15daf03d542ce1a953e2fbc0eafa1fd96db48a027e6c3dfbee710ba9",
     "canonical/rules/source_spans.jsonl": "372d63b587fafe6f62b7eec9cab83abf61fccfc0524e733d7d46d60e6ec3ed33",
-    "manifests/cases.manifest.json": "1bd449c3560b2b6af5f29026cafd3f6d30464ce525492531233a7521885279f8",
+    "manifests/cases.manifest.json": "2e408e151d11073997ad3677d748c8037daabf37f99e1612a7876d74e6a4c699",
     "manifests/civil_code.manifest.json": "d56838677ee32cc88ed948c76f207f2cd8cde206dc469837b0993a0e130347c0"
   },
   "nodes": [
@@ -1018,6 +1018,178 @@
       }
     },
     {
+      "key": "[\"Case\",\"case.spc.civil-code-1.huang-property-health\"]",
+      "label": "Case",
+      "object_id": "case.spc.civil-code-1.huang-property-health",
+      "properties": {
+        "contract_version": "1.3",
+        "case_id": "case.spc.civil-code-1.huang-property-health",
+        "title": "黄某诉某物业服务有限公司健康权纠纷案",
+        "case_no": null,
+        "court": null,
+        "judgment_date": null,
+        "cause": "健康权纠纷",
+        "keywords": [
+          "民事",
+          "健康权纠纷",
+          "物业服务",
+          "应急处置",
+          "过错责任"
+        ],
+        "facts_text": "疫情防控期间，黄某骑共享单车进入小区，保安呼喊要求其停车亮码、登记。黄某回头后加速骑行，保安骑车追赶并伸手接触其背部，随后车辆失控摔倒。黄某请求物业公司赔偿相关损失。",
+        "reasoning_text": "生效裁判认为，物业公司依照有关政策要求值守、验码登记、阻拦冲岗，属于履职尽责，行为没有过错；黄某在被呼喊时仍加速骑行，应自行承担相应后果。",
+        "summary": "【编辑摘要，非判决原文】法院认定物业公司履行应急管理职责没有过错，驳回黄某的赔偿请求。",
+        "related_provision_ids": [
+          "law.prc.civil_code.2021.article_0286"
+        ],
+        "maturity": "L1"
+      }
+    },
+    {
+      "key": "[\"Case\",\"case.spc.civil-code-1.logistics-v-wu\"]",
+      "label": "Case",
+      "object_id": "case.spc.civil-code-1.logistics-v-wu",
+      "properties": {
+        "contract_version": "1.3",
+        "case_id": "case.spc.civil-code-1.logistics-v-wu",
+        "title": "某物流有限公司诉吴某运输合同纠纷案",
+        "case_no": null,
+        "court": null,
+        "judgment_date": null,
+        "cause": "运输合同纠纷",
+        "keywords": [
+          "民事",
+          "运输合同纠纷",
+          "第三人代为履行",
+          "合法利益",
+          "债权转让"
+        ],
+        "facts_text": "吴某未向承运司机结清运费导致货物被扣留，物流公司为保障运输时效代为支付46万元，并通知吴某，吴某当时没有异议。吴某随后仅偿还其中6万元，物流公司追偿余款未果后起诉。",
+        "reasoning_text": "生效裁判认定物流公司对履行吴某所欠运费具有合法利益；代为履行后，承运司机对吴某的债权依法转由物流公司享有。",
+        "summary": "【编辑摘要，非判决原文】法院支持物流公司请求吴某支付剩余运费的诉讼请求。",
+        "related_provision_ids": [
+          "law.prc.civil_code.2021.article_0524"
+        ],
+        "maturity": "L1"
+      }
+    },
+    {
+      "key": "[\"Case\",\"case.spc.civil-code-1.lou-portrait\"]",
+      "label": "Case",
+      "object_id": "case.spc.civil-code-1.lou-portrait",
+      "properties": {
+        "contract_version": "1.3",
+        "case_id": "case.spc.civil-code-1.lou-portrait",
+        "title": "楼某熙诉杜某峰、某网络技术有限公司肖像权纠纷案",
+        "case_no": null,
+        "court": null,
+        "judgment_date": null,
+        "cause": "肖像权纠纷",
+        "keywords": [
+          "民事",
+          "肖像权纠纷",
+          "网络侵权",
+          "未成年人",
+          "精神损害"
+        ],
+        "facts_text": "杜某峰在微博发布含未成年人清晰面部和体貌的照片，并配发失实内容；经监护人和网友指出后仍未及时删除。其账号后因其他不当言论被平台关闭，所发内容被清除，楼某熙提起肖像权侵权诉讼。",
+        "reasoning_text": "生效裁判认定涉案图片能够识别楼某熙，相关发布和持续传播构成对其肖像的歪曲使用，侵害肖像权。",
+        "summary": "【编辑摘要，非判决原文】法院判令杜某峰赔礼道歉，并赔偿精神损害抚慰金、合理维权费用等损失。",
+        "related_provision_ids": [
+          "law.prc.civil_code.2021.article_1018",
+          "law.prc.civil_code.2021.article_1019",
+          "law.prc.civil_code.2021.article_1183"
+        ],
+        "maturity": "L1"
+      }
+    },
+    {
+      "key": "[\"Case\",\"case.spc.civil-code-1.song-v-zhou-body-right\"]",
+      "label": "Case",
+      "object_id": "case.spc.civil-code-1.song-v-zhou-body-right",
+      "properties": {
+        "contract_version": "1.3",
+        "case_id": "case.spc.civil-code-1.song-v-zhou-body-right",
+        "title": "宋某祯诉周某身体权纠纷案",
+        "case_no": null,
+        "court": null,
+        "judgment_date": null,
+        "cause": "身体权纠纷",
+        "keywords": [
+          "民事",
+          "身体权纠纷",
+          "自甘冒险",
+          "体育活动",
+          "重大过失"
+        ],
+        "facts_text": "多年参与羽毛球运动的宋某祯自愿参加比赛，在周某杀球进攻时举拍防守未果，被羽毛球击伤右眼，随后请求周某赔偿相关损失。",
+        "reasoning_text": "生效裁判认为羽毛球属于具有一定风险的对抗性体育活动，周某的动作正常且不存在故意或重大过失；法律亦未规定本案适用公平责任分担损失。",
+        "summary": "【编辑摘要，非判决原文】一审法院于2021年1月4日驳回全部诉讼请求，二审驳回上诉、维持原判；汇编未披露二审裁判日期。",
+        "related_provision_ids": [
+          "law.prc.civil_code.2021.article_1176",
+          "law.prc.civil_code.2021.article_1186"
+        ],
+        "maturity": "L1"
+      }
+    },
+    {
+      "key": "[\"Case\",\"case.spc.civil-code-1.su-statutory-inheritance\"]",
+      "label": "Case",
+      "object_id": "case.spc.civil-code-1.su-statutory-inheritance",
+      "properties": {
+        "contract_version": "1.3",
+        "case_id": "case.spc.civil-code-1.su-statutory-inheritance",
+        "title": "苏某甲诉李某田等法定继承纠纷案",
+        "case_no": null,
+        "court": null,
+        "judgment_date": null,
+        "cause": "法定继承纠纷",
+        "keywords": [
+          "民事",
+          "法定继承纠纷",
+          "侄甥代位继承",
+          "遗产酌给",
+          "扶养义务"
+        ],
+        "facts_text": "被继承人未立遗嘱、未订立遗赠扶养协议，生前未生育或收养子女，父母、妻子及唯一的姐姐均先于其死亡。姐姐的养女与生前扶养被继承人较多的其他亲属对遗产分配发生争议。",
+        "reasoning_text": "生效裁判依照民法典时间效力的相关规定，适用侄甥代位继承规则确认姐姐养女的继承资格；同时考虑其他亲属长期扶养和处理丧葬事务，向其酌给遗产。",
+        "summary": "【编辑摘要，非判决原文】法院确认姐姐养女有权代位继承，并根据扶养情况、财产分配及便于执行等因素，确定财产归属和折价补偿。",
+        "related_provision_ids": [
+          "law.prc.civil_code.2021.article_1128",
+          "law.prc.civil_code.2021.article_1131"
+        ],
+        "maturity": "L1"
+      }
+    },
+    {
+      "key": "[\"Case\",\"case.spc.civil-code-1.yu-high-rise-object\"]",
+      "label": "Case",
+      "object_id": "case.spc.civil-code-1.yu-high-rise-object",
+      "properties": {
+        "contract_version": "1.3",
+        "case_id": "case.spc.civil-code-1.yu-high-rise-object",
+        "title": "庾某娴诉黄某辉高空抛物损害责任纠纷案",
+        "case_no": null,
+        "court": null,
+        "judgment_date": null,
+        "cause": "高空抛物损害责任纠纷",
+        "keywords": [
+          "民事",
+          "高空抛物损害责任纠纷",
+          "监护责任",
+          "侵权责任",
+          "精神损害"
+        ],
+        "facts_text": "庾某娴在小区散步时，被从35楼抛到身旁的矿泉水瓶惊吓摔倒。监控和双方确认书能够确定抛物来源，双方确认抛物者为无民事行为能力人、黄某辉为其监护人。黄某辉支付部分赔偿后拒绝支付剩余治疗费，庾某娴起诉。",
+        "reasoning_text": "生效裁判依据监控、确认书和监护关系认定责任，并按民法典时间效力的相关规定适用高空抛物责任条款。",
+        "summary": "【编辑摘要，非判决原文】审理法院于2021年1月4日判令监护人赔偿医疗、护理、交通等损失及精神损害抚慰金；汇编未明确该裁判的审级或终审日期。",
+        "related_provision_ids": [
+          "law.prc.civil_code.2021.article_1254"
+        ],
+        "maturity": "L1"
+      }
+    },
+    {
       "key": "[\"Case\",\"eQrx3a8dhIQZNq9GJB6MTgwnW83%2BGEnOI6E6A14C9hg%3D\"]",
       "label": "Case",
       "object_id": "eQrx3a8dhIQZNq9GJB6MTgwnW83%2BGEnOI6E6A14C9hg%3D",
@@ -1247,7 +1419,7 @@
       "properties": {
         "contract_version": "1.3",
         "case_id": "lexrel.102f10d1-ca09-4ed1-ae2e-f45007ce3038",
-        "title": "张明政诉青鸟（大连）健身有限公司服务合同纠纷案",
+        "title": "LexRel服务合同关系案例 102f10d1-ca09-4ed1-ae2e-f45007ce3038",
         "case_no": null,
         "court": null,
         "judgment_date": null,
@@ -1272,7 +1444,7 @@
       "properties": {
         "contract_version": "1.3",
         "case_id": "lexrel.1ec928ab-bb1e-4131-bafc-e17593454e1b",
-        "title": "柳芊芊诉武汉三特教育发展有限公司服务合同纠纷案",
+        "title": "LexRel服务合同关系案例 1ec928ab-bb1e-4131-bafc-e17593454e1b",
         "case_no": null,
         "court": null,
         "judgment_date": null,
@@ -1297,7 +1469,7 @@
       "properties": {
         "contract_version": "1.3",
         "case_id": "lexrel.55d87466-4e50-4e16-bfd3-7ff06aaeaad6",
-        "title": "朱树兵诉东莞市东城医院服务合同纠纷案",
+        "title": "LexRel服务合同关系案例 55d87466-4e50-4e16-bfd3-7ff06aaeaad6",
         "case_no": null,
         "court": null,
         "judgment_date": null,
@@ -1322,7 +1494,7 @@
       "properties": {
         "contract_version": "1.3",
         "case_id": "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
-        "title": "郑期雄诉北京捷越联合信息咨询有限公司服务合同纠纷案",
+        "title": "LexRel服务合同关系案例 698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
         "case_no": null,
         "court": null,
         "judgment_date": null,
@@ -1347,7 +1519,7 @@
       "properties": {
         "contract_version": "1.3",
         "case_id": "lexrel.829d6968-3b55-43c8-9e18-9d6ccccfd391",
-        "title": "马爽诉上海携程国际旅行社有限公司服务合同纠纷案",
+        "title": "LexRel服务合同关系案例 829d6968-3b55-43c8-9e18-9d6ccccfd391",
         "case_no": null,
         "court": null,
         "judgment_date": null,
@@ -1372,7 +1544,7 @@
       "properties": {
         "contract_version": "1.3",
         "case_id": "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
-        "title": "人人行科技股份有限公司诉九派天下支付有限公司服务合同纠纷案",
+        "title": "LexRel服务合同关系案例 83dfccf1-1ba7-47d5-890a-a97e0208c09e",
         "case_no": null,
         "court": null,
         "judgment_date": null,
@@ -1397,7 +1569,7 @@
       "properties": {
         "contract_version": "1.3",
         "case_id": "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
-        "title": "张晶洁诉易游天下国际旅行社（北京）有限公司天津分公司服务合同纠纷案",
+        "title": "LexRel服务合同关系案例 8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
         "case_no": null,
         "court": null,
         "judgment_date": null,
@@ -1422,7 +1594,7 @@
       "properties": {
         "contract_version": "1.3",
         "case_id": "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332",
-        "title": "李天俊诉广西新长丰信息咨询有限公司服务合同纠纷案",
+        "title": "LexRel服务合同关系案例 aea77fcf-9dae-4e62-85b6-05c56d79e332",
         "case_no": null,
         "court": null,
         "judgment_date": null,
@@ -1447,7 +1619,7 @@
       "properties": {
         "contract_version": "1.3",
         "case_id": "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
-        "title": "中国某某股份有限公司某某分公司诉某某县某某天然气液化有限责任公司服务合同纠纷案",
+        "title": "LexRel服务合同关系案例 dc2bb512-fe17-4ec2-bc66-00703647dc6c",
         "case_no": null,
         "court": null,
         "judgment_date": null,
@@ -2201,14 +2373,12 @@
       "object_id": "lexrel.102f10d1-ca09-4ed1-ae2e-f45007ce3038.claim.001",
       "properties": {
         "claim_id": "lexrel.102f10d1-ca09-4ed1-ae2e-f45007ce3038.claim.001",
-        "claim_type": "服务合同解除与返还",
-        "claimant": "张明政",
-        "respondent": "青鸟（大连）健身有限公司",
-        "requested_remedy": "因会所未正式开业且处于关闭状态，解除会员合同并返还已付会员费",
-        "amount": 2499.0,
-        "invoked_rule_ids": [
-          "rule.service_contract.termination_refund.v1"
-        ]
+        "claim_type": "服务合同纠纷",
+        "claimant": null,
+        "respondent": null,
+        "requested_remedy": "原数据未标注具体诉请",
+        "amount": null,
+        "invoked_rule_ids": []
       }
     },
     {
@@ -2218,9 +2388,9 @@
       "properties": {
         "claim_id": "lexrel.1ec928ab-bb1e-4131-bafc-e17593454e1b.claim.001",
         "claim_type": "服务合同解除与返还",
-        "claimant": "柳芊芊",
-        "respondent": "武汉三特教育发展有限公司",
-        "requested_remedy": "因培训机构关门停业，退还尚未上课的教育辅导培训费1200元",
+        "claimant": null,
+        "respondent": null,
+        "requested_remedy": "主张退还1，200元的教育辅导培训费",
         "amount": 1200.0,
         "invoked_rule_ids": [
           "rule.service_contract.termination_refund.v1"
@@ -2234,9 +2404,9 @@
       "properties": {
         "claim_id": "lexrel.55d87466-4e50-4e16-bfd3-7ff06aaeaad6.claim.001",
         "claim_type": "服务合同纠纷",
-        "claimant": "朱树兵",
-        "respondent": "东莞市东城医院",
-        "requested_remedy": "牙齿修复诊疗服务",
+        "claimant": null,
+        "respondent": null,
+        "requested_remedy": "原数据未标注具体诉请",
         "amount": null,
         "invoked_rule_ids": []
       }
@@ -2248,9 +2418,9 @@
       "properties": {
         "claim_id": "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa.claim.001",
         "claim_type": "服务合同纠纷",
-        "claimant": "郑期雄",
-        "respondent": "北京捷越联合信息咨询有限公司",
-        "requested_remedy": "北京捷越联合信息咨询有限公司有权请求郑期雄给付咨询服务费、信用审核费和信息管理费。义务：郑期雄应当给付咨询服务费、信用审核费和信息管理费。",
+        "claimant": null,
+        "respondent": null,
+        "requested_remedy": "要求的三日内一次性支付余下的所有本金、利息、罚息和逾期违约金；",
         "amount": null,
         "invoked_rule_ids": []
       }
@@ -2262,10 +2432,10 @@
       "properties": {
         "claim_id": "lexrel.829d6968-3b55-43c8-9e18-9d6ccccfd391.claim.001",
         "claim_type": "服务合同纠纷",
-        "claimant": "马爽",
-        "respondent": "上海携程国际旅行社有限公司",
-        "requested_remedy": "请求退还因未履行服务责任而应当退还的剩余服务款17541元",
-        "amount": 17541.0,
+        "claimant": null,
+        "respondent": null,
+        "requested_remedy": "要求退团、退款；",
+        "amount": null,
         "invoked_rule_ids": []
       }
     },
@@ -2276,9 +2446,9 @@
       "properties": {
         "claim_id": "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e.claim.001",
         "claim_type": "服务合同纠纷",
-        "claimant": "人人行科技股份有限公司",
-        "respondent": "九派天下支付有限公司",
-        "requested_remedy": "代收代付款项、查询等非金融机构支付服务",
+        "claimant": null,
+        "respondent": null,
+        "requested_remedy": "原数据未标注具体诉请",
         "amount": null,
         "invoked_rule_ids": []
       }
@@ -2290,10 +2460,10 @@
       "properties": {
         "claim_id": "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b.claim.001",
         "claim_type": "服务合同纠纷",
-        "claimant": "张晶洁",
-        "respondent": "易游天下国际旅行社（北京）有限公司天津分公司",
-        "requested_remedy": "请求退还按期归国保证金及相关服务费用",
-        "amount": 60000.0,
+        "claimant": null,
+        "respondent": null,
+        "requested_remedy": "原数据未标注具体诉请",
+        "amount": null,
         "invoked_rule_ids": []
       }
     },
@@ -2304,9 +2474,9 @@
       "properties": {
         "claim_id": "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332.claim.001",
         "claim_type": "服务合同纠纷",
-        "claimant": "李天俊",
-        "respondent": "广西新长丰信息咨询有限公司",
-        "requested_remedy": "支付信息咨询和融资安排服务费用",
+        "claimant": null,
+        "respondent": null,
+        "requested_remedy": "原数据未标注具体诉请",
         "amount": null,
         "invoked_rule_ids": []
       }
@@ -2318,9 +2488,9 @@
       "properties": {
         "claim_id": "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c.claim.001",
         "claim_type": "服务合同纠纷",
-        "claimant": "中国某某股份有限公司某某分公司",
-        "respondent": "某某县某某天然气液化有限责任公司",
-        "requested_remedy": "请求支付服务费用",
+        "claimant": null,
+        "respondent": null,
+        "requested_remedy": "原数据未标注具体诉请",
         "amount": null,
         "invoked_rule_ids": []
       }
@@ -177650,6 +177820,12 @@
       "target": "[\"SourceSpan\",\"span.civil-code.504.ultra-vires-rep\"]"
     },
     {
+      "key": "223942209c6a68302bb90d869623092ca125f0dd80a9715e35771bbdb87f2d1d",
+      "source": "[\"Case\",\"case.spc.civil-code-1.su-statutory-inheritance\"]",
+      "type": "CITES_PROVISION",
+      "target": "[\"Provision\",\"law.prc.civil_code.2021.article_1131\"]"
+    },
+    {
       "key": "223d8b8e132a629791d52b909feee67d35ced5d7d59334c41100c134007d2ddd",
       "source": "[\"LegalRule\",\"rule.family.divorce.fault_damages.v1\"]",
       "type": "HAS_CONDITION",
@@ -183764,6 +183940,12 @@
       "target": "[\"RuleCondition\",\"cond.declaration_arrived\"]"
     },
     {
+      "key": "2e648f3f6fea00a2c1ed1e68ad1a861ab9c536f76847d394d3bcb12bbfac9ed6",
+      "source": "[\"Case\",\"case.spc.civil-code-1.huang-property-health\"]",
+      "type": "CITES_PROVISION",
+      "target": "[\"Provision\",\"law.prc.civil_code.2021.article_0286\"]"
+    },
+    {
       "key": "2e69fa909afe79f73ad92509652ea6ff0cfd9354434c7e10398b575b94a50fe4",
       "source": "[\"ConditionGroup\",\"group.storage.lien.branch\"]",
       "type": "HAS_MEMBER",
@@ -183894,6 +184076,12 @@
       "source": "[\"LegalRule\",\"rule.partnership.transfer_share.v1\"]",
       "type": "EVIDENCED_BY",
       "target": "[\"SourceSpan\",\"span.civil-code.975.no-subrogate\"]"
+    },
+    {
+      "key": "2eaf3f4a3677d7f6cadea98a84b7a65c4b6805ca3e9ec93b1392111cfcbee2eb",
+      "source": "[\"Case\",\"case.spc.civil-code-1.su-statutory-inheritance\"]",
+      "type": "CITES_PROVISION",
+      "target": "[\"Provision\",\"law.prc.civil_code.2021.article_1128\"]"
     },
     {
       "key": "2eb3fb74fb1e945929851e78a2388ba77492d66a39e57d527f8029a009e0d4e6",
@@ -192084,6 +192272,12 @@
       "source": "[\"Provision\",\"law.prc.civil_code.2021.article_0335\"]",
       "type": "EVIDENCED_BY",
       "target": "[\"SourceSpan\",\"span.civil-code.335\"]"
+    },
+    {
+      "key": "3f080782658c3c6ad43feac76924b41951ab83e788f8581edaf8e5039a0a2586",
+      "source": "[\"Case\",\"case.spc.civil-code-1.lou-portrait\"]",
+      "type": "CITES_PROVISION",
+      "target": "[\"Provision\",\"law.prc.civil_code.2021.article_1183\"]"
     },
     {
       "key": "3f0a000e711bcc66083dda9dbcc60ae7504c79437930a0ab90d557c1ae68f2f1",
@@ -231230,6 +231424,12 @@
       "target": "[\"SourceSpan\",\"span.civil-code.557.terminate\"]"
     },
     {
+      "key": "8bb98b7cb1a6e8f4e9727aa35d2fa8d86a6887fe9d8dafa57d9319eeecfa1ddb",
+      "source": "[\"Case\",\"case.spc.civil-code-1.song-v-zhou-body-right\"]",
+      "type": "CITES_PROVISION",
+      "target": "[\"Provision\",\"law.prc.civil_code.2021.article_1176\"]"
+    },
+    {
       "key": "8bbc1ee39e890f698b1f6b8772cb36fdae6285f9596e91a30e98a5fa715d7ccf",
       "source": "[\"LegalRule\",\"rule.guarantee.limitation.start.v1\"]",
       "type": "EVIDENCED_BY",
@@ -241002,6 +241202,12 @@
       "source": "[\"LegalConsequence\",\"consequence.tort.env_general\"]",
       "type": "EVIDENCED_BY",
       "target": "[\"SourceSpan\",\"span.civil-code.1229.pollute\"]"
+    },
+    {
+      "key": "9f548f657b6c9874564dca0532b0a951b7c0d7e546cf03e3b86ce8a29b047e1f",
+      "source": "[\"Case\",\"case.spc.civil-code-1.lou-portrait\"]",
+      "type": "CITES_PROVISION",
+      "target": "[\"Provision\",\"law.prc.civil_code.2021.article_1018\"]"
     },
     {
       "key": "9f5df967aee0c47c12d9b2ff5134922e3700462f3435926b3e0e26b8638cf26d",
@@ -251784,6 +251990,12 @@
       "source": "[\"LegalRule\",\"rule.work.remuneration_timing.v1\"]",
       "type": "EVIDENCED_BY",
       "target": "[\"SourceSpan\",\"span.civil-code.780.deliver\"]"
+    },
+    {
+      "key": "b3d535915c5e6cc33fbc099d043415c20ba9d4d841f83b3f485615141dcba2e0",
+      "source": "[\"Case\",\"case.spc.civil-code-1.song-v-zhou-body-right\"]",
+      "type": "CITES_PROVISION",
+      "target": "[\"Provision\",\"law.prc.civil_code.2021.article_1186\"]"
     },
     {
       "key": "b3d53d45abbb5dd85973ad41327e27c585c4e10843c1000f44b14b08d094e4f5",
@@ -267296,6 +267508,12 @@
       "target": "[\"LegalConsequence\",\"consequence.guarantee_period_six_months\"]"
     },
     {
+      "key": "d1d7eb0398bbb460647411a691a17b50652eebd296f276fc73de8b3b1d01fb48",
+      "source": "[\"Case\",\"case.spc.civil-code-1.lou-portrait\"]",
+      "type": "CITES_PROVISION",
+      "target": "[\"Provision\",\"law.prc.civil_code.2021.article_1019\"]"
+    },
+    {
       "key": "d1d9164330bb640febac83e5cb257c639dadca9c89b28e319d4fc3bf913e9917",
       "source": "[\"LegalRule\",\"rule.tech.insurmountable_risk.v1\"]",
       "type": "BASED_ON",
@@ -270962,12 +271180,6 @@
       "target": "[\"Provision\",\"law.prc.civil_code.2021.article_1060\"]"
     },
     {
-      "key": "d93ccfbacd5a964f3c8a905d6d910dc887e34e138d17b6a958a7e7c06867f34a",
-      "source": "[\"Claim\",\"lexrel.102f10d1-ca09-4ed1-ae2e-f45007ce3038.claim.001\"]",
-      "type": "INVOKES",
-      "target": "[\"LegalRule\",\"rule.service_contract.termination_refund.v1\"]"
-    },
-    {
       "key": "d93ce3aeeb622cd2c39f8d2708da8dd4fe9db5bee2df8a105fd81fec264c6000",
       "source": "[\"LegalRule\",\"rule.transport.stop_return_or_redirect.v1\"]",
       "type": "BASED_ON",
@@ -273546,6 +273758,12 @@
       "source": "[\"LegalConsequence\",\"consequence.lost.finder\"]",
       "type": "EVIDENCED_BY",
       "target": "[\"SourceSpan\",\"span.civil-code.314.notify\"]"
+    },
+    {
+      "key": "de0eb8e9700d05dca4759dc367f27488b922a8f5b045ae433ff960ca56bb0563",
+      "source": "[\"Case\",\"case.spc.civil-code-1.yu-high-rise-object\"]",
+      "type": "CITES_PROVISION",
+      "target": "[\"Provision\",\"law.prc.civil_code.2021.article_1254\"]"
     },
     {
       "key": "de0f9dddd886d2014b78556143a8c1458e3cda4bf739b6050d433ef499e0d2b6",
@@ -279336,6 +279554,12 @@
       "source": "[\"LegalRule\",\"rule.transport.rescue_duty.v1\"]",
       "type": "BASED_ON",
       "target": "[\"Provision\",\"law.prc.civil_code.2021.article_0832\"]"
+    },
+    {
+      "key": "e92925409e1a059f033caddb2d932f8b790420d82ffd23437c19976a5a226661",
+      "source": "[\"Case\",\"case.spc.civil-code-1.logistics-v-wu\"]",
+      "type": "CITES_PROVISION",
+      "target": "[\"Provision\",\"law.prc.civil_code.2021.article_0524\"]"
     },
     {
       "key": "e92bfd9a536df63ed7bc821d2a6eecb60a98926146e6afb5ccfd82c8165b6ee2",
@@ -290978,5 +291202,5 @@
       "target": "[\"SourceSpan\",\"span.civil-code.460.return\"]"
     }
   ],
-  "release_id": "d8a34d70186d3308e4d2bb07fbf876d1c0a556a20275a2f0c29defea90856c7f"
+  "release_id": "929b1c0c2a032ff5fef01f16c5bba01e22faa9d8422aaa1ba986b014603454cc"
 }

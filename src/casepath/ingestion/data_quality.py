@@ -20,7 +20,7 @@ from casepath.ingestion.cases.validation import validate_records as validate_cas
 from casepath.ingestion.laws.civil_code import CIVIL_CODE_SOURCE_ID, provision_id
 from casepath.ingestion.laws.jsonl import sha256_file, sha256_text, write_json
 
-GENERATED_ON = "2026-09-11"
+GENERATED_ON = "2026-09-13"
 FILES = {
     "canonical/rules/legal_sources.jsonl": LegalSourceRecord,
     "canonical/rules/provisions.jsonl": ProvisionRecord,

@@ -1,0 +1,170 @@
+{
+  "report_version": "1.0",
+  "input_revision": "casepath.spc-first-batch.summary.v1",
+  "input": {
+    "path": "data/inputs/spc_civil_code_first_batch.jsonl",
+    "sha256_lf": "57205d17755ddbc8db470df229c62bb49c83f7584bf7778a766ba7ab66a868a4",
+    "record_count": 6
+  },
+  "upstream_editorial_baseline": {
+    "repository_url": "https://github.com/Lithium9767/CasePath",
+    "branch": "P3",
+    "revision": "6be749d",
+    "path": "data/canonical/cases/additional_cases.jsonl",
+    "sha256_lf": "86c16fdf7c0c657f7f679b0a6ba5eb1211d7bcc64b5d1b925e66428022932b23"
+  },
+  "authority": {
+    "publisher": "最高人民法院",
+    "collection": "人民法院贯彻实施民法典典型案例（第一批）",
+    "source_url": "https://www.court.gov.cn/zixun/xiangqing/347181.html",
+    "source_published_on": "2022-02-25",
+    "checked_on": "2026-09-13"
+  },
+  "representation": {
+    "text_kind": "editorial_summary",
+    "source_is_full_judgment": false,
+    "verbatim_source_spans_created": false,
+    "maturity": "L1",
+    "creates_deep_records": false,
+    "human_verified": false,
+    "summary_notice": "【编辑摘要，非判决原文】",
+    "verification_scope": "逐案对比最高法公开汇编的基本案情、裁判结果和民法典条文指引，修正摘要中的省略、过度概括和审级日期混淆；不是对完整判决书的逐字核验。",
+    "date_policy": "未披露案号、审理法院、明确终审日期时索引字段保持null。已披露的一审或未明示审级裁判日期仅在摘要和本来源记录保留。",
+    "privacy_policy": "沿用官方匿名化称谓，不增补真实姓名、住址、证件、联系方式或未披露身份信息。"
+  },
+  "deduplication": {
+    "against_p2_revision": "030476fc19d929be04c5695793a3160826fe4254",
+    "existing_canonical_case_count": 54,
+    "duplicate_ids": 0,
+    "duplicate_exact_titles": 0,
+    "duplicate_whitespace_normalized_facts": 0,
+    "distinctive_fact_review_duplicate_candidates": 0,
+    "limitation": "未发现重复不等于全网案件身份去重；官方汇编未披露案号，无法用案号进行跨库证明。"
+  },
+  "cases": [
+    {
+      "case_id": "case.spc.civil-code-1.huang-property-health",
+      "source_url": "https://www.court.gov.cn/zixun/xiangqing/347181.html",
+      "source_section_number": 4,
+      "upstream_p3_revision": "6be749d",
+      "text_kind": "editorial_summary",
+      "checked_on": "2026-09-13",
+      "related_provision_ids": [
+        "law.prc.civil_code.2021.article_0286"
+      ],
+      "case_no": null,
+      "court": null,
+      "index_judgment_date": null,
+      "source_reported_judgment_date": null,
+      "source_reported_date_scope": null,
+      "revision_reasons": [
+        "补回保安骑车追赶、伸手接触背部后车辆失控的经过，避免省略关键事实。",
+        "将概括性责任表述收敛为汇编明确记载的本案认定和驳回赔偿请求。"
+      ]
+    },
+    {
+      "case_id": "case.spc.civil-code-1.logistics-v-wu",
+      "source_url": "https://www.court.gov.cn/zixun/xiangqing/347181.html",
+      "source_section_number": 6,
+      "upstream_p3_revision": "6be749d",
+      "text_kind": "editorial_summary",
+      "checked_on": "2026-09-13",
+      "related_provision_ids": [
+        "law.prc.civil_code.2021.article_0524"
+      ],
+      "case_no": null,
+      "court": null,
+      "index_judgment_date": null,
+      "source_reported_judgment_date": null,
+      "source_reported_date_scope": null,
+      "revision_reasons": [
+        "保留垫付46万元、归还6万元的区分，补足已通知债务人且当时无异议的经过。",
+        "摘要仅记载法院支持剩余运费请求，不将关系规则改写为其他未披露判项。"
+      ]
+    },
+    {
+      "case_id": "case.spc.civil-code-1.lou-portrait",
+      "source_url": "https://www.court.gov.cn/zixun/xiangqing/347181.html",
+      "source_section_number": 7,
+      "upstream_p3_revision": "6be749d",
+      "text_kind": "editorial_summary",
+      "checked_on": "2026-09-13",
+      "related_provision_ids": [
+        "law.prc.civil_code.2021.article_1018",
+        "law.prc.civil_code.2021.article_1019",
+        "law.prc.civil_code.2021.article_1183"
+      ],
+      "case_no": null,
+      "court": null,
+      "index_judgment_date": null,
+      "source_reported_judgment_date": null,
+      "source_reported_date_scope": null,
+      "revision_reasons": [
+        "补足账号因其他言论被关闭、内容已清除的经过。",
+        "删去原摘要中未被明确记载为本案判项的停止侵害，仅保留赔礼道歉及赔偿。"
+      ]
+    },
+    {
+      "case_id": "case.spc.civil-code-1.su-statutory-inheritance",
+      "source_url": "https://www.court.gov.cn/zixun/xiangqing/347181.html",
+      "source_section_number": 8,
+      "upstream_p3_revision": "6be749d",
+      "text_kind": "editorial_summary",
+      "checked_on": "2026-09-13",
+      "related_provision_ids": [
+        "law.prc.civil_code.2021.article_1128",
+        "law.prc.civil_code.2021.article_1131"
+      ],
+      "case_no": null,
+      "court": null,
+      "index_judgment_date": null,
+      "source_reported_judgment_date": null,
+      "source_reported_date_scope": null,
+      "revision_reasons": [
+        "补足被继承人生前未生育或收养子女、只有一位姐姐且姐姐先死亡的适用前提。",
+        "区分代位继承与继承人以外扶养较多者的遗产酌给，并保留时间效力适用的限定。"
+      ]
+    },
+    {
+      "case_id": "case.spc.civil-code-1.song-v-zhou-body-right",
+      "source_url": "https://www.court.gov.cn/zixun/xiangqing/347181.html",
+      "source_section_number": 10,
+      "upstream_p3_revision": "6be749d",
+      "text_kind": "editorial_summary",
+      "checked_on": "2026-09-13",
+      "related_provision_ids": [
+        "law.prc.civil_code.2021.article_1176",
+        "law.prc.civil_code.2021.article_1186"
+      ],
+      "case_no": null,
+      "court": null,
+      "index_judgment_date": null,
+      "source_reported_judgment_date": "2021-01-04",
+      "source_reported_date_scope": "first_instance; appeal affirmed, appeal date undisclosed",
+      "revision_reasons": [
+        "2021-01-04系一审裁判日期；汇编未披露二审维持原判的日期，因此索引裁判日期置null。",
+        "摘要区分一审和二审，并保留故意或重大过失例外及本案不适用公平责任的理由。"
+      ]
+    },
+    {
+      "case_id": "case.spc.civil-code-1.yu-high-rise-object",
+      "source_url": "https://www.court.gov.cn/zixun/xiangqing/347181.html",
+      "source_section_number": 13,
+      "upstream_p3_revision": "6be749d",
+      "text_kind": "editorial_summary",
+      "checked_on": "2026-09-13",
+      "related_provision_ids": [
+        "law.prc.civil_code.2021.article_1254"
+      ],
+      "case_no": null,
+      "court": null,
+      "index_judgment_date": null,
+      "source_reported_judgment_date": "2021-01-04",
+      "source_reported_date_scope": "judgment date; instance and finality not explicitly disclosed",
+      "revision_reasons": [
+        "汇编披露2021-01-04裁判，但未明确审级或终审日期；保留该已知日期于摘要及本来源记录，索引日期保守置null。",
+        "区分抛物行为人和承担赔偿责任的监护人，保留时间效力适用限定。"
+      ]
+    }
+  ]
+}

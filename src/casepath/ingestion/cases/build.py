@@ -32,19 +32,47 @@ from .ids import (
 )
 from .lexrel import load_service_contract_cases
 from .manifest import CaseDatasetManifest
+from .spc_supplement import (
+    COUNT as SPC_COUNT,
+)
+from .spc_supplement import (
+    INPUT_PATH as SPC_INPUT_PATH,
+)
+from .spc_supplement import (
+    INPUT_REVISION as SPC_INPUT_REVISION,
+)
+from .spc_supplement import (
+    INPUT_SHA256 as SPC_INPUT_SHA256,
+)
+from .spc_supplement import (
+    SOURCE_URL as SPC_SOURCE_URL,
+)
+from .spc_supplement import (
+    load_spc_cases,
+)
 from .validation import (
     CaseDatasetValidationReport,
     validate_canonical_cases,
     validate_records,
 )
 
-PINNED_GENERATED_ON = date(2026, 9, 11)
+PINNED_GENERATED_ON = date(2026, 9, 13)
 GENERATED_PATHS = (
     Path("canonical/cases/cases_l1.jsonl"),
     Path("canonical/cases/cases_deep.jsonl"),
     Path("manifests/cases.manifest.json"),
 )
 LIMITATIONS = [
+    (
+        "Stage 2 v7 incorporates six source-checked SPC editorial summaries as L1-only "
+        "records. They are not verbatim judgment text, have no invented claims or source "
+        "spans, and do not enter the 54 deep records. Unknown final judgment dates stay null."
+    ),
+    (
+        "LexRel relation subjects do not establish litigant roles, and abstract relation "
+        "rights/obligations do not establish actual requested remedies. Claims use only "
+        "explicit source facts; missing demands are identified as not annotated."
+    ),
     (
         "Stage 2 v6 corrects explicit demand amounts, decimal/grouped/unit amounts, "
         "current dispositions and source-span boundaries. A source-only correction "
@@ -144,8 +172,7 @@ def _publish_staged_outputs(staged_data_root: Path, data_root: Path) -> None:
                 pass
         if rollback_errors:
             raise RuntimeError(
-                "P3 publication rollback failed; unrecovered backups remain at "
-                f"{backup_data_root}"
+                f"P3 publication rollback failed; unrecovered backups remain at {backup_data_root}"
             ) from None
         shutil.rmtree(backup_container, ignore_errors=True)
         raise
@@ -156,9 +183,10 @@ def _publish_staged_outputs(staged_data_root: Path, data_root: Path) -> None:
 def _stage_rules(final_data_root: Path, staged_data_root: Path) -> None:
     source_rules = final_data_root / "canonical" / "rules"
     target_rules = staged_data_root / "canonical" / "rules"
-    if not (source_rules / "provisions.jsonl").is_file() or not (
-        source_rules / "rules.jsonl"
-    ).is_file():
+    if (
+        not (source_rules / "provisions.jsonl").is_file()
+        or not (source_rules / "rules.jsonl").is_file()
+    ):
         raise ValueError("P2 provisions and rules are required to validate P3")
     shutil.copytree(source_rules, target_rules)
 
@@ -168,6 +196,13 @@ def _lexrel_input_path(data_root: Path) -> Path:
     if candidate.is_file():
         return candidate
     return Path(__file__).resolve().parents[4] / EXPECTED_LEXREL_SERVICE_PATH
+
+
+def _spc_input_path(data_root: Path) -> Path:
+    candidate = data_root / "inputs" / Path(SPC_INPUT_PATH).name
+    if candidate.exists():
+        return candidate
+    return Path(__file__).resolve().parents[4] / SPC_INPUT_PATH
 
 
 def _merge_lexrel_cases(
@@ -222,11 +257,14 @@ def build_dataset(
 
     cleaner = CaseCleaner(input_path, markdown_dir)
     lightweight, deep = cleaner.build_records()
+    lexrel_path = _lexrel_input_path(final_data_root)
+    spc_path = _spc_input_path(final_data_root)
     lightweight, deep = _merge_lexrel_cases(
         lightweight,
         deep,
-        _lexrel_input_path(final_data_root),
+        lexrel_path,
     )
+    lightweight = sorted([*lightweight, *load_spc_cases(spc_path)], key=lambda item: item.case_id)
     validate_records(lightweight, deep, provisions, rules)
 
     final_data_root.parent.mkdir(parents=True, exist_ok=True)
@@ -266,6 +304,13 @@ def build_dataset(
                     repository_url=EXPECTED_LEXREL_REPOSITORY_URL,
                     revision=EXPECTED_LEXREL_REVISION,
                 ),
+                ManifestFile(
+                    path=SPC_INPUT_PATH,
+                    sha256=SPC_INPUT_SHA256,
+                    record_count=SPC_COUNT,
+                    repository_url=SPC_SOURCE_URL,
+                    revision=SPC_INPUT_REVISION,
+                ),
             ],
             outputs=[
                 ManifestFile(
@@ -289,6 +334,13 @@ def build_dataset(
         )
         write_json(staged_data_root / "manifests" / "cases.manifest.json", manifest)
         validation = validate_canonical_cases(staged_data_root)
+        for source_path, expected in (
+            (input_path, digest),
+            (lexrel_path, EXPECTED_LEXREL_SERVICE_SHA256),
+            (spc_path, SPC_INPUT_SHA256),
+        ):
+            if not source_path.is_file() or sha256_file(source_path) != expected:
+                raise ValueError("case input changed during build; refusing to publish")
         _publish_staged_outputs(staged_data_root, final_data_root)
 
     return BuildResult(
