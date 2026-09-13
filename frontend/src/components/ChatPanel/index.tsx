@@ -6,14 +6,18 @@ import {
   UserOutlined,
   FileTextOutlined,
 } from '@ant-design/icons';
-import type { ChatMessage } from '@/types';
+import type { ChatMessage, TurnSnapshot } from '@/types';
 import { StatusTag } from '@/components/StatusTag';
 import { QuestionCard } from './QuestionCard';
+import { ChatHistory } from './ChatHistory';
 
 const { Text, Paragraph } = Typography;
 
 interface Props {
   messages: ChatMessage[];
+  history: TurnSnapshot[];
+  viewingTurn: number | null;
+  onView: (turn: number | null) => void;
   loading: boolean;
   hasQuestion: boolean;
   onAnswer: (answer: string) => void;
@@ -64,7 +68,7 @@ const ExplanationBubble = ({ msg }: { msg: Extract<ChatMessage, { kind: 'explana
   </div>
 );
 
-export function ChatPanel({ messages, loading, hasQuestion, onAnswer, onSubmit, onViewExplanation }: Props) {
+export function ChatPanel({ messages, history, viewingTurn, onView, loading, hasQuestion, onAnswer, onSubmit, onViewExplanation }: Props) {
   const [draft, setDraft] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -94,6 +98,7 @@ export function ChatPanel({ messages, loading, hasQuestion, onAnswer, onSubmit, 
     <div className="chat-panel">
       <div className="chat-panel__heading"><RobotOutlined /><strong>与 CasePath 对话</strong><span>从你的实际情况开始</span></div>
       <div className="chat-panel__list" ref={listRef} role="region" aria-label="对话记录" tabIndex={0}>
+        <ChatHistory history={history} viewingTurn={viewingTurn} onView={onView} />
         {messages.length === 0 ? (
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}

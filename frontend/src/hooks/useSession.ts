@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiError, api } from '@/api/client';
-import type { CapabilityStatus, ChatMessage, ResolvedSnapshot, Understanding } from '@/types';
+import type { CapabilityStatus, ChatMessage, ResolvedSnapshot, TurnSnapshot, Understanding } from '@/types';
 import { conditionLabels } from '@/utils/contracts';
 
 let idCounter = 0;
@@ -12,6 +12,9 @@ export interface SessionController {
   loading: boolean;
   error: string | null;
   capabilities: CapabilityStatus[];
+  history: TurnSnapshot[];
+  viewingTurn: number | null;
+  setViewingTurn: (turn: number | null) => void;
   submitQuery: (query: string) => Promise<void>;
   answerQuestion: (answer: string) => Promise<void>;
   viewExplanationNow: () => Promise<void>;
@@ -45,6 +48,8 @@ export function useSession(): SessionController {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [capabilities, setCapabilities] = useState<CapabilityStatus[]>([]);
+  const [history, setHistory] = useState<TurnSnapshot[]>([]);
+  const [viewingTurn, setViewingTurn] = useState<number | null>(null);
   const snapshotRef = useRef<ResolvedSnapshot | null>(null);
 
   const setBoth = useCallback((s: ResolvedSnapshot | null) => {
@@ -71,6 +76,8 @@ export function useSession(): SessionController {
       try {
         const res = await api.analyze(trimmed);
         setBoth(res);
+        setHistory([{ turn: 0, snapshot: res }]);
+        setViewingTurn(null);
         setMessages((prev) => {
           const next: ChatMessage[] = [
             ...prev,
@@ -138,6 +145,8 @@ export function useSession(): SessionController {
           selected_option: selected,
         });
         setBoth(res);
+        setHistory((prev) => [...prev, { turn: prev.length, snapshot: res }]);
+        setViewingTurn(null);
         setMessages((prev) => {
           const next: ChatMessage[] = [...prev];
           if (res.next_question) {
@@ -182,6 +191,10 @@ export function useSession(): SessionController {
     try {
       const res = await api.refresh(s.query_state.session_id);
       setBoth(res);
+      setHistory((prev) =>
+        prev.length > 0 ? prev.map((h, i) => (i === prev.length - 1 ? { ...h, snapshot: res } : h)) : prev,
+      );
+      setViewingTurn(null);
       if (res.explanation_plan) {
         setMessages((prev) => [
           ...prev,
@@ -210,6 +223,8 @@ export function useSession(): SessionController {
     setBoth(null);
     setMessages([]);
     setError(null);
+    setHistory([]);
+    setViewingTurn(null);
   }, [setBoth]);
 
   return {
@@ -218,6 +233,9 @@ export function useSession(): SessionController {
     loading,
     error,
     capabilities,
+    history,
+    viewingTurn,
+    setViewingTurn,
     submitQuery,
     answerQuestion,
     viewExplanationNow,

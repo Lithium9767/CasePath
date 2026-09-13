@@ -410,6 +410,12 @@ export interface ResolvedSnapshot extends WorkflowSnapshot {
   spans: Record<string, SourceSpan>;
 }
 
+// 一轮会话快照（用于历史对话面板回看）
+export interface TurnSnapshot {
+  turn: number;
+  snapshot: ResolvedSnapshot;
+}
+
 // ---- 会话展示用消息 ----
 export interface Understanding {
   candidate_claims: CandidateClaim[];
