@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import ClassVar
 
 import pytest
@@ -95,15 +96,128 @@ class ScriptedModel:
     def __init__(self, responses):
         self.responses = list(responses)
         self.calls = []
+        self.prompts = []
 
     def generate_structured(self, **kwargs):
         self.calls.append(kwargs.get("stage"))
+        raw = kwargs.get("user_prompt")
+        if isinstance(raw, str):
+            try:
+                self.prompts.append(json.loads(raw))
+            except json.JSONDecodeError:
+                self.prompts.append({"raw": raw})
+        else:
+            self.prompts.append({})
         if not self.responses:
             raise AssertionError("unexpected model call")
         item = self.responses.pop(0)
         if isinstance(item, Exception):
             raise item
         return item
+
+
+@pytest.mark.parametrize(
+    "status", ["DUPLICATE", "USER_UNABLE", "USER_DECLINED", "ALREADY_ANSWERED"]
+)
+def test_llm_cross_condition_coverage_is_not_asked(status):
+    # 语义结论来自模型替身，不在产品代码中写“培训”等关键词过滤。
+    item = MissingFactCandidate(
+        candidate_id="mf.1",
+        condition_ids=["cond.new"],
+        description="是否另有服务安排",
+        status=status,
+        checked_question_ids=["question.old"],
+        why_needed="历史已覆盖该事项",
+    )
+    askable, excluded = filter_missing_facts([item])
+    assert not askable
+    assert excluded == {status: 1}
+
+
+def test_refinement_requires_reference_and_new_detail():
+    draft = MissingFactDraft(
+        condition_ids=["cond.x"],
+        description="改变的是哪些内容",
+        status="REFINE",
+        why_needed="具体差异影响比较",
+    )
+    args = {
+        "allowed_condition_ids": {"cond.x"},
+        "known_fact_ids": {"f.1"},
+        "known_question_ids": set(),
+    }
+    assert not validate_missing_fact_drafts([draft], **args)[0]
+    draft.checked_fact_ids = ["f.1"]
+    assert not validate_missing_fact_drafts([draft], **args)[0]
+    draft.refinement_difference = "已知不同，但未说明具体改变的内容"
+    assert validate_missing_fact_drafts([draft], **args)[0]
+
+
+def test_identify_retries_invented_history_reference():
+    bad = MissingFactIdentifyBatch(
+        items=[
+            MissingFactDraft(
+                condition_ids=["cond.x"],
+                description="某项事实",
+                status="DUPLICATE",
+                checked_question_ids=["invented"],
+            )
+        ]
+    )
+    model = ScriptedModel([bad, bad])
+    policy = KeyConditionQuestionPolicy(_catalog(["cond.x"]), language_model=model)
+    with pytest.raises(QuestionGenerationFailed):
+        policy._identify_missing_facts({"effective_facts": [], "dialogue": []}, CallBudget(4))
+    assert model.calls == ["missing_facts", "missing_facts"]
+
+
+def test_identify_coverage_review_reclassifies_missing_from_effective_facts():
+    """无引用的 MISSING 在有有效事实时触发覆盖复核，应能改成 ALREADY_ANSWERED。"""
+    first = MissingFactIdentifyBatch(
+        items=[
+            MissingFactDraft(
+                condition_ids=["cond.alternative_performance"],
+                description="新机构课程与原课程是否不同",
+                status="MISSING",
+                why_needed="替代履行比较",
+            )
+        ]
+    )
+    second = MissingFactIdentifyBatch(
+        items=[
+            MissingFactDraft(
+                condition_ids=["cond.alternative_performance"],
+                description="新机构课程与原课程是否不同",
+                status="ALREADY_ANSWERED",
+                checked_fact_ids=["fact.alt"],
+                why_needed="有效事实已说明课程内容不同",
+            )
+        ]
+    )
+    model = ScriptedModel([first, second])
+    policy = KeyConditionQuestionPolicy(
+        _catalog(["cond.alternative_performance"]), language_model=model
+    )
+    drafts = policy._identify_missing_facts(
+        {
+            "effective_facts": [
+                {
+                    "fact_id": "fact.alt",
+                    "text": "新机构课程内容也不同，我没有同意转课。",
+                    "evidence_role": "effective",
+                    "inactive_for_conditions": [],
+                }
+            ],
+            "dialogue": [],
+        },
+        CallBudget(4),
+    )
+    assert len(drafts) == 1
+    assert drafts[0].status == "ALREADY_ANSWERED"
+    assert drafts[0].checked_fact_ids == ["fact.alt"]
+    assert model.calls == ["missing_facts", "missing_facts"]
+    second_prompt = model.prompts[1]
+    assert "coverage_review" in second_prompt.get("validation_feedback", "")
 
 
 def test_merge_one_fact_two_conditions():
@@ -176,9 +290,7 @@ def test_inheritance_already_answered_skips_generation():
         ]
     )
     catalog = _catalog(["cond.succession.first_order_heir_exists"], title="继承")
-    token = bind_scope(
-        RuleScope(("rule.x",), (), (), ("cond.succession.first_order_heir_exists",))
-    )
+    token = bind_scope(RuleScope(("rule.x",), (), (), ("cond.succession.first_order_heir_exists",)))
     meta = SessionRuntimeMeta()
     mt = bind_runtime_meta(meta)
     try:
@@ -211,28 +323,31 @@ def test_inheritance_already_answered_skips_generation():
 
 
 def test_training_cross_condition_course_dedup():
+    identify = MissingFactIdentifyBatch(
+        items=[
+            MissingFactDraft(
+                condition_ids=[
+                    "cond.performance_impossible",
+                    "cond.alternative_performance",
+                ],
+                description="新机构课程内容是否与原课程相同",
+                status="ALREADY_ANSWERED",
+                checked_fact_ids=["fact.alt"],
+                why_needed="替代服务差异",
+            ),
+            MissingFactDraft(
+                condition_ids=["cond.contract_terminated"],
+                description="是否已提出退款并协商解除",
+                status="MISSING",
+                checked_fact_ids=["fact.alt"],
+                why_needed="解除程序",
+            ),
+        ]
+    )
     model = ScriptedModel(
         [
-            MissingFactIdentifyBatch(
-                items=[
-                    MissingFactDraft(
-                        condition_ids=[
-                            "cond.performance_impossible",
-                            "cond.alternative_performance",
-                        ],
-                        description="新机构课程内容是否与原课程相同",
-                        status="ALREADY_ANSWERED",
-                        checked_fact_ids=["fact.alt"],
-                        why_needed="替代服务差异",
-                    ),
-                    MissingFactDraft(
-                        condition_ids=["cond.contract_terminated"],
-                        description="是否已提出退款并协商解除",
-                        status="MISSING",
-                        why_needed="解除程序",
-                    ),
-                ]
-            ),
+            identify,
+            identify,
             QuestionDraft(
                 condition_id="cond.contract_terminated",
                 askable=True,
@@ -292,25 +407,28 @@ def test_training_cross_condition_course_dedup():
         assert question is not None
         assert question.condition_id == "cond.contract_terminated"
         assert "课程" not in question.question
-        assert model.calls == ["missing_facts", "question"]
+        assert model.calls == ["missing_facts", "missing_facts", "question"]
     finally:
         reset_runtime_meta(mt)
         reset_scope(token)
 
 
 def test_gym_rejects_amount_bundling_then_accepts_clean_question():
+    identify = MissingFactIdentifyBatch(
+        items=[
+            MissingFactDraft(
+                condition_ids=["cond.performance_impossible"],
+                description="是否有恢复营业安排",
+                status="MISSING",
+                checked_fact_ids=["fact.pay"],
+                why_needed="履行能否继续",
+            )
+        ]
+    )
     model = ScriptedModel(
         [
-            MissingFactIdentifyBatch(
-                items=[
-                    MissingFactDraft(
-                        condition_ids=["cond.performance_impossible"],
-                        description="是否有恢复营业安排",
-                        status="MISSING",
-                        why_needed="履行能否继续",
-                    )
-                ]
-            ),
+            identify,
+            identify,
             QuestionDraft(
                 condition_id="cond.performance_impossible",
                 askable=True,
@@ -375,9 +493,7 @@ def test_unable_does_not_rephrase():
             )
         ]
     )
-    catalog = _catalog(
-        ["cond.succession.estate_mixed_with_common_property"], title="继承"
-    )
+    catalog = _catalog(["cond.succession.estate_mixed_with_common_property"], title="继承")
     token = bind_scope(
         RuleScope(
             ("rule.x",),
@@ -535,9 +651,7 @@ def test_identify_and_generate_share_budget():
     meta = SessionRuntimeMeta()
     mt = bind_runtime_meta(meta)
     try:
-        policy = KeyConditionQuestionPolicy(
-            catalog, language_model=model, generation_budget=2
-        )
+        policy = KeyConditionQuestionPolicy(catalog, language_model=model, generation_budget=2)
         state = QueryState(
             session_id="s-budget",
             initial_query="退费",
@@ -577,7 +691,6 @@ def test_validate_drops_unknown_ids_with_reasons():
     assert kept[0].condition_ids == ["cond.ok"]
     assert kept[0].checked_fact_ids == ["f.ok"]
     assert any("dropped_unknown_condition" in item for item in reasons)
-
 
 
 def test_training_identify_failure_does_not_invent_missing_facts():
@@ -659,17 +772,26 @@ def test_training_identify_failure_does_not_invent_missing_facts():
 
 def test_same_condition_different_missing_fact_is_retained():
     """课程差异已回答，不影响同条件下恢复营业安排的候选。"""
-    drafts = [MissingFactDraft(
-        condition_ids=["cond.performance_impossible"], description=description,
-        status=status, why_needed="比较服务安排",
-    ) for description, status in [
-        ("课程是否相同", "ALREADY_ANSWERED"),
-        ("是否有恢复营业安排", "MISSING"),
-    ]]
+    drafts = [
+        MissingFactDraft(
+            condition_ids=["cond.performance_impossible"],
+            description=description,
+            status=status,
+            why_needed="比较服务安排",
+        )
+        for description, status in [
+            ("课程是否相同", "ALREADY_ANSWERED"),
+            ("是否有恢复营业安排", "MISSING"),
+        ]
+    ]
     merged = merge_drafts_by_description(drafts)
-    candidates = [MissingFactCandidate(
-        candidate_id=f"mf.{i}", **item.model_dump(),
-    ) for i, item in enumerate(merged)]
+    candidates = [
+        MissingFactCandidate(
+            candidate_id=f"mf.{i}",
+            **item.model_dump(),
+        )
+        for i, item in enumerate(merged)
+    ]
     askable, _ = filter_missing_facts(candidates)
     assert [item.description for item in askable] == ["是否有恢复营业安排"]
 
@@ -678,10 +800,17 @@ def test_same_condition_different_missing_fact_is_retained():
 def test_invalid_description_is_failure_not_empty_success(description):
     class Model:
         def generate_structured(self, **kwargs):
-            return MissingFactIdentifyBatch(items=[MissingFactDraft(
-                condition_ids=["cond.x"], description=description,
-                status="MISSING", why_needed="测试",
-            )])
+            return MissingFactIdentifyBatch(
+                items=[
+                    MissingFactDraft(
+                        condition_ids=["cond.x"],
+                        description=description,
+                        status="MISSING",
+                        why_needed="测试",
+                    )
+                ]
+            )
+
     policy = KeyConditionQuestionPolicy(None, Model())
     budget = CallBudget(4)
     with pytest.raises(QuestionGenerationFailed):
@@ -691,8 +820,10 @@ def test_invalid_description_is_failure_not_empty_success(description):
 
 def test_long_valid_description_converts_to_candidate():
     draft = MissingFactDraft(
-        condition_ids=["cond.x"], description="事实" * 75,
-        status="MISSING", why_needed="测试长度一致",
+        condition_ids=["cond.x"],
+        description="事实" * 75,
+        status="MISSING",
+        why_needed="测试长度一致",
     )
     candidate = MissingFactCandidate(candidate_id="mf.1", **draft.model_dump())
     assert len(candidate.description) == 150

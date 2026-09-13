@@ -15,6 +15,8 @@ MissingFactStatus = Literal[
     "USER_UNABLE",
     "USER_DECLINED",
     "UNCERTAIN",
+    "DUPLICATE",
+    "REFINE",
 ]
 
 _VALID_STATUSES: set[str] = {
@@ -23,6 +25,8 @@ _VALID_STATUSES: set[str] = {
     "USER_UNABLE",
     "USER_DECLINED",
     "UNCERTAIN",
+    "DUPLICATE",
+    "REFINE",
 }
 
 
@@ -36,6 +40,7 @@ class MissingFactCandidate(ContractModel):
     checked_fact_ids: list[str] = Field(default_factory=list)
     checked_question_ids: list[str] = Field(default_factory=list)
     why_needed: str = Field(min_length=1, max_length=200)
+    refinement_difference: str = Field(default="", max_length=160)
     priority_tier: int = 3
     rule_rank: int = 0
     rule_title: str = ""
@@ -49,6 +54,7 @@ class MissingFactDraft(ContractModel):
     checked_fact_ids: list[str] = Field(default_factory=list)
     checked_question_ids: list[str] = Field(default_factory=list)
     why_needed: str = Field(default="needed for current explanation", max_length=200)
+    refinement_difference: str = Field(default="", max_length=160)
 
 
 class MissingFactIdentifyBatch(ContractModel):
@@ -106,6 +112,8 @@ def merge_drafts_by_description(drafts: list[MissingFactDraft]) -> list[MissingF
             "USER_UNABLE": 0,
             "USER_DECLINED": 0,
             "UNCERTAIN": 1,
+            "DUPLICATE": 0,
+            "REFINE": 2,
             "MISSING": 2,
         }
         status = current.status
@@ -147,6 +155,13 @@ def validate_missing_fact_drafts(
             reasons.append(f"item[{index}]:dropped_unknown_condition")
         facts = [fid for fid in draft.checked_fact_ids if fid in known_fact_ids]
         questions = [qid for qid in draft.checked_question_ids if qid in known_question_ids]
+        # 跨条件语义由 LLM 判断；程序只要求判定有可定位的依据，不匹配领域关键词。
+        if draft.status in {"DUPLICATE", "REFINE"} and not (facts or questions):
+            reasons.append(f"item[{index}]:missing_history_reference")
+            continue
+        if draft.status == "REFINE" and not draft.refinement_difference.strip():
+            reasons.append(f"item[{index}]:missing_refinement_difference")
+            continue
         kept.append(
             draft.model_copy(
                 update={
@@ -167,7 +182,7 @@ def filter_missing_facts(
     askable: list[MissingFactCandidate] = []
     excluded: dict[str, int] = {}
     for item in candidates:
-        if item.status == "MISSING":
+        if item.status in {"MISSING", "REFINE"}:
             askable.append(item)
             continue
         excluded[item.status] = excluded.get(item.status, 0) + 1
@@ -207,6 +222,7 @@ def assign_candidate_ids(
                 checked_fact_ids=list(draft.checked_fact_ids),
                 checked_question_ids=list(draft.checked_question_ids),
                 why_needed=draft.why_needed,
+                refinement_difference=draft.refinement_difference,
                 priority_tier=min(tiers) if tiers else 3,
                 rule_rank=min(ranks) if ranks else 99,
                 rule_title=title,

@@ -7,8 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from casepath.contracts import CaseIndexRecord, MaturityLevel
+from casepath.contracts import CaseIndexRecord, CaseRecord, MaturityLevel
 from casepath.ingestion.cases import spc_supplement as spc
+from casepath.ingestion.cases.ids import EXPECTED_CIVIL_CASE_COUNT
 from casepath.ingestion.laws.jsonl import read_jsonl, sha256_file
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -51,7 +52,10 @@ def test_new_summaries_do_not_duplicate_existing_canonical_cases():
     existing = read_jsonl(ROOT / "data/canonical/cases/cases_l1.jsonl", CaseIndexRecord)
     existing = [record for record in existing if record.case_id not in spc.CASE_IDS]
     normalize = lambda text: re.sub(r"\s+", "", text)
-    assert len(existing) == 54
+    # 合并后的非摘要集合应与结构化案例集合完全一致，不能只改旧计数。
+    deep = read_jsonl(ROOT / "data/canonical/cases/cases_deep.jsonl", CaseRecord)
+    assert len(existing) == EXPECTED_CIVIL_CASE_COUNT - spc.COUNT
+    assert {record.case_id for record in existing} == {record.case_id for record in deep}
     records = spc.load_spc_cases(INPUT)
     assert not spc.CASE_IDS & {record.case_id for record in existing}
     assert not {record.title for record in records} & {record.title for record in existing}

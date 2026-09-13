@@ -124,7 +124,6 @@ def _check_missing_fact_against_history(
     return "MISSING", "still missing askable fact"
 
 
-
 class KeyConditionQuestionPolicy:
     def __init__(
         self,
@@ -362,10 +361,11 @@ class KeyConditionQuestionPolicy:
 
     @staticmethod
     def _stop_from_exclusions(excluded, unable, declined, default: str) -> str:
-        if (
-            excluded.get("ALREADY_ANSWERED")
-            and set(excluded) <= {"ALREADY_ANSWERED", "UNCERTAIN", "ASKABLE_FALSE"}
-        ):
+        if excluded.get("ALREADY_ANSWERED") and set(excluded) <= {
+            "ALREADY_ANSWERED",
+            "UNCERTAIN",
+            "ASKABLE_FALSE",
+        }:
             return "ALL_ALREADY_ANSWERED"
         if (excluded.get("USER_UNABLE") or unable) and not excluded.get("MISSING"):
             return "USER_UNABLE_TO_ANSWER"
@@ -484,13 +484,65 @@ class KeyConditionQuestionPolicy:
             '{"items":[{'
             '"condition_ids":["cond.x"],'
             '"description":"...",'
-            '"status":"MISSING|ALREADY_ANSWERED|USER_UNABLE|USER_DECLINED|UNCERTAIN",'
+            '"status":"MISSING|ALREADY_ANSWERED|USER_UNABLE|USER_DECLINED|UNCERTAIN|DUPLICATE|REFINE",'
             '"checked_fact_ids":[],'
             '"checked_question_ids":[],'
-            '"why_needed":"..."'
+            '"why_needed":"...", "refinement_difference":""'
             "}]}. "
             "For each relevant condition, identify the underlying factual point that would actually need "
             "to be known. "
+            # 不按 condition_id 限定历史检查：不同条件可能共用同一次事实回答。
+            "Before proposing any question, compare its factual meaning against ALL effective_facts and "
+            "ALL dialogue questions AND answers, including those with different condition_ids. "
+            "Judge duplication by the underlying factual proposition being sought, not by wording, "
+            "granularity, condition_id, or the legal reason for asking it. "
+            "Ordinary factual entailment counts as answered (a partially completed activity is not fully "
+            "completed); this is distinct from inferring a legal consequence. "
+            "A question is DUPLICATE when it seeks the same underlying factual proposition that was "
+            "already requested, even if the new question uses different wording; asks the user to be "
+            "more specific; asks how, in what way, which part, exactly what, or for examples; asks for "
+            "explanation, evidence, supporting details, or particulars of the same assertion; or narrows "
+            "the phrasing without introducing an independently different fact. "
+            "A request for more detail about an already requested fact is NOT REFINE merely because the "
+            "earlier answer was brief, vague, conclusory, or lacked examples. "
+            "For example, if the user has already been asked whether the courses were different and "
+            "answered that they were different, asking how exactly they differed (including Chinese "
+            "phrasing such as 具体哪里不同) is still the same factual proposition. "
+            "If that proposition was already answered, use ALREADY_ANSWERED; if it was only asked but "
+            "not resolved, use DUPLICATE. Neither is REFINE. "
+            "Do not use REFINE merely to obtain a more detailed version, explanation, example, or proof "
+            "of that same fact. "
+            "After the user has already stated that two courses, services, arrangements, or offers differ "
+            "(or are the same), asking which sub-aspects differ — such as name, content, hours, teachers, "
+            "goals, schedule, location, or price — is still unpacking that same sameness/difference "
+            "proposition, not an independently new factual dimension. "
+            "Use REFINE only when ALL of the following are true: "
+            "(1) the earlier question/fact and the proposed question seek genuinely different factual "
+            "propositions, not merely different levels of specificity about the same proposition; "
+            "(2) the new detail was not already requested, answered, declined, or stated as unknown; "
+            "(3) the new detail can be answered independently of the earlier factual proposition; "
+            "(4) the new detail materially affects the current explanation or legal analysis; and "
+            "(5) refinement_difference can state the new factual dimension precisely without describing "
+            "it merely as more detail, more specific, examples, reasons, or supporting facts. "
+            "Useful test: if the proposed question is essentially asking the user to unpack, "
+            "substantiate, exemplify, clarify, or make more precise an answer to an earlier question, "
+            "classify it as DUPLICATE, ALREADY_ANSWERED, USER_DECLINED, or USER_UNABLE as appropriate, "
+            "not REFINE. "
+            "REFINE requires a new factual dimension, not a deeper version of the old one. "
+            "If the same factual request was already asked without useful resolution, use DUPLICATE. "
+            "If it was answered, use ALREADY_ANSWERED. "
+            "If it was declined, use USER_DECLINED. "
+            "If the user said they do not know or cannot provide it, use USER_UNABLE. "
+            "Do not bypass any of these outcomes by changing condition_id, paraphrasing, narrowing the "
+            "wording, or asking for greater specificity. "
+            "Populate checked_fact_ids and checked_question_ids with the exact relevant input IDs. "
+            "For REFINE, cite the earlier fact/question, state the exact independently new factual "
+            "dimension in refinement_difference, and explain in why_needed why that distinct fact "
+            "materially changes the current analysis. "
+            "REFINE must not request the same information already answered, declined, unknown, or "
+            "previously requested at a broader level. If uncertain whether the proposed question is a "
+            "new factual dimension or merely asks for more detail about an old one, use UNCERTAIN. "
+            "Group semantically identical missing facts across conditions into one item. "
             "The description must be a concrete fact that a user could in principle observe, remember, "
             "describe, or provide evidence about. "
             "Do not restate a legal element as though it were a factual question. "
@@ -508,13 +560,20 @@ class KeyConditionQuestionPolicy:
             "Preserve negation, uncertainty, time, subject, conditions, hypotheticals, and future intent. "
             "Something planned, alleged, disputed, uncertain, or asked about must not be converted into "
             "something that already occurred or is already established. "
-            "Use ALREADY_ANSWERED only when effective facts directly answer the factual point. "
-            "Do not mark a condition ALREADY_ANSWERED merely because the existing facts appear sufficient "
-            "for a legal inference. "
+            "Use ALREADY_ANSWERED when any effective_fact (including the initial query fact) already "
+            "asserts or factually entails the underlying proposition in the item description. "
+            "This remains ALREADY_ANSWERED even if the parent legal condition is still UNKNOWN overall "
+            "or other distinct facts under that condition are still missing: mark the covered proposition "
+            "ALREADY_ANSWERED and emit a separate MISSING item only for genuinely uncovered propositions. "
+            "Cite the covering fact IDs in checked_fact_ids. "
+            "Do not mark ALREADY_ANSWERED merely because existing facts appear sufficient for a legal "
+            "inference without answering the factual point. "
             "Use USER_UNABLE only when the user has indicated that they cannot know, remember, obtain, "
             "or provide the factual information. "
             "Use USER_DECLINED only when the user has actually declined to provide it. "
-            "Use MISSING when a concrete, relevant, askable factual point remains unresolved. "
+            "Use MISSING only when no effective_fact or dialogue answer asserts or entails that "
+            "proposition; do not use MISSING to re-ask, unpack, or seek proof of a proposition already "
+            "present in effective_facts. "
             "Use UNCERTAIN when the supplied condition cannot be safely translated into a concrete factual "
             "point without making an unsupported assumption, or when it is unclear whether the existing facts "
             "already address the condition. "
@@ -535,45 +594,110 @@ class KeyConditionQuestionPolicy:
             "or extra fields."
         )
         feedback = ""
+        items: list[MissingFactDraft] | None = None
+        # Schema 最多两试；通过后再视情况做一次命题覆盖复核。
         for attempt in range(2):
             if not budget.consume("missing_fact_identify"):
                 raise QuestionGenerationFailed("question_budget_exhausted")
             try:
-                batch = self.language_model.generate_structured(
-                    system_prompt=prompt,
-                    user_prompt=json.dumps(
-                        {**context, "validation_feedback": feedback}, ensure_ascii=False
+                items = self._parse_identify_batch(
+                    self.language_model.generate_structured(
+                        system_prompt=prompt,
+                        user_prompt=json.dumps(
+                            {**context, "validation_feedback": feedback}, ensure_ascii=False
+                        ),
+                        response_model=MissingFactIdentifyBatch,
+                        stage="missing_facts",
                     ),
-                    response_model=MissingFactIdentifyBatch,
-                    stage="missing_facts",
+                    context,
                 )
-                batch = MissingFactIdentifyBatch.model_validate(batch.model_dump())
-                # Drop empty descriptions after coerce
-                items = []
-                for item in batch.items:
-                    desc = (item.description or "").strip()
-                    if not desc:
-                        raise InvalidComponentOutput("empty_missing_fact_description")
-                    items.append(item.model_copy(update={"description": desc}))
-                return items
+                break
             except LanguageModelUnavailable:
                 raise
             except (InvalidComponentOutput, ValidationError) as exc:
                 detail = str(exc)
-                reason = (
-                    "output_truncated"
-                    if "长度上限" in detail
-                    else "schema_invalid"
-                )
+                reason = "output_truncated" if "长度上限" in detail else "schema_invalid"
                 feedback = (
                     f"{reason}: return {{items:[...]}} with condition_ids and description; "
-                    "status must be an allowed enum value; keep output compact"
+                    "status must be allowed; cite only supplied fact/question IDs; "
+                    "DUPLICATE/REFINE/ALREADY_ANSWERED require history references when facts exist; "
+                    "REFINE requires refinement_difference; keep output compact"
                 )
                 logging.getLogger("uvicorn.error").warning(
                     "Missing-fact identify attempt=%s reason=%s", attempt + 1, reason
                 )
-        # 识别失败不等于事实缺失，不能退回谓词直接提问。
-        raise QuestionGenerationFailed("missing_fact_identification_failed")
+                items = None
+        if items is None:
+            raise QuestionGenerationFailed("missing_fact_identification_failed")
+
+        needs_coverage_review = bool(context.get("effective_facts")) and any(
+            item.status in {"MISSING", "REFINE"} for item in items
+        )
+        if not needs_coverage_review:
+            return items
+        if not budget.consume("missing_fact_identify"):
+            return items
+        fact_lines = [
+            f"{row.get('fact_id')}: {row.get('text', '')}"
+            for row in context.get("effective_facts", [])
+        ]
+        coverage_feedback = (
+            "coverage_review: re-check every MISSING/REFINE item against these effective_facts "
+            "and dialogue, even if you already listed checked_fact_ids. "
+            "Citing a fact does not keep MISSING valid when that fact asserts or entails the "
+            "proposition (including a brief statement that courses/services differ or are the same). "
+            "If entailed, reclassify as ALREADY_ANSWERED with checked_fact_ids; "
+            "if only asked unresolved use DUPLICATE; if declined/unknown use USER_DECLINED/USER_UNABLE. "
+            "Unpacking sub-aspects of an already-stated sameness/difference remains ALREADY_ANSWERED "
+            "or DUPLICATE, not MISSING or REFINE. "
+            "Keep MISSING only when none of the facts cover that distinct proposition. "
+            "Facts:\n" + "\n".join(fact_lines)
+        )
+        logging.getLogger("uvicorn.error").warning(
+            "Missing-fact identify reason=coverage_review"
+        )
+        try:
+            return self._parse_identify_batch(
+                self.language_model.generate_structured(
+                    system_prompt=prompt,
+                    user_prompt=json.dumps(
+                        {**context, "validation_feedback": coverage_feedback},
+                        ensure_ascii=False,
+                    ),
+                    response_model=MissingFactIdentifyBatch,
+                    stage="missing_facts",
+                ),
+                context,
+            )
+        except LanguageModelUnavailable:
+            raise
+        except (InvalidComponentOutput, ValidationError):
+            # 覆盖复核失败时保留首轮结果，避免整轮追问崩溃。
+            logging.getLogger("uvicorn.error").warning(
+                "Missing-fact identify coverage_review failed; keeping first-pass items"
+            )
+            return items
+
+    def _parse_identify_batch(self, batch, context: dict) -> list[MissingFactDraft]:
+        batch = MissingFactIdentifyBatch.model_validate(batch.model_dump())
+        fact_ids = {row["fact_id"] for row in context.get("effective_facts", [])}
+        question_ids = {row["question_id"] for row in context.get("dialogue", [])}
+        items: list[MissingFactDraft] = []
+        for item in batch.items:
+            if set(item.checked_fact_ids) - fact_ids or set(item.checked_question_ids) - question_ids:
+                raise InvalidComponentOutput("unknown_coverage_reference")
+            missing_refs = not (item.checked_fact_ids or item.checked_question_ids)
+            if item.status in {"DUPLICATE", "REFINE"} and missing_refs:
+                raise InvalidComponentOutput("missing_history_reference")
+            if item.status == "ALREADY_ANSWERED" and missing_refs and fact_ids:
+                raise InvalidComponentOutput("missing_history_reference")
+            if item.status == "REFINE" and not item.refinement_difference.strip():
+                raise InvalidComponentOutput("missing_refinement_difference")
+            desc = (item.description or "").strip()
+            if not desc:
+                raise InvalidComponentOutput("empty_missing_fact_description")
+            items.append(item.model_copy(update={"description": desc}))
+        return items
 
     def _select_without_llm(
         self, state, comparison, condition_candidates, unable, declined, meta, excluded
@@ -657,6 +781,8 @@ class KeyConditionQuestionPolicy:
                 "condition_ids": missing_fact.condition_ids,
                 "description": missing_fact.description,
                 "why_needed": missing_fact.why_needed,
+                "coverage_status": missing_fact.status,
+                "refinement_difference": missing_fact.refinement_difference,
             },
             "primary_condition_id": primary,
             "definition": definition.predicate,

@@ -13,12 +13,15 @@ import {
   type GraphNode,
 } from '@/mock/graph';
 import { conditionLabels } from '@/utils/contracts';
+import { LiveRetrievalGraph } from './LiveRetrievalGraph';
 
 interface Props {
   snapshot: ResolvedSnapshot;
 }
 
 export function KnowledgeGraphPanel({ snapshot }: Props) {
+  // 与 API 模式保持一致。真实接口绝不能混入固定健身房演示图。
+  if (import.meta.env.VITE_USE_MOCK !== 'true') return <LiveRetrievalGraph snapshot={snapshot} />;
   const { nodes, edges } = buildGraph();
   const active = activeNodeIds(snapshot);
   const focusId = focusConditionId(snapshot);
@@ -112,7 +115,7 @@ export function KnowledgeGraphPanel({ snapshot }: Props) {
   return (
     <Card
       size="small"
-      title="两层知识图谱"
+      title="两层知识图谱（Mock 演示）"
       extra={<span className="panel-card__hint">随对话自动高亮</span>}
       className="panel-card"
     >
