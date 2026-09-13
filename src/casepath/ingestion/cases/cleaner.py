@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -79,6 +79,7 @@ class CaseCleaner:
         )
 
     def lightweight(self, case: dict[str, Any]) -> CaseIndexRecord:
+        facts, reasoning, _ = self._case_texts(case)
         return CaseIndexRecord(
             case_id=_case_id(case),
             title=str(case.get("title") or "未命名案例"),
@@ -87,12 +88,26 @@ class CaseCleaner:
             judgment_date=_date(case.get("judgment_date")),
             cause=case.get("case_cause") or None,
             keywords=[str(item) for item in (case.get("keywords") or [])],
-            facts_text=str(case.get("case_facts") or ""),
-            reasoning_text=str(case.get("judgment_reasoning") or ""),
+            facts_text=facts,
+            reasoning_text=reasoning,
             summary=str(case.get("judgment_summary") or ""),
             related_provision_ids=related_provision_ids(case),
             maturity=MaturityLevel.L1,
         )
+
+    def _case_texts(
+        self, case: dict[str, Any], markdown: str | None = None
+    ) -> tuple[str, str, str]:
+        sections = split_sections(self.document_text(case, markdown))
+        facts = str(sections.get("基本案情", case.get("case_facts") or ""))
+        reasoning = str(sections.get("裁判理由", case.get("judgment_reasoning") or ""))
+        result = sections.get("裁判结果", "")
+        # CaseIndexRecord has no separate result text. Retain an explicit
+        # result section verbatim in the indexed facts so offsets remain
+        # resolvable by every downstream consumer of the canonical record.
+        if result and result not in facts:
+            facts = f"{facts}\n{result}".strip()
+        return facts, reasoning, result
 
     def plaintiff_text(self, case: dict[str, Any], markdown: str | None = None) -> str:
         document = self.document_text(case, markdown)
@@ -115,18 +130,19 @@ class CaseCleaner:
         canonical case text. Unreviewed machine output stays L1.
         """
 
-        document = self.document_text(case, markdown)
-        sections = split_sections(document)
-        facts = sections.get("基本案情", case.get("case_facts") or "")
-        reasoning = sections.get("裁判理由", case.get("judgment_reasoning") or "")
+        facts, reasoning, result_section = self._case_texts(case, markdown)
         # 【a 案例抽取】先分文书章节，再用 extract.py 的领域规则/短语匹配抽取结构。
         # 输入已有上游字段；这里不是通用 NER，不调用 embedding 判定实体关系。
-        result_section = sections.get("裁判结果", "")
         partitions = split_fact_partitions(facts)
-        holding = result_section or partitions.holding
-        if result_section and not partitions.holding:
-            partitions = split_fact_partitions(f"{facts}\n{result_section}")
-            holding = partitions.holding or result_section
+        if result_section:
+            result_holding = split_fact_partitions(result_section).holding or result_section
+            partitions = replace(partitions, holding=result_holding)
+            # A heading without "判决：" still delimits findings from the result.
+            if result_section in partitions.court:
+                partitions = replace(
+                    partitions, court=partitions.court.split(result_section, 1)[0].strip()
+                )
+        holding = partitions.holding
         case_id = _case_id(case)
         book = SpanBook(case_id)
         claim = extract_claim(case_id, case, partitions, str(case.get("title") or ""))

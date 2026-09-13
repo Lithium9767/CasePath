@@ -1,13 +1,14 @@
 # P2 规范规则层数据
 
-本目录由 `python -m casepath.rule_layer` 确定性生成，请勿手工修改 JSONL。
+本目录由 `python -m casepath.rule_layer.stage2_refinement` 确定性生成，请勿手工修改 JSONL。
+第二阶段完成内容、核验命令、案例补充与剩余限制统一见[根目录 README](../../../README.md#p2-规范规则数据)。
 
 | 文件 | 记录数 | 用途 |
 |---|---:|---|
 | `legal_sources.jsonl` | 1 | 《中华人民共和国民法典》的版本与权威来源 |
 | `provisions.jsonl` | 1,260 | 第 1—1260 条完整正文与修正后的层级 |
-| `rules.jsonl` | 5 | 第 509、563、565、566 条形成的 4 条 L3 基础规则与 1 条 L2 综合规则 |
-| `source_spans.jsonl` | 1,268 | 每条法条全文跨度及规则使用的细粒度跨度 |
+| `rules.jsonl` | 776 | 771 条 L1 扩展规则，保留 4 条 L3 基础规则与 1 条 L2 综合规则；1,928 个唯一条件 |
+| `source_spans.jsonl` | 3,272 | 每条法条全文跨度及规则使用的细粒度跨度 |
 
 `SourceSpan.start_offset` 为零基索引，`end_offset` 为右开区间；必须满足：
 

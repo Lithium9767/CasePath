@@ -25,9 +25,9 @@ EXPECTED_PROCESSED_CASES_SHA256 = (
 EXPECTED_UPSTREAM_RECORD_COUNT = 51
 EXPECTED_LEGAL_RAG_CIVIL_COUNT = 45
 EXPECTED_LEXREL_SERVICE_CASE_COUNT = 9
-EXPECTED_CIVIL_CASE_COUNT = 54
+EXPECTED_CIVIL_CASE_COUNT = 60
 EXPECTED_DEEP_CASE_COUNT = 54
-GENERATOR = "casepath.ingestion.cases.build:v5"
+GENERATOR = "casepath.ingestion.cases.build:v7"
 DATASET_ID = "dataset.civil_cases.v1"
 
 EXPECTED_LEXREL_REPOSITORY_URL = "https://github.com/thunlp/LexRel"
@@ -41,6 +41,6 @@ LEXREL_CASE_ID_PREFIX = "lexrel."
 
 # Filled after the first pinned release so later edits fail validation.
 EXPECTED_CANONICAL_OUTPUT_HASHES: dict[str, str] = {
-    "cases_l1.jsonl": "16f5418a9d884033dbc49b56e194771bccb234602bb968816d5bdc4c86a803ad",
-    "cases_deep.jsonl": "fe7aa68c0df34385965069034e89fa1a79c0a523002ee9553c0e390cdbea7e53",
+    "cases_l1.jsonl": "d78d1ff747652db2de5d7e0e316d1fee81449af76ca72aa62b697354bd57adef",
+    "cases_deep.jsonl": "bbe6a9639ef027bcb97c006f7ec1f55ec78573ba2836dc9487f109c936299662",
 }

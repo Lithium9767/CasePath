@@ -4,6 +4,8 @@ CasePath 是“规范规则层 + 案例适用层”的交互式民事法律信�
 当前兼容历史 v1.1 公共合同，增加 v1.2 会话合同、v1.3 P4工作流/规则合同及多轮会话服务。
 默认仍使用演示检索和保守回答记录器，不提供自动法律判断，引用尚未核验。
 
+第二阶段数据交接见下文 [P2 规范规则数据](#p2-规范规则数据)：本次只调整数据与离线构建校验，未改算法、前端或公共 contracts。
+
 ## 当前完成
 
 - 十一个v1.1公共合同：法源、法条、规则、案例、用户状态、检索、解释、回答、错误、能力状态和工作流快照；
@@ -14,7 +16,7 @@ CasePath 是“规范规则层 + 案例适用层”的交互式民事法律信�
 - JSON Schema 导出脚本和契约测试；
 - FastAPI 可选入口。
 - 单进程内存会话服务：创建、读取、回答、原文保存、并发版本检查和成功请求重放。
-- P2规则数据：1部民法典、1,260条法条、1,268个原文片段和5条核验规则。
+- P2规则数据：1部民法典、1,260条法条、3,272个法条原文片段和776条规则（771 L1、1 L2、4 L3）。
 
 ## 目录职责
 
@@ -309,16 +311,183 @@ RuleRetriever
 P2以同级`../legal-rag`仓库固定提交中的《民法典》JSON为输入，修复已知的109条
 层级错位，再生成P1公共合同格式的数据。`condition_id`是P2、P3和P4共享的稳定连接键。
 
-```powershell
-uv run python -m casepath.rule_layer --verified-on 2026-09-04 `
-  --upstream-revision ce7872c7ae343e5ff860d627195ec4e72c7ef7ce
-uv run python -m casepath.rule_layer --validate-only
-uv run pytest tests/ingestion/laws tests/rule_layer
+### 第二阶段数据交接（2026-09-13，结合 P3 增量）
+
+本轮以团队 `master@8345205` 中已整合的 P2 数据为基线，提交到 `P2` 分支，由组长统一合并。
+在上次 P2 提交 `030476f` 上，进一步对照了 `P3@6be749d`，逐项吸收数据工作，不整分支覆盖。
+没有引入本地私有实验版，没有修改 P4 算法、追问、前端、API 或公共 contracts。
+
+已完成的数据工作：
+
+- 核查全部 1,260 条法条的编号连续性、唯一性、非空正文、Schema、原文跨度与引用完整性；保留原法源、法条正文和原有 5 条演示规则。
+- 合并第 583、584 条中定义一致的违约条件，独立条件由 1,929 个减为 1,928 个，不删除其他损失、因果关系或限制条件。新增 3 个细粒度法条跨度，修正损失原因、提存前提的原文锚点。
+- 补齐共享条件原文对应的父法条引用，合计修订 262 条规则记录；规则总数仍为 776，**不因修正引用而提升 L1/L2/L3 标签**。本轮涉及的第 570、583、584 条对照了[最高人民法院公布的民法典全文](https://www.court.gov.cn/zixun/xiangqing/233181.html)，文本哈希与变更清单保存在 manifest 的 `data_refinement` 中。
+- 精炼原有 54 条案例：保留上一版金额、最终裁判与原文跨度修复；进一步修正 9 条 LexRel 的主体角色和诉请——不按关系主体顺序推断原被告，不把付款余额或抽象权利义务当作已提出的请求。未明确的主体、金额保持为空，未标注的诉请明确说明。
+- 接入 P3 尚未被构建器读取的 6 条[最高法民法典典型案例](https://www.court.gov.cn/zixun/xiangqing/347181.html)，核对并补回关键经过、删去未被本案明确判令的概括性责任，区分一审日期与终审日期。它们是**编辑摘要、仅 L1**，不造深度记录和权威原文跨度。
+- 完成空正文、重复 ID、去空白重复事实、重复关键词、跨数据集同 ID 原文冲突的校验，并绑定三个输入的固定哈希。正式案例为 **60 条轻量记录、54 条深度记录**；六条新增摘要可进入检索目录。
+- 保留 1,140 条事实-only LexRel 本地评测语料。P3 新增的 96 条已全部包含其中，不能重复计数；相对当前 P2 正式库净增 1,131 条，可用案例联合去重为 **1,191 条**，不是线上案例数。新增独立评测入口，标签与检索文本隔离，可跑离线 BM25 或读取算法组预测排名评分。
+
+| 正式文件 | 记录数 | 说明 |
+| --- | ---: | --- |
+| `data/canonical/rules/legal_sources.jsonl` | 1 | 法源和版本 |
+| `data/canonical/rules/provisions.jsonl` | 1,260 | 完整法条，四位编号 |
+| `data/canonical/rules/rules.jsonl` | 776 | 771 L1、1 L2、4 L3；1,928 个唯一条件 |
+| `data/canonical/rules/source_spans.jsonl` | 3,272 | 可按字符偏移核对的法条片段 |
+| `data/canonical/cases/cases_l1.jsonl` | 60 | 45 条 legal-rag、9 条 LexRel、6 条最高法摘要 |
+| `data/canonical/cases/cases_deep.jsonl` | 54 | 原有 54 条的结构化层；六条摘要不伪装成深度案例 |
+
+与 P3 的数量对账：P3 正式库 150 条中含 105 条 LexRel，其全部在 P2 的 1,140 条评测语料内；
+所以评测语料相对 **P3** 净增是 1,035，相对 **P2** 净增是 1,131，不能混用这两个分母。
+没有把 P3 的 96 条新增原文再复制上网：其中有完整长数字串/账户语境，且上游再分发许可未明确。
+六条最高法摘要经修订后只保存一份输入、由构建器正式加载，不保留第二份闲置的 `additional_cases.jsonl`。
+
+条件 ID 的唯一迁移为：
+
+```text
+cond.contract.not_or_badly_performed_583 ─┐
+                                       ├→ cond.contract.nonperformance_or_nonconformity
+cond.contract.not_or_badly_performed_584 ─┘
 ```
 
-构建器先在临时目录生成并完成跨文件校验，最后才替换五个发布文件；发布中途失败会恢复旧数据。
+现有正式案例不引用这两个旧 ID；若下游另存了条件缓存，应同步刷新。
+修订配方位于 `data/inputs/rules/2adc0d2c4c66953e973c4a0c57f576b5134d1a46c7d9f778813164e37dbee750.json`，
+引用固定哈希的原始批次，不额外复制整份规则输入。
+
+### 核验、重建和交接证据
+
+在仓库根目录运行（无需 LLM、Neo4j 或付费 API）：
+
+```powershell
+uv run python -m casepath.rule_layer --validate-only
+uv run python -m casepath.ingestion.cases --validate-only
+uv run python -m casepath.ingestion.data_quality --data-root data --output data/reports/data_quality.stage2.json
+uv run pytest -ra
+uv run ruff check src tests scripts
+```
+
+从已签入的规则输入重建本轮数据：
+
+```powershell
+uv run python -m casepath.rule_layer.stage2_refinement --data-root data --check-only
+uv run python -m casepath.rule_layer.stage2_refinement --data-root data
+```
+
+不要用历史五规则构建命令覆盖当前扩展版。案例需从同级 `legal-rag` 的固定原始输入重建：
+
+```powershell
+uv run python -m casepath.ingestion.cases --input ../legal-rag/data/processed/processed_cases.json --data-root data
+```
+
+固定输入提交为 `ce7872c7ae343e5ff860d627195ec4e72c7ef7ce`；输入哈希不匹配会拒绝发布。
+构建先生成并校验临时产物，再发布正式文件。主要证据：
+
+- [数据质量报告](data/reports/data_quality.stage2.json)：绑定 6 个正式 JSONL 和 2 个 manifest 的 SHA-256，列出连续编号、Schema、跨度、引用及成熟度检查；当前结构错误和父法条漏引均为 0。
+- [法条与规则 manifest](data/manifests/civil_code.manifest.json)：来源、版本、固定输入、输出哈希、原核验记录与本轮修订明细。
+- [案例 manifest](data/manifests/cases.manifest.json)：v7 抽取器、三份输入及输出哈希、数量与限制。
+- [LexRel 构建凭据](data/reports/lexrel_retrieval.manifest.json)：上游版本、原始文件 SHA-256、实际构建数量、评测协议、输出哈希；不包含案例正文。
+- [P2/P3 去重对账](data/reports/p3_data_handoff.stage2.json)：固定 P3 提交、样本 ID 与原文一致性、不同基线的净增数量及来源哈希。
+- [最高法摘要来源核对](data/reports/spc_civil_code_first_batch.provenance.json)：逐案官方来源章节、编辑摘要属性及修订依据。
+- [13 查询离线评测结果](data/reports/lexrel_recall.relation_type.stage2.json)：1,140 候选、仅事实文本、全部正例分母和汇总指标，不含原始案情。
+
+本轮实测：**491 passed、2 skipped，Ruff 检查通过**；本次修改前为 395 项通过，新增 96 项回归检查。
+两项跳过分别是未配置专用 Neo4j 测试库、当前 Windows 进程无符号链接权限；不是法条或案例校验跳过。
+另有 2 条既有 Starlette/httpx 弃用警告。规则、案例独立验收、报告文件哈希、图预览重放均通过；
+本地 LexRel 完整语料已构建并与签入的统计凭据核对一致。
+
+代码入口：`rule_layer/stage2_refinement.py` 负责确定性规则修订，`rule_layer/expansion.py` 负责发布与验收，
+`ingestion/cases/{sections,extract,cleaner}.py` 负责案例抽取，`ingestion/cases/lexrel_retrieval.py` 负责补充语料，
+`ingestion/data_quality.py` 负责独立质量报告。对应回归测试在 `tests/rule_layer/` 与 `tests/ingestion/`。
+本轮新增 `spc_supplement.py`（来源核对摘要加载）、`branch_handoff.py`（跨分支去重对账）、
+`retrieval_evaluation.py`（隔离标签的离线评测），均在 `ingestion/cases/` 下。
+
+### LexRel 补充数据与评测使用方式
+
+来源：[THUNLP/LexRel](https://github.com/thunlp/LexRel)，固定提交
+`5d04570483da5726d5db99d72633c3ab919b4e4b` 的 `LexRel/test.json`。
+本轮未发现明确的数据再分发许可，且原文可能含个人或敏感信息，因此只提交构建代码和统计凭据，
+不批量上传新增原文；`data/derived/lexrel_retrieval/` 已加入 `.gitignore`。
+
+组员可显式从上游下载并在本地复现（不调用模型）：
+
+```powershell
+uv run python -m casepath.ingestion.cases.lexrel_retrieval --download
+```
+
+默认不会联网；也可用已下载、哈希一致的原始文件离线检查：
+
+```powershell
+uv run python -m casepath.ingestion.cases.lexrel_retrieval --input "D:\datasets\LexRel\test.json" --check-only
+```
+
+生成目录包括 `cases_l1.jsonl`、`labels.jsonl`、`qrels.jsonl`、`manifest.json`。
+1,140 条记录无精确/空白归一化重复，含 103 类非空关系标签，涉及借款、担保、买卖、租赁、
+婚姻、继承、侵权等领域；这是来源中的事实描述，不冒充完整裁判文书，不虚构法院、案号或裁判结果。
+
+给算法组的协议：
+
+1. 仅将 `cases_l1.jsonl` 的 `facts_text` 建索引；`labels.jsonl` 与 `qrels.jsonl` 只供评分，不能参与检索或查询构造。
+2. 每条事实作一次查询，先剔除 `exclude_case_ids` 中的自身，再计算 Recall@K；该查询分母为全部 `relevant_case_ids`。
+3. 只有 1,091 个 `evaluable=true` 查询计入平均值；49 个无正样本查询排除，其中 33 个无有效标签、16 个找不到同标签同伴。无标签样本不是已确认的不相关样本。
+4. “共享至少一个关系标签”只是弱监督相关性，不是专家标注的相似判例或裁判结果金标准；标签分布不均衡，文字变体仅去首尾空白，不擅自语义合并。
+5. 保留上游 test 划分；不能用其标签训练或调参后再报告为无偏测试。合并已有案例库时按 `case_id` 去除 9 个重合样本。
+
+构建命令只生成语料；新增评测命令直接读取同一份语料，不需要加载线上目录或调用 API：
+
+```powershell
+uv run python -m casepath.ingestion.cases.retrieval_evaluation --protocol relation_type --k 5 10 20
+```
+
+`relation_type` 沿用 P3 的 13 个固定自然语言主题查询，但从独立标签文件取正例，且候选池为完整 1,140 条。
+本次事实-only BM25 实测宏 Recall@5 / @10 / @20 为 **0.063266 / 0.132968 / 0.234000**。
+这些是宽泛关系标签下的离线基线，不是胜诉预测准确率，也不与 P3 较小候选池、含标签检索文本的成绩直接比较。
+例如“借款”查询有 536 个正例，即使前 20 条全相关，Recall@20 上限也只有 20/536。
+
+`case_overlap` 使用每条事实作为查询，剔除自身，统计 1,091 个有正例查询；49 个无正例查询跳过。
+该协议的校验与评分已有回归测试，但本机 Python 3.14.3 下，内置 BM25 全量长批次尚未跑通：
+曾在第 492 个查询出现 `TypeError: 'list_iterator' object is not subscriptable`，同一查询单独运行正常，
+具体原因尚未确定。因此本次没有全量 `case_overlap` 实测报告，也不把部分运行结果当作完整成绩。
+可先使用上面已实测的 13 查询基线；算法组也可导出 JSONL 预测，
+每行 `{"query_id":"…","ranked_case_ids":["lexrel.…"]}`，使用已通过测试的外部排名评分入口：
+
+```powershell
+uv run python -m casepath.ingestion.cases.retrieval_evaluation --protocol case_overlap --predictions predictions.jsonl --k 5 10 20
+```
+
+预测必须覆盖所有可评测查询，不能漏掉难例；空排名计零分，重复/未知 ID 拒绝，先去自身再截取前 K。
+外部预测是否使用了标签，单靠评分器无法证明，结果会明确标记其检索来源未经审计。
+可加 `--output data/reports/my_recall.json` 保存不含案情的结果；已有不同内容的报告拒绝覆盖，需换新文件名。
+
+需要重跑 P3 对账时，在独立目录检出 `6be749d` 后运行（只读 P3）：
+
+```powershell
+uv run python -m casepath.ingestion.cases.branch_handoff --data-root data --p3-data-root ../CasePath-P3-review/data --output data/reports/p3_data_handoff.stage2.json
+```
+
+原始 1,140 条构建凭据固定记录的是初版 54 案例基线；本次跨分支报告按实际 P2/P3 文件计算重合和净增，
+不擅自改写旧构建凭据。算法组后续仍需对正式 P4/向量检索运行自己的评测。
+
+### 边界与后续工作
+
+本轮“已有数据核对精炼”和“补充案例以支持召回率测试”两项数据交付已完成；不等于民法典全领域规则语义全部完善。
+771 条 L1 尚未逐条提升为可靠的 L2/L3；报告保留 6 组同谓词候选和 89 条诊断条件语境提示，
+它们是待核查线索，不等于 89 个已确认错误，也没有据此自动合并或改动法定要件。
+多请求、多审级、周期性金额等复杂案例仍需结合全文判断，不能将结构校验通过等同于法律结论正确。
+
 规则条件通过`ConditionGroup.role`区分`CORE`法定核心条件和`DIAGNOSTIC`案例比较条件，
 P4不得把诊断条件直接当作规则成立要件。
+
+集成后需按新数据重建图谱并按需重建向量索引。离线图预览可用：
+
+```powershell
+uv run python -m casepath.ingestion.graph --data-root data --output data/derived/graph/preview.json
+```
+
+签入的离线预览已同步：10,110 个节点、21,864 条边，
+`release_id=929b1c0c2a032ff5fef01f16c5bba01e22faa9d8422aaa1ba986b014603454cc`。
+
+本轮不连接远端 Neo4j，不调用付费 embedding，不更新部署或用户会话；旧向量文件不能代表新数据。
+若启用这些服务，由集成负责人按上文 Live 配置重新导入/建索引并重启服务。
+多次追问、召回算法、历史对话与前端图谱交互属于其他组员本阶段工作，不在本次修改范围内。
 
 ## 验证
 

@@ -1,0 +1,10 @@
+{
+  "recipe_version": "p2-data-refinement.1",
+  "base_input_path": "inputs/rules/0de3517f83eb917b316e9579a87be8244ed55b27124127ccef62e3166f60d68a.json",
+  "base_input_sha256": "0de3517f83eb917b316e9579a87be8244ed55b27124127ccef62e3166f60d68a",
+  "operations": [
+    "merge_exact_583_584_condition_definitions",
+    "anchor_570_583_584_conditions_to_actual_premises",
+    "declare_all_provisions_referenced_by_shared_source_spans"
+  ]
+}

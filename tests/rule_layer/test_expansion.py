@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from casepath.contracts import ProvisionRecord, RuleRecord
-from casepath.ingestion.laws.jsonl import read_jsonl, sha256_file
+from casepath.ingestion.laws.jsonl import read_jsonl, sha256_file, write_json, write_jsonl
 from casepath.rule_layer.civil_code import build_civil_code_rules
 from casepath.rule_layer.expansion import normalize, publish, validate_expanded
 
@@ -40,6 +40,33 @@ def test_normalizer_rejects_semantic_id_collision():
     batch["rules"][0]["conditions"][0]["predicate"] = "改变已有条件含义"
     with pytest.raises(ValueError, match="定义冲突"):
         normalize(batch, provisions)
+
+
+@pytest.mark.parametrize("newline", ["\n", "\r\n"])
+def test_first_expansion_without_input_directory(tmp_path, newline):
+    root = tmp_path / "data"
+    for part in ("canonical", "manifests"):
+        shutil.copytree(ROOT / part, root / part)
+    manifest_path = root / "manifests/civil_code.manifest.json"
+    manifest = json.loads(manifest_path.read_text("utf-8"))
+    batch, provisions = small_batch()
+    base = build_civil_code_rules(provisions)
+    write_jsonl(root / "canonical/rules/rules.jsonl", base.rules)
+    write_jsonl(
+        root / "canonical/rules/source_spans.jsonl",
+        [
+            *(s for p in provisions for s in p.source_spans),
+            *base.source_spans,
+        ],
+    )
+    write_json(manifest_path, manifest["baseline_manifest"])
+    source = tmp_path / "batch.json"
+    source.write_text(
+        json.dumps(batch, ensure_ascii=False, indent=2), encoding="utf-8", newline=newline
+    )
+    assert not (root / "inputs").exists()
+    assert publish(source, root)["rules"] == 6
+    assert validate_expanded(root).rule_count == 6
 
 
 def test_publish_roundtrip_and_failure_preserves_files(tmp_path, monkeypatch):

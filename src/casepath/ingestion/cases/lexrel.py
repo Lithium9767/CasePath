@@ -29,25 +29,24 @@ from .ids import (
     LEXREL_CASE_ID_PREFIX,
     REVIEWED_L2_CASE_IDS,
 )
-from .refinements import apply_case_overlay, uses_refund_condition_template
+from .refinements import (
+    SERVICE_REFUND_RULE_CASE_IDS,
+    apply_case_overlay,
+    uses_refund_condition_template,
+)
 from .sections import parse_requested_amount
 
 RELATION_TYPE = "服务合同关系"
 CAUSE = "服务合同纠纷"
-_PARTY_SPLIT_RE = re.compile(r"[，,、;；]")
+UNANNOTATED_REMEDY = "原数据未标注具体诉请"
+_REQUEST_RE = re.compile(r"请求(?:法院)?(?:依法)?(?:判令)?[：:]?|诉讼请求[：:]?|诉请|主张|要求")
+_REMEDY_ACTION_RE = re.compile(
+    r"返还|退还|退款|退团|退费|解除|支付|给付|赔偿|补偿|偿还|归还|履行|确认|撤销|停止|交付"
+)
 
 
 def case_id_for(uniqid: str) -> str:
     return f"{LEXREL_CASE_ID_PREFIX}{uniqid.strip()}"
-
-
-def _parties(subject: str) -> tuple[str | None, str | None]:
-    parts = [part.strip() for part in _PARTY_SPLIT_RE.split(subject or "") if part.strip()]
-    if not parts:
-        return None, None
-    if len(parts) == 1:
-        return parts[0], None
-    return parts[0], parts[-1]
 
 
 def _first_sentence(text: str) -> str:
@@ -55,11 +54,24 @@ def _first_sentence(text: str) -> str:
     return match.group(0).strip() if match else ""
 
 
-def _requested_remedy(plaintiff: str) -> str:
-    match = re.search(r"请求判令[：:](.+)", plaintiff or "")
-    if match:
-        return match.group(1).strip()[:240]
-    return _first_sentence(plaintiff)
+def _requested_remedy(facts_text: str) -> str:
+    """Keep an expressed request, never an annotated right or a contract price."""
+
+    for sentence in re.findall(r"[^。\n]+", facts_text):
+        for match in _REQUEST_RE.finditer(sentence):
+            prefix = sentence[: match.start()]
+            # A permission/contract term is not a request that was actually made.
+            if re.search(
+                r"有权(?:利)?$|无权$|可以$|可$|不得$|不再$|未曾$|没有$|无需$|无须$|未$|不$",
+                prefix,
+            ):
+                continue
+            if re.search(r"(?:合同|协议)(?:中)?(?:约定|载明)", prefix):
+                continue
+            remainder = sentence[match.end() :].strip()
+            if _REMEDY_ACTION_RE.search(remainder):
+                return sentence[match.start() :].strip()
+    return ""
 
 
 def _first_content_line(content: str) -> str:
@@ -70,25 +82,8 @@ def _first_content_line(content: str) -> str:
     return _first_sentence(content)
 
 
-_GENERIC_RIGHTS = "服务提供者有权要求服务接受者支付报酬"
-
-
-def _remedy(content: str, object_: str, refund: bool) -> str:
-    if refund:
-        return (
-            _requested_remedy(content)
-            or object_.strip()
-            or "解除服务合同并返还未履行服务费用"
-        )
-    line = _first_content_line(content)
-    if object_.strip() and (not line or line.startswith(_GENERIC_RIGHTS)):
-        return object_.strip()[:240]
-    return (line or object_.strip() or CAUSE)[:240]
-
-
-def _title(claimant: str | None, respondent: str | None, uniqid: str) -> str:
-    if claimant and respondent:
-        return f"{claimant}诉{respondent}服务合同纠纷案"
+def _title(uniqid: str) -> str:
+    # Relation participants have no plaintiff/defendant role or ordering contract.
     return f"LexRel服务合同关系案例 {uniqid}"
 
 
@@ -108,15 +103,19 @@ def convert_sample(sample: dict[str, Any]) -> tuple[CaseIndexRecord, CaseRecord]
     if not facts_text:
         raise ValueError(f"LexRel sample {uniqid} has empty input facts")
     payload = _relation_payload(sample)
-    subject = str(payload.get("主体") or "")
     object_ = str(payload.get("客体") or "")
     content = str(payload.get("内容") or "")
     case_id = case_id_for(uniqid)
-    claimant, respondent = _parties(subject)
-    title = _title(claimant, respondent, uniqid)
-    pleading = "\n".join(part for part in (content, object_, facts_text) if part)
+    title = _title(uniqid)
+    explicit_remedy = _requested_remedy(facts_text)
     case = {"title": title, "case_cause": CAUSE}
-    refund = is_service_termination_refund(case, pleading)
+    refund = bool(explicit_remedy) and (
+        is_service_termination_refund(case, explicit_remedy)
+        or (
+            case_id in SERVICE_REFUND_RULE_CASE_IDS
+            and bool(re.search(r"返还|退还|退款|退费", explicit_remedy))
+        )
+    )
     index = CaseIndexRecord(
         case_id=case_id,
         title=title,
@@ -147,10 +146,10 @@ def convert_sample(sample: dict[str, Any]) -> tuple[CaseIndexRecord, CaseRecord]
     claim = ClaimRecord(
         claim_id=entity_id(case_id, "claim", 1),
         claim_type=CLAIM_TYPE_SERVICE_TERMINATION_REFUND if refund else CAUSE,
-        claimant=claimant,
-        respondent=respondent,
-        requested_remedy=_remedy(content, object_, refund),
-        amount=parse_requested_amount(pleading),
+        claimant=None,
+        respondent=None,
+        requested_remedy=explicit_remedy or UNANNOTATED_REMEDY,
+        amount=parse_requested_amount(explicit_remedy),
         invoked_rule_ids=[RULE_SERVICE_TERMINATION_REFUND] if refund else [],
     )
     maturity = MaturityLevel.L2 if case_id in REVIEWED_L2_CASE_IDS else MaturityLevel.L1
@@ -170,6 +169,9 @@ def convert_sample(sample: dict[str, Any]) -> tuple[CaseIndexRecord, CaseRecord]
         source_spans=book.spans,
     )
     record = apply_case_overlay(record, facts_text, "")
+    # Keep the source-anchored condition bridges, but an overlay must not turn
+    # a payment/balance or hypothetical remedy into the source's actual claim.
+    record.claims = [claim]
     return index, record
 
 

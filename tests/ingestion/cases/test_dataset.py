@@ -26,14 +26,17 @@ from casepath.ingestion.cases.ids import (
     PROPERTY_CASE_ID,
     REVIEWED_L2_CASE_IDS,
 )
+from casepath.ingestion.cases.spc_supplement import CASE_IDS as SPC_CASE_IDS
 from casepath.ingestion.cases.validation import validate_canonical_cases, validate_records
 from casepath.ingestion.laws.civil_code import provision_id
-from casepath.ingestion.laws.jsonl import read_jsonl, sha256_file, write_json
+from casepath.ingestion.laws.jsonl import read_jsonl, sha256_file, write_json, write_jsonl
 from casepath.rule_layer.ids import RULE_SERVICE_TERMINATION_REFUND
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 STATIC_DATA_ROOT = REPOSITORY_ROOT / "data"
-UPSTREAM_CASES = REPOSITORY_ROOT.parent / "legal-rag" / "data" / "processed" / "processed_cases.json"
+UPSTREAM_CASES = (
+    REPOSITORY_ROOT.parent / "legal-rag" / "data" / "processed" / "processed_cases.json"
+)
 L1_PATH = Path("canonical/cases/cases_l1.jsonl")
 DEEP_PATH = Path("canonical/cases/cases_deep.jsonl")
 MANIFEST_PATH = Path("manifests/cases.manifest.json")
@@ -80,11 +83,12 @@ def test_all_civil_code_provision_ids_resolve(canonical_data_root: Path) -> None
         record
         for record in lightweight
         if not record.case_id.startswith(LEXREL_CASE_ID_PREFIX)
+        and record.case_id not in SPC_CASE_IDS
     ]
     cited = [pid for record in legal_rag for pid in record.related_provision_ids]
     assert len(legal_rag) == EXPECTED_LEGAL_RAG_CIVIL_COUNT
     assert cited
-    assert report.resolved_civil_code_citation_count == 70
+    assert report.resolved_civil_code_citation_count == 80
     assert len(cited) == 70
     assert len(set(cited)) == 59
     assert all(pid.startswith("law.prc.civil_code.2021.article_") for pid in cited)
@@ -95,13 +99,18 @@ def test_all_civil_code_provision_ids_resolve(canonical_data_root: Path) -> None
 def test_all_legal_rag_cases_have_deep_records(canonical_data_root: Path) -> None:
     lightweight, deep = _read_cases(canonical_data_root)
     legal_rag_l1 = [
-        record for record in lightweight if not record.case_id.startswith(LEXREL_CASE_ID_PREFIX)
+        record
+        for record in lightweight
+        if not record.case_id.startswith(LEXREL_CASE_ID_PREFIX)
+        and record.case_id not in SPC_CASE_IDS
     ]
     legal_rag_deep = [
         record for record in deep if not record.case_id.startswith(LEXREL_CASE_ID_PREFIX)
     ]
     assert len(legal_rag_l1) == EXPECTED_LEGAL_RAG_CIVIL_COUNT
-    assert {record.case_id for record in legal_rag_l1} == {record.case_id for record in legal_rag_deep}
+    assert {record.case_id for record in legal_rag_l1} == {
+        record.case_id for record in legal_rag_deep
+    }
     for record in legal_rag_deep:
         assert record.contract_version == "1.1"
         assert record.claims
@@ -113,7 +122,9 @@ def test_lexrel_service_cases_are_deep_without_invented_holdings(
     canonical_data_root: Path,
 ) -> None:
     lightweight, deep = _read_cases(canonical_data_root)
-    lexrel_l1 = [record for record in lightweight if record.case_id.startswith(LEXREL_CASE_ID_PREFIX)]
+    lexrel_l1 = [
+        record for record in lightweight if record.case_id.startswith(LEXREL_CASE_ID_PREFIX)
+    ]
     lexrel_deep = [record for record in deep if record.case_id.startswith(LEXREL_CASE_ID_PREFIX)]
     assert len(lexrel_l1) == EXPECTED_LEXREL_SERVICE_CASE_COUNT
     assert {record.case_id for record in lexrel_l1} == {record.case_id for record in lexrel_deep}
@@ -214,7 +225,9 @@ def test_rejects_unanchored_source_span(canonical_data_root: Path) -> None:
         validate_records(lightweight, [record], provisions, rules)
 
 
-def test_manifest_tamper_of_input_or_output_fails(canonical_data_root: Path, tmp_path: Path) -> None:
+def test_manifest_tamper_of_input_or_output_fails(
+    canonical_data_root: Path, tmp_path: Path
+) -> None:
     copied = tmp_path / "data"
     shutil.copytree(canonical_data_root, copied)
     output_path = copied / "canonical" / "cases" / "cases_l1.jsonl"
@@ -258,3 +271,70 @@ def test_public_validator_accepts_canonical_dataset(canonical_data_root: Path) -
     )
     assert all("remain unresolved raw citations" not in item for item in manifest["limitations"])
     assert any("are not retained as raw citations" in item for item in manifest["limitations"])
+
+
+def test_spc_summary_cannot_be_promoted_to_a_deep_case(
+    canonical_data_root: Path, tmp_path: Path
+) -> None:
+    lightweight, deep = _read_cases(canonical_data_root)
+    index = next(record for record in lightweight if record.case_id in SPC_CASE_IDS)
+    # Schema-valid synthetic data is used solely to test the rejection boundary.
+    # The editorial source does not supply this claim or any deep evidence.
+    fabricated = CaseRecord(
+        case_id=index.case_id,
+        title=index.title,
+        case_no=index.case_no,
+        court=index.court,
+        judgment_date=index.judgment_date,
+        cause=index.cause,
+        maturity=MaturityLevel.L1,
+        claims=[
+            {
+                "claim_id": f"{index.case_id}.claim.rejection-test",
+                "claim_type": "民事请求",
+                "requested_remedy": "仅用于拒绝测试的占位请求，并非来源事实",
+            }
+        ],
+    )
+    altered_deep = [*deep, fabricated]
+    provisions = read_jsonl(
+        canonical_data_root / "canonical/rules/provisions.jsonl", ProvisionRecord
+    )
+    rules = read_jsonl(canonical_data_root / "canonical/rules/rules.jsonl", RuleRecord)
+    assert validate_records(lightweight, altered_deep, provisions, rules).status == "passed"
+
+    copied = tmp_path / "data"
+    for directory in ("canonical", "manifests"):
+        shutil.copytree(canonical_data_root / directory, copied / directory)
+    write_jsonl(copied / DEEP_PATH, altered_deep)
+    # This must fail at the L1-only identity guard, before counts or hashes.
+    with pytest.raises(ValueError, match="only the six SPC editorial summaries may remain L1-only"):
+        validate_canonical_cases(copied)
+
+
+@pytest.mark.parametrize(
+    ("problem", "message"),
+    [
+        ("empty_facts", "empty facts_text"),
+        ("normalized_duplicate", "duplicate normalized case facts"),
+        ("duplicate_keywords", "duplicate keywords"),
+    ],
+)
+def test_light_case_quality_rejects_empty_or_redundant_fields(
+    canonical_data_root: Path, problem: str, message: str
+) -> None:
+    lightweight, deep = _read_cases(canonical_data_root)
+    first = lightweight[0].model_copy(deep=True)
+    if problem == "empty_facts":
+        first.facts_text = " \n\t "
+    elif problem == "normalized_duplicate":
+        first.facts_text = " \n" + lightweight[1].facts_text + "\t "
+    else:
+        first.keywords = ["duplicate", "duplicate"]
+    altered = [first, *lightweight[1:]]
+    provisions = read_jsonl(
+        canonical_data_root / "canonical/rules/provisions.jsonl", ProvisionRecord
+    )
+    rules = read_jsonl(canonical_data_root / "canonical/rules/rules.jsonl", RuleRecord)
+    with pytest.raises(ValueError, match=message):
+        validate_records(altered, deep, provisions, rules)

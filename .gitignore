@@ -9,3 +9,6 @@ pytest-cache-files-*/
 dist/
 build/
 *.egg-info/
+
+# Upstream LexRel has no explicit redistribution license; local evaluation only.
+data/derived/lexrel_retrieval/

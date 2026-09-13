@@ -1,8 +1,8 @@
 {
   "manifest_version": "1.1",
   "dataset_id": "dataset.civil_cases.v1",
-  "generated_on": "2026-09-07",
-  "generator": "casepath.ingestion.cases.build:v5",
+  "generated_on": "2026-09-13",
+  "generator": "casepath.ingestion.cases.build:v7",
   "upstream_repository_url": "https://github.com/litunan/legal-rag",
   "upstream_revision": "ce7872c7ae343e5ff860d627195ec4e72c7ef7ce",
   "inputs": [
@@ -19,25 +19,32 @@
       "record_count": 9,
       "repository_url": "https://github.com/thunlp/LexRel",
       "revision": "5d04570483da5726d5db99d72633c3ab919b4e4b"
+    },
+    {
+      "path": "data/inputs/spc_civil_code_first_batch.jsonl",
+      "sha256": "57205d17755ddbc8db470df229c62bb49c83f7584bf7778a766ba7ab66a868a4",
+      "record_count": 6,
+      "repository_url": "https://www.court.gov.cn/zixun/xiangqing/347181.html",
+      "revision": "casepath.spc-first-batch.summary.v1"
     }
   ],
   "outputs": [
     {
       "path": "data/canonical/cases/cases_l1.jsonl",
-      "sha256": "16f5418a9d884033dbc49b56e194771bccb234602bb968816d5bdc4c86a803ad",
-      "record_count": 54,
+      "sha256": "d78d1ff747652db2de5d7e0e316d1fee81449af76ca72aa62b697354bd57adef",
+      "record_count": 60,
       "repository_url": null,
       "revision": null
     },
     {
       "path": "data/canonical/cases/cases_deep.jsonl",
-      "sha256": "fe7aa68c0df34385965069034e89fa1a79c0a523002ee9553c0e390cdbea7e53",
+      "sha256": "bbe6a9639ef027bcb97c006f7ec1f55ec78573ba2836dc9487f109c936299662",
       "record_count": 54,
       "repository_url": null,
       "revision": null
     }
   ],
-  "l1_case_count": 54,
+  "l1_case_count": 60,
   "deep_case_count": 54,
   "contract_versions": {
     "CaseIndexRecord": "1.3",
@@ -47,6 +54,10 @@
   "review_date": null,
   "reviews": [],
   "limitations": [
+    "Stage 2 v7 incorporates six source-checked SPC editorial summaries as L1-only records. They are not verbatim judgment text, have no invented claims or source spans, and do not enter the 54 deep records. Unknown final judgment dates stay null.",
+    "LexRel relation subjects do not establish litigant roles, and abstract relation rights/obligations do not establish actual requested remedies. Claims use only explicit source facts; missing demands are identified as not annotated.",
+    "Stage 2 v6 corrects explicit demand amounts, decimal/grouped/unit amounts, current dispositions and source-span boundaries. A source-only correction does not upgrade maturity or establish complete legal review.",
+    "Separate explicit disposition sections are retained verbatim in facts_text because CaseIndexRecord has no disposition-text field. Indexed text is source material, not a claim that every sentence is a court finding. Affirmances without a restated amount and complex multi-claim outcomes remain limited. Interest subtotals, competing demands and periodic payments are not treated as a single case total; ambiguous amounts stay null.",
     "Machine-extracted L1 cases are not human-verified; L2 requires REVIEWED_L2_CASE_IDS.",
     "Citations that are not Civil Code articles 1-1260 are not written to related_provision_ids and are not retained as raw citations in this dataset.",
     "Every legal-rag civil case and every LexRel expert-annotated 服务合同关系 sample remains a deep CaseRecord for text retrieval. Refund-rule condition bridges are limited to SERVICE_REFUND_COMPARISON_CASE_IDS. The gym refund rule is invoked only for prepaid-closure / 解除+返还 cases in that set. LexRel train splits are unused.",

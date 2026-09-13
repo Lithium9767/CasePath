@@ -35,10 +35,17 @@ def test_refund_comparison_set_is_curated_and_anchored():
         assert COND_ALTERNATIVE_PERFORMANCE in {
             item.condition_id for item in record.condition_findings
         }
-        known = [item for item in record.condition_findings if item.status != ConditionStatus.UNKNOWN]
+        known = [
+            item for item in record.condition_findings if item.status != ConditionStatus.UNKNOWN
+        ]
         assert all(item.source_span_ids for item in known)
         assert all(item.human_verified is False for item in record.condition_findings)
-        if case_id in SERVICE_REFUND_RULE_CASE_IDS:
+        # A comparison/template ID alone is not evidence of an expressed claim.
+        # The gym snapshot has a payment and closure, but no refund request.
+        if (
+            case_id in SERVICE_REFUND_RULE_CASE_IDS
+            and "主张退还" in record.claims[0].requested_remedy
+        ):
             assert record.claims[0].invoked_rule_ids == [RULE_SERVICE_TERMINATION_REFUND]
         else:
             assert RULE_SERVICE_TERMINATION_REFUND not in record.claims[0].invoked_rule_ids
@@ -56,12 +63,12 @@ def test_non_comparison_lexrel_cases_have_no_refund_conditions():
 def test_ctrip_keeps_uncertain_impossible_and_unperformed_labels():
     _, deep = load_service_contract_cases(LEXREL_INPUT)
     ctrip = next(
-        record
-        for record in deep
-        if record.case_id.endswith("829d6968-3b55-43c8-9e18-9d6ccccfd391")
+        record for record in deep if record.case_id.endswith("829d6968-3b55-43c8-9e18-9d6ccccfd391")
     )
     by_cond = {item.condition_id: item for item in ctrip.condition_findings}
-    assert ctrip.claims[0].amount == 17541
+    # Facts show a prior refund request and a remaining balance, not that the
+    # later balance of 17,541 was itself requested as a litigation amount.
+    assert ctrip.claims[0].amount is None
     assert by_cond[COND_PERFORMANCE_IMPOSSIBLE].status == ConditionStatus.UNKNOWN
     assert by_cond[COND_UNPERFORMED_BALANCE].status == ConditionStatus.UNKNOWN
     assert ctrip.decisions == []
@@ -69,10 +76,7 @@ def test_ctrip_keeps_uncertain_impossible_and_unperformed_labels():
 
 
 def test_purchase_language_alone_does_not_prove_payment():
-    facts = (
-        "法院经审理查明：双方签订《会员协议》，约定曾某购买会籍服务以及私人教练服务。"
-        "门店关闭。"
-    )
+    facts = "法院经审理查明：双方签订《会员协议》，约定曾某购买会籍服务以及私人教练服务。门店关闭。"
     book = SpanBook("case.payment-anti")
     findings = extract_findings_from_facts("case.payment-anti", facts, book)
     # Force a court-style sentence list through the refund bridge path.
@@ -112,4 +116,4 @@ def test_applies_span_is_the_matching_sentence():
     assert step.applied_rule_ids == [RULE_SERVICE_TERMINATION_REFUND]
     assert step.conclusion == quote
     assert book.spans[0].quote == quote
-    assert text[book.spans[0].start_offset:book.spans[0].end_offset] == quote
+    assert text[book.spans[0].start_offset : book.spans[0].end_offset] == quote

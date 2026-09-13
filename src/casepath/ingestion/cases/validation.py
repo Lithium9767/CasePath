@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from pydantic import Field
@@ -42,6 +43,24 @@ from .ids import (
     REVIEWED_L2_CASE_IDS,
 )
 from .manifest import CaseDatasetManifest
+from .spc_supplement import (
+    CASE_IDS as SPC_CASE_IDS,
+)
+from .spc_supplement import (
+    COUNT as SPC_COUNT,
+)
+from .spc_supplement import (
+    INPUT_PATH as SPC_INPUT_PATH,
+)
+from .spc_supplement import (
+    INPUT_REVISION as SPC_INPUT_REVISION,
+)
+from .spc_supplement import (
+    INPUT_SHA256 as SPC_INPUT_SHA256,
+)
+from .spc_supplement import (
+    SOURCE_URL as SPC_SOURCE_URL,
+)
 
 
 class CaseDatasetValidationReport(ContractModel):
@@ -93,17 +112,31 @@ def validate_records(
     errors: list[str] = []
     provision_ids = {item.provision_id for item in provisions}
     rule_ids = {item.rule_id for item in rules}
-    condition_ids = {
-        condition.condition_id for rule in rules for condition in rule.conditions
-    }
+    condition_ids = {condition.condition_id for rule in rules for condition in rule.conditions}
     l1_ids = [item.case_id for item in lightweight]
     _require(len(l1_ids) == len(set(l1_ids)), "L1 case_id values must be unique", errors)
     l1_by_id = {item.case_id: item for item in lightweight}
+    deep_ids = [item.case_id for item in deep]
+    _require(len(deep_ids) == len(set(deep_ids)), "deep case_id values must be unique", errors)
 
     child_ids: dict[str, str] = {}
     resolved_citations = 0
+    normalized_facts: set[str] = set()
     for record in lightweight:
-        _require(record.contract_version == "1.3", f"{record.case_id} is not CaseIndexRecord v1.3", errors)
+        facts = re.sub(r"\s+", "", record.facts_text)
+        _require(bool(facts), f"{record.case_id} has empty facts_text", errors)
+        _require(facts not in normalized_facts, "duplicate normalized case facts", errors)
+        normalized_facts.add(facts)
+        _require(
+            len(record.keywords) == len(set(record.keywords)),
+            f"{record.case_id} has duplicate keywords",
+            errors,
+        )
+        _require(
+            record.contract_version == "1.3",
+            f"{record.case_id} is not CaseIndexRecord v1.3",
+            errors,
+        )
         for provision_id in record.related_provision_ids:
             resolved_citations += 1
             _require(
@@ -119,7 +152,9 @@ def validate_records(
 
     for record in deep:
         _require(record.case_id in l1_by_id, f"deep case {record.case_id} is not in L1", errors)
-        _require(record.contract_version == "1.1", f"{record.case_id} is not CaseRecord v1.1", errors)
+        _require(
+            record.contract_version == "1.1", f"{record.case_id} is not CaseRecord v1.1", errors
+        )
         if record.case_id not in REVIEWED_L2_CASE_IDS:
             _require(
                 record.maturity == MaturityLevel.L1,
@@ -146,7 +181,9 @@ def validate_records(
             )
         for claim in record.claims:
             for rule_id in claim.invoked_rule_ids:
-                _require(rule_id in rule_ids, f"{record.case_id} invokes unknown rule {rule_id}", errors)
+                _require(
+                    rule_id in rule_ids, f"{record.case_id} invokes unknown rule {rule_id}", errors
+                )
             if RULE_SERVICE_TERMINATION_REFUND in claim.invoked_rule_ids:
                 _require(
                     claim.claim_type == "服务合同解除与返还",
@@ -185,6 +222,7 @@ def validate_records(
         status="passed",
     )
 
+
 # 校验案例数据合法性
 def validate_canonical_cases(data_root: Path) -> CaseDatasetValidationReport:
     cases_root = data_root / "canonical" / "cases"
@@ -195,6 +233,10 @@ def validate_canonical_cases(data_root: Path) -> CaseDatasetValidationReport:
     provisions = read_jsonl(rules_root / "provisions.jsonl", ProvisionRecord)
     rules = read_jsonl(rules_root / "rules.jsonl", RuleRecord)
     report = validate_records(lightweight, deep, provisions, rules)
+    light_ids = {record.case_id for record in lightweight}
+    deep_ids = {record.case_id for record in deep}
+    if light_ids - deep_ids != SPC_CASE_IDS or deep_ids & SPC_CASE_IDS:
+        raise ValueError("only the six SPC editorial summaries may remain L1-only")
 
     manifest = CaseDatasetManifest.model_validate_json(manifest_path.read_bytes())
     _require_manifest_identity(manifest)
@@ -257,9 +299,11 @@ def _require_manifest_identity(manifest: CaseDatasetManifest) -> None:
 
 
 def _validate_manifest_input(manifest: CaseDatasetManifest, manifest_root: Path) -> None:
-    if len(manifest.inputs) != 2:
-        raise ValueError("manifest must record processed-cases and LexRel service-contract inputs")
-    item = manifest.inputs[0]
+    expected_paths = {EXPECTED_PROCESSED_CASES_PATH, EXPECTED_LEXREL_SERVICE_PATH, SPC_INPUT_PATH}
+    inputs = {Path(item.path).as_posix(): item for item in manifest.inputs}
+    if len(inputs) != len(manifest.inputs) or set(inputs) != expected_paths:
+        raise ValueError("manifest must record unique processed-cases, LexRel and SPC inputs")
+    item = inputs[EXPECTED_PROCESSED_CASES_PATH]
     if (
         Path(item.path).as_posix() != EXPECTED_PROCESSED_CASES_PATH
         or item.sha256 != EXPECTED_PROCESSED_CASES_SHA256
@@ -271,7 +315,7 @@ def _validate_manifest_input(manifest: CaseDatasetManifest, manifest_root: Path)
     input_path = manifest_root / item.path
     if input_path.is_file() and sha256_file(input_path) != item.sha256:
         raise ValueError(f"manifest hash mismatch for {item.path}")
-    lexrel = manifest.inputs[1]
+    lexrel = inputs[EXPECTED_LEXREL_SERVICE_PATH]
     if (
         Path(lexrel.path).as_posix() != EXPECTED_LEXREL_SERVICE_PATH
         or lexrel.sha256 != EXPECTED_LEXREL_SERVICE_SHA256
@@ -283,3 +327,14 @@ def _validate_manifest_input(manifest: CaseDatasetManifest, manifest_root: Path)
     lexrel_path = manifest_root / lexrel.path
     if lexrel_path.is_file() and sha256_file(lexrel_path) != lexrel.sha256:
         raise ValueError(f"manifest hash mismatch for {lexrel.path}")
+    spc = inputs[SPC_INPUT_PATH]
+    if (
+        spc.sha256 != SPC_INPUT_SHA256
+        or spc.record_count != SPC_COUNT
+        or spc.repository_url != SPC_SOURCE_URL
+        or spc.revision != SPC_INPUT_REVISION
+    ):
+        raise ValueError("manifest input metadata mismatch for SPC summaries")
+    spc_path = manifest_root / spc.path
+    if spc_path.is_file() and sha256_file(spc_path) != spc.sha256:
+        raise ValueError(f"manifest hash mismatch for {spc.path}")

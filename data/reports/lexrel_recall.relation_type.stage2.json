@@ -1,0 +1,278 @@
+{
+  "generator": "casepath.ingestion.cases.retrieval_evaluation:v1",
+  "dataset_id": "dataset.lexrel_retrieval.test.v1",
+  "protocol": "relation_type",
+  "retriever": "existing_bm25_default_k1_1.2_b_0.75",
+  "source": {
+    "repository_url": "https://github.com/thunlp/LexRel",
+    "revision": "5d04570483da5726d5db99d72633c3ab919b4e4b",
+    "path": "LexRel/test.json",
+    "download_url": "https://raw.githubusercontent.com/thunlp/LexRel/5d04570483da5726d5db99d72633c3ab919b4e4b/LexRel/test.json",
+    "sha256": "4dbc837e1f287fe2bc322523494061a70da2b49c344250e2bbe40065aea334a0",
+    "bytes": 2100237,
+    "split": "test"
+  },
+  "data_sha256": {
+    "manifest.json": "268eb7cb89382f9a5f680aca351ce200ffa831c71741225c6c9f49d012f56317",
+    "trusted_receipt": "268eb7cb89382f9a5f680aca351ce200ffa831c71741225c6c9f49d012f56317",
+    "cases_l1.jsonl": "00e91a6799e1791902349ec2bcfcd41b34d77a1e71b88cb919f92c8bb67f937e",
+    "labels.jsonl": "aa3a7ef3b2fc2e9e75d603dea5f9c39e2a790cb97eda69d8ddb091ce9d68cf56",
+    "qrels.jsonl": "7810b86b8845eed3ed7f3d59facff5121995e053ade5fedd0992ed1fb3f8fb74"
+  },
+  "predictions_sha256": null,
+  "k": [
+    5,
+    10,
+    20
+  ],
+  "counts": {
+    "candidates": 1140,
+    "queries": 13,
+    "evaluated": 13,
+    "skipped_no_positive": 0
+  },
+  "metrics": {
+    "macro_recall@5": 0.0632659748454276,
+    "macro_recall@10": 0.13296793226925166,
+    "macro_recall@20": 0.23399983527592166
+  },
+  "policy": {
+    "candidate_text": "facts_text only; annotation fields excluded",
+    "label_access": "separate labels/qrels are used only to establish evaluation judgments",
+    "self_match": "case_overlap excludes query case before top-k slicing; relation_type has no query case",
+    "denominator": "all labeled positives per query; macro average only over evaluable queries",
+    "missing_predictions": "reject incomplete query coverage; empty ranking counts as zero recall",
+    "external_rankings": null
+  },
+  "limitations": [
+    "Weak relation-overlap/topic labels are not expert similar-case or outcome relevance judgments.",
+    "P3's original 13-query score used a smaller candidate pool and annotation-enriched metadata; scores are not directly comparable.",
+    "Relation types are imbalanced; small k and many positives impose a low achievable recall ceiling.",
+    "The test split is evaluation-only; tuning on these labels invalidates an unbiased test claim.",
+    "Unlabeled candidates are not human-verified negatives; exact deduplication does not establish semantic independence.",
+    "This report tests an offline baseline, not the deployed P4 or vector retrieval pipeline."
+  ],
+  "queries": [
+    {
+      "query_id": "lexrel.loan",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 536,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.009328358208955223,
+        "recall@10": 0.018656716417910446,
+        "recall@20": 0.03731343283582089
+      }
+    },
+    {
+      "query_id": "lexrel.guarantee",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 223,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.02242152466367713,
+        "recall@10": 0.04484304932735426,
+        "recall@20": 0.08968609865470852
+      }
+    },
+    {
+      "query_id": "lexrel.marriage",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 122,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.03278688524590164,
+        "recall@10": 0.06557377049180328,
+        "recall@20": 0.14754098360655737
+      }
+    },
+    {
+      "query_id": "lexrel.traffic",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 104,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.04807692307692308,
+        "recall@10": 0.0673076923076923,
+        "recall@20": 0.15384615384615385
+      }
+    },
+    {
+      "query_id": "lexrel.property_insurance",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 103,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.04854368932038835,
+        "recall@10": 0.08737864077669903,
+        "recall@20": 0.1650485436893204
+      }
+    },
+    {
+      "query_id": "lexrel.sale",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 94,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.0,
+        "recall@10": 0.02127659574468085,
+        "recall@20": 0.05319148936170213
+      }
+    },
+    {
+      "query_id": "lexrel.mortgage_contract",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 63,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.031746031746031744,
+        "recall@10": 0.1111111111111111,
+        "recall@20": 0.23809523809523808
+      }
+    },
+    {
+      "query_id": "lexrel.house_sale",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 49,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.08163265306122448,
+        "recall@10": 0.1836734693877551,
+        "recall@20": 0.3469387755102041
+      }
+    },
+    {
+      "query_id": "lexrel.recourse",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 49,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.04081632653061224,
+        "recall@10": 0.08163265306122448,
+        "recall@20": 0.10204081632653061
+      }
+    },
+    {
+      "query_id": "lexrel.labor_service",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 41,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.12195121951219512,
+        "recall@10": 0.1951219512195122,
+        "recall@20": 0.3170731707317073
+      }
+    },
+    {
+      "query_id": "lexrel.lease",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 34,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.14705882352941177,
+        "recall@10": 0.2647058823529412,
+        "recall@20": 0.47058823529411764
+      }
+    },
+    {
+      "query_id": "lexrel.property_service",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 21,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.23809523809523808,
+        "recall@10": 0.47619047619047616,
+        "recall@20": 0.8095238095238095
+      }
+    },
+    {
+      "query_id": "lexrel.service",
+      "evaluable": true,
+      "skip_reason": null,
+      "positive_count": 9,
+      "excluded_candidate_count": 0,
+      "returned_counts": {
+        "5": 5,
+        "10": 10,
+        "20": 20
+      },
+      "recall": {
+        "recall@5": 0.0,
+        "recall@10": 0.1111111111111111,
+        "recall@20": 0.1111111111111111
+      }
+    }
+  ]
+}

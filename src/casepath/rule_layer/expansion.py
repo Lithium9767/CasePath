@@ -12,8 +12,10 @@ from pathlib import Path
 
 from casepath.contracts import LegalSourceRecord, ProvisionRecord, RuleRecord
 from casepath.ingestion.laws.jsonl import (
+    normalise_lf_bytes,
     read_jsonl,
     render_jsonl,
+    sha256_bytes,
     sha256_file,
     sha256_text,
     write_json,
@@ -101,6 +103,10 @@ def normalize(batch: dict, provisions: list[ProvisionRecord]):
             payload["source_spans"] = [
                 spans[key].model_dump(mode="json") for key in sorted(required)
             ]
+            if batch.get("data_refinement_version") == "p2-data-refinement.1":
+                from casepath.rule_layer.stage2_refinement import declare_span_provisions
+
+                declare_span_provisions(payload, provisions)
         for ref in rule.provisions:
             p = by_id.get(ref.provision_id)
             if p is None or (
@@ -197,7 +203,12 @@ def validate_expanded(data_root: Path):
         or previous.authority_verification != authority_verification_snapshot()
     ):
         raise ValueError("归档基线回执不匹配")
-    batch = json.loads(source.read_text("utf-8"))
+    input_payload = json.loads(source.read_text("utf-8"))
+    batch = input_payload
+    if "recipe_version" in input_payload:
+        from casepath.rule_layer.stage2_refinement import materialize
+
+        batch = materialize(input_payload, provisions, data_root)
     rules, spans = normalize(batch, provisions)
     expected_outputs = {
         "legal_sources.jsonl": sha256_file(root / "legal_sources.jsonl"),
@@ -212,6 +223,13 @@ def validate_expanded(data_root: Path):
             raise ValueError(f"扩展输出哈希不匹配: {name}")
     if manifest.get("coverage") != coverage(batch, rules):
         raise ValueError("覆盖回执不匹配")
+    expected_refinement = None
+    if "recipe_version" in input_payload:
+        from casepath.rule_layer.stage2_refinement import receipt
+
+        expected_refinement = receipt(input_payload, provisions, rules, data_root)
+    if manifest.get("data_refinement") != expected_refinement:
+        raise ValueError("第二阶段修订回执不匹配")
     if manifest.get("new_rule_review") != "L1_unreviewed" or manifest.get("rule_count") != len(
         rules
     ):
@@ -240,21 +258,28 @@ def publish(source: Path, data_root: Path, *, check_only: bool = False):
         for p in [
             *(data_root / "canonical").rglob("*.jsonl"),
             *(data_root / "manifests").glob("*.json"),
+            *(data_root / "inputs/rules").rglob("*.json"),
         ]
     }
     raw = source.read_bytes()
     batch = json.loads(raw)
-    digest = sha256_file(source)
+    digest = sha256_bytes(normalise_lf_bytes(raw))
     relative_input = Path(f"inputs/rules/{digest}.json")
     with tempfile.TemporaryDirectory(prefix=".rules-expansion-", dir=data_root.parent) as temp:
         stage = Path(temp) / "data"
         # 原有基线、案例及回执一起参与候选验证，但只发布 P2 的五个正式文件。
-        for name in ("canonical", "manifests"):
-            shutil.copytree(data_root / name, stage / name)
-        (stage / relative_input).parent.mkdir(parents=True)
+        for name in ("canonical", "manifests", "inputs"):
+            if (data_root / name).exists():
+                shutil.copytree(data_root / name, stage / name)
+        (stage / relative_input).parent.mkdir(parents=True, exist_ok=True)
         (stage / relative_input).write_bytes(raw)
         provisions = read_jsonl(stage / RULES_ROOT / "provisions.jsonl", ProvisionRecord)
-        rules, spans = normalize(batch, provisions)
+        materialized = batch
+        if "recipe_version" in batch:
+            from casepath.rule_layer.stage2_refinement import materialize
+
+            materialized = materialize(batch, provisions, stage)
+        rules, spans = normalize(materialized, provisions)
         write_jsonl(stage / RULES_ROOT / "rules.jsonl", rules)
         write_jsonl(stage / RULES_ROOT / "source_spans.jsonl", spans)
         manifest = {
@@ -276,8 +301,12 @@ def publish(source: Path, data_root: Path, *, check_only: bool = False):
                     "source_spans.jsonl",
                 )
             },
-            "coverage": coverage(batch, rules),
+            "coverage": coverage(materialized, rules),
         }
+        if "recipe_version" in batch:
+            from casepath.rule_layer.stage2_refinement import receipt
+
+            manifest["data_refinement"] = receipt(batch, provisions, rules, stage)
         write_json(stage / "manifests/civil_code.manifest.json", manifest)
         bundle = load_projection(stage)  # 同时验证 P3 桥接和图节点/边完整性。
         result = {
@@ -288,7 +317,7 @@ def publish(source: Path, data_root: Path, *, check_only: bool = False):
         }
         if check_only:
             return result
-        if any(sha256_file(path) != value for path, value in before.items()):
+        if any(not path.is_file() or sha256_file(path) != value for path, value in before.items()):
             raise ValueError("构建期间输入发生变化，拒绝发布")
         target = data_root / relative_input
         if target.resolve() != target.absolute():
