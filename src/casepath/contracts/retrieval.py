@@ -99,6 +99,11 @@ class RetrievalBundle(ContractModel): # P4一次检索和重排后交给Workflow
     cited_span_ids: list[Identifier] = Field(default_factory=list) # 本轮结果已经使用的法条或案例原文ID
     degraded: bool = False # 本轮检索是否因组件或数据不足而降级
     degradation_reason: str | None = None # 降级原因；正常运行时为空
+    # 候选池结构化摘要，供前端区分「无候选 / 仅未定角色 / 已定角色」。
+    fused_case_count: int = Field(default=0, ge=0)
+    undetermined_case_count: int = Field(default=0, ge=0)
+    undetermined_case_ids: list[Identifier] = Field(default_factory=list)
+    undetermined_reason_summary: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_candidate_roles(self) -> RetrievalBundle:
@@ -114,4 +119,6 @@ class RetrievalBundle(ContractModel): # P4一次检索和重排后交给Workflow
         case_groups = [set(groups[name]) for name in ("support", "limiting", "boundary")]
         if any(case_groups[left] & case_groups[right] for left, right in ((0, 1), (0, 2), (1, 2))):
             raise ValueError("a case must have exactly one primary comparison role")
+        if len(self.undetermined_case_ids) != len(set(self.undetermined_case_ids)):
+            raise ValueError("undetermined case IDs must be unique")
         return self

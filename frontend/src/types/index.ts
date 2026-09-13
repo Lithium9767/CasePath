@@ -272,6 +272,10 @@ export interface RetrievalBundle {
   cited_span_ids: string[];
   degraded: boolean;
   degradation_reason?: string | null;
+  fused_case_count?: number;
+  undetermined_case_count?: number;
+  undetermined_case_ids?: string[];
+  undetermined_reason_summary?: string[];
 }
 
 export interface ConditionComparison {
@@ -333,6 +337,11 @@ export interface ExplanationPlan {
   evidence_actions: EvidenceAction[];
   citations: CitationRecord[];
   disclaimer: string;
+  fused_case_count?: number;
+  undetermined_case_count?: number;
+  role_assigned_case_count?: number;
+  undetermined_reason_summary?: string[];
+  question_stop_reason?: string | null;
 }
 
 // ---- workflow.py（P1 API 返回结构） ----
@@ -364,6 +373,15 @@ export interface AnswerInterpretation {
   contract_version: string;
   new_facts: UserFact[];
   condition_updates: QueryConditionState[];
+  disposition?: 'FACTS_PROVIDED' | 'UNABLE' | 'DECLINED' | 'MIXED';
+  unable_condition_ids?: string[];
+  declined_condition_ids?: string[];
+  corrections?: Array<{
+    target_fact_id: string;
+    replacement_fact_id?: string | null;
+    condition_id?: string | null;
+    reason: string;
+  }>;
 }
 
 export interface ErrorResponse {

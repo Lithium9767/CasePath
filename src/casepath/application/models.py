@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 
 from pydantic import Field, model_validator
 
+from casepath.application.runtime_meta import SessionRuntimeMeta
 from casepath.contracts import AnswerRequest, ContractModel, WorkflowSnapshot
 from casepath.contracts.base import Identifier
 
@@ -23,6 +24,8 @@ class SessionRecord(ContractModel):
     latest_snapshot: WorkflowSnapshot
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     answer_receipts: dict[str, AnswerReceipt] = Field(default_factory=dict)
+    # 投影账本/无法回答/纠正：与快照同版本提交；失败不落库。
+    runtime_meta: SessionRuntimeMeta = Field(default_factory=SessionRuntimeMeta)
 
     @model_validator(mode="after")
     def validate_sessions(self) -> "SessionRecord":

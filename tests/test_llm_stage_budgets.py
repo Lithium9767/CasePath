@@ -84,12 +84,56 @@ def test_length_finish_is_rejected_even_when_json_parses():
         model.generate_structured(system_prompt="JSON", user_prompt="test", response_model=Reply)
 
 
+def test_missing_facts_stage_budget_and_truncation_retry():
+    class FlakyClient(Client):
+        def __init__(self):
+            super().__init__("length")
+            self.n = 0
+
+        def create(self, **kwargs):
+            self.calls.append(kwargs)
+            self.n += 1
+            finish = "length" if self.n == 1 else "stop"
+            return SimpleNamespace(
+                choices=[
+                    SimpleNamespace(
+                        finish_reason=finish,
+                        message=SimpleNamespace(content='{"text":"ok"}'),
+                    )
+                ]
+            )
+
+    client = FlakyClient()
+    model = OpenAICompatibleStructuredLanguageModel(
+        client,
+        model="test",
+        default_timeout_seconds=30,
+        max_completion_tokens=256,
+        output_mode=StructuredOutputMode.JSON_OBJECT,
+        provider="deepseek",
+        stage_policies={
+            "missing_facts": LLMStagePolicy(max_tokens=2000, timeout_seconds=45, max_retries=0)
+        },
+    )
+    out = model.generate_structured(
+        system_prompt="JSON",
+        user_prompt="test",
+        response_model=Reply,
+        stage="missing_facts",
+    )
+    assert out.text == "ok"
+    assert len(client.calls) == 2
+    assert client.calls[0]["max_tokens"] == 2000
+    assert client.calls[1]["max_tokens"] == 4000
+
+
 def test_partial_stage_config_preserves_other_defaults():
     settings = RuntimeSettings.from_env(
         {"CASEPATH_LLM_STAGE_POLICIES": json.dumps({"projection": {"thinking": "enabled"}})}
     )
     assert settings.llm_stage_policies["projection"].thinking == "enabled"
     assert settings.llm_stage_policies["explanation"].max_tokens == 1800
+    assert settings.llm_stage_policies["missing_facts"].max_tokens == 2000
     assert settings.llm_stage_policies["projection"].max_retries == 0
     with pytest.raises(ValueError):
         RuntimeSettings.from_env({"CASEPATH_LLM_STAGE_POLICIES": '{"typo":{}}'})

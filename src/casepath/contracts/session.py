@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import Field, field_validator, model_validator
 
-from .base import ContractModel
+from .base import ContractModel, Identifier
 from .query import QueryConditionState, UserFact
 
 
@@ -23,6 +23,15 @@ class CreateSessionRequest(ContractModel):
         return value
 
 
+class CorrectionOperation(ContractModel):
+    """明确纠正操作：由解释器提出，会话服务校验后写入运行时纠正链。"""
+
+    target_fact_id: Identifier
+    replacement_fact_id: Identifier | None = None
+    condition_id: Identifier | None = None
+    reason: str = Field(min_length=1, max_length=200)
+
+
 class AnswerInterpretation(ContractModel):
     """P4 返回事实和条件更新，不得替换整个会话或生成最终法律判断。"""
 
@@ -30,6 +39,12 @@ class AnswerInterpretation(ContractModel):
     contract_version: Literal["1.2", "1.3"] = "1.3"
     new_facts: list[UserFact] = Field(default_factory=list)
     condition_updates: list[QueryConditionState] = Field(default_factory=list)
+    # 回答整体属性：无法回答不是条件状态，而是回答处置。
+    disposition: Literal["FACTS_PROVIDED", "UNABLE", "DECLINED", "MIXED"] = "FACTS_PROVIDED"
+    unable_condition_ids: list[str] = Field(default_factory=list)
+    declined_condition_ids: list[str] = Field(default_factory=list)
+    # 仅明确纠正；普通相反描述不进入此列表。
+    corrections: list[CorrectionOperation] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_unique_ids(self) -> "AnswerInterpretation":
@@ -44,4 +59,10 @@ class AnswerInterpretation(ContractModel):
             not item.has_consistent_evidence_summary() for item in self.condition_updates
         ):
             raise ValueError("v1.3 condition evidence must match supporting_fact_ids")
+        correction_keys = [
+            (item.target_fact_id, item.replacement_fact_id, item.condition_id)
+            for item in self.corrections
+        ]
+        if len(correction_keys) != len(set(correction_keys)):
+            raise ValueError("correction operations must be unique")
         return self

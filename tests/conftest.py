@@ -73,3 +73,24 @@ def answer(initial):
         answer="所有门店都已经永久关闭了",
         selected_option="永久停止经营",
     )
+
+
+@pytest.fixture(autouse=True)
+def _clear_request_context():
+    """清理请求级 ContextVar，避免 RuleScope / RoundEvidence / runtime_meta 跨测试串线。"""
+    from casepath.adapters.retrieval.retrieval_catalog import clear_round, clear_scope
+    from casepath.application.runtime_meta import (
+        SessionRuntimeMeta,
+        bind_runtime_meta,
+        reset_runtime_meta,
+    )
+
+    clear_scope()
+    clear_round()
+    token = bind_runtime_meta(SessionRuntimeMeta())
+    try:
+        yield
+    finally:
+        reset_runtime_meta(token)
+        clear_scope()
+        clear_round()

@@ -130,6 +130,20 @@ class CaseDocument:
     finding_ids: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class RuleScope:
+    """单轮活动范围：A 写入，B/C/D/E/解释读取。只存 ID，不复制规则对象。
+
+    与 RoundEvidence 分工：本对象描述规则用途；RoundEvidence 描述案例证据池。
+    生命周期为一次 workflow.run，必须 finally 清理，不得写入共享 retriever 实例字段。
+    """
+
+    active_rule_ids: tuple[str, ...]
+    alternative_rule_ids: tuple[str, ...]
+    background_rule_ids: tuple[str, ...]
+    active_condition_ids: tuple[str, ...]
+
+
 @dataclass
 class RoundEvidence:
     """本轮 C 写入、D/解释读取；不得跨请求复用。"""
@@ -142,6 +156,9 @@ class RoundEvidence:
     fused_case_ids: tuple[str, ...] = ()
     undetermined_case_ids: frozenset[str] = frozenset()
     channels_by_case: dict[str, tuple[str, ...]] | None = None
+    # 未定角色原因：case_id → 稳定原因码，供 D/解释消费，不另造候选池。
+    undetermined_reasons: dict[str, str] = field(default_factory=dict)
+    compared_rule_ids: tuple[str, ...] = ()
 
 
 @dataclass
@@ -458,6 +475,9 @@ def load_canonical_catalog(data_root: Path, *, embedding_model: str = "none") ->
     )
 
 
+_SCOPE: ContextVar[RuleScope | None] = ContextVar("casepath_rule_scope", default=None)
+
+
 def bind_context(context: RetrievalContext) -> Token:
     return _CONTEXT.set(context)
 
@@ -478,8 +498,14 @@ def require_context() -> RetrievalContext:
     return context
 
 
-def bind_round(evidence: RoundEvidence) -> Token:
+def bind_round(evidence: RoundEvidence | None) -> Token:
+    """绑定本轮案例证据；允许 None 作为请求外层空槽位。"""
     return _ROUND.set(evidence)
+
+
+def set_round(evidence: RoundEvidence | None) -> None:
+    """在外层已拥有 token 的作用域内更新本轮证据，不另开嵌套 token。"""
+    _ROUND.set(evidence)
 
 
 def current_round() -> RoundEvidence | None:
@@ -489,6 +515,69 @@ def current_round() -> RoundEvidence | None:
 def reset_round(token: Token | None) -> None:
     if token is not None:
         _ROUND.reset(token)
+
+
+def bind_scope(scope: RuleScope | None) -> Token:
+    """绑定规则用途；允许 None 作为请求外层空槽位。"""
+    return _SCOPE.set(scope)
+
+
+def set_scope(scope: RuleScope | None) -> None:
+    """在外层已拥有 token 的作用域内更新 RuleScope，不另开嵌套 token。"""
+    _SCOPE.set(scope)
+
+
+def reset_scope(token: Token | None) -> None:
+    if token is not None:
+        _SCOPE.reset(token)
+
+
+def clear_scope() -> None:
+    _SCOPE.set(None)
+
+
+def clear_round() -> None:
+    _ROUND.set(None)
+
+
+def current_scope() -> RuleScope | None:
+    return _SCOPE.get()
+
+
+def require_scope() -> RuleScope:
+    scope = _SCOPE.get()
+    if scope is None:
+        raise RuntimeError("RuleScope 未绑定：须由 A 写入或由测试显式注入，禁止无声回退为全部规则")
+    return scope
+
+
+def validate_rule_scope(scope: RuleScope, catalog: RetrievalCatalog) -> None:
+    """校验三种用途互不重叠、ID 存在、活动条件属于活动规则。"""
+    active = list(scope.active_rule_ids)
+    alternative = list(scope.alternative_rule_ids)
+    background = list(scope.background_rule_ids)
+    for name, values in (
+        ("active", active),
+        ("alternative", alternative),
+        ("background", background),
+        ("active_conditions", list(scope.active_condition_ids)),
+    ):
+        if len(values) != len(set(values)):
+            raise ValueError(f"RuleScope.{name} contains duplicates")
+    bags = (set(active), set(alternative), set(background))
+    if any(left & right for i, left in enumerate(bags) for right in bags[i + 1 :]):
+        raise ValueError("RuleScope rule usage sets must be disjoint")
+    for rule_id in (*active, *alternative, *background):
+        if rule_id not in catalog.rules:
+            raise ValueError(f"RuleScope references unknown rule {rule_id}")
+    allowed_conditions = {
+        condition_id
+        for rule_id in active
+        for condition_id in catalog.rules[rule_id].condition_ids
+    }
+    for condition_id in scope.active_condition_ids:
+        if condition_id not in allowed_conditions:
+            raise ValueError(f"active condition {condition_id} is not owned by an active rule")
 
 
 class MemoryHybridSearch:

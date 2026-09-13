@@ -69,18 +69,35 @@ def test_configured_llm_reaches_p4_and_is_closed(monkeypatch, provider_fails):
         calls.append(kwargs)
         if provider_fails:
             raise TimeoutError("private-provider-details")
-        # 查询扩展新增为首个调用；空术语仍保留原始查询。
-        if len(calls) == 1:
-            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content='{"terms": []}'))])
-        content = '{"links": []}' if len(calls) == 3 else (
-            '{"paragraphs":[{"text":"根据你提供的原话，尚需进一步核对相关条件。",'
-            '"evidence_ids":[],"fact_ids":["fact.initial.query"]}],"branches":[]}'
-        )
-        if len(calls) == 2:
-            import json
-            candidates = json.loads(kwargs["messages"][1]["content"])["candidates"]
-            content = json.dumps({"items": [{"rule_id": item["rule_id"],
-                "relevance": "GENERAL", "reason": "测试候选"} for item in candidates]})
+        import json
+
+        user = kwargs["messages"][1]["content"]
+        system = kwargs["messages"][0]["content"]
+        if "candidates" in user:
+            candidates = json.loads(user)["candidates"]
+            content = json.dumps(
+                {
+                    "items": [
+                        {
+                            "rule_id": item["rule_id"],
+                            "relevance": "GENERAL",
+                            "usage": "ACTIVE",
+                            "reason": "测试候选",
+                        }
+                        for item in candidates
+                    ]
+                },
+                ensure_ascii=False,
+            )
+        elif "条件证据映射" in system or "只输出符合 schema 的 JSON links" in system:
+            content = '{"links": []}'
+        elif "terms" in system or "检索术语" in system or "query expansion" in system.lower() or len(calls) == 1:
+            content = '{"terms": []}'
+        else:
+            content = (
+                '{"paragraphs":[{"text":"根据你提供的原话，尚需进一步核对相关条件。",'
+                '"evidence_ids":[],"fact_ids":["fact.initial.query"]}],"branches":[]}'
+            )
         return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content))])
 
     sdk = SimpleNamespace(

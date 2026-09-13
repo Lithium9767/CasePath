@@ -9,6 +9,12 @@ from uuid import uuid4
 
 from pydantic import ValidationError
 
+from casepath.adapters.runtime.request_context import p4_request_context
+from casepath.application.runtime_meta import (
+    CorrectionLink,
+    SessionRuntimeMeta,
+    current_runtime_meta,
+)
 from casepath.contracts import (
     AnswerInterpretation,
     AnswerRequest,
@@ -53,10 +59,16 @@ class SessionService:
         state = QueryState(session_id=str(uuid4()), initial_query=request.query)
         # 【首次提问】这里只登记问题与会话 ID；事实抽取和条件映射交给工作流。
         # 【首次请求 04：进入 _run】跳到本类 _run(state)，不是再次发 HTTP 请求。
-        snapshot = self._run(state)
+        snapshot, runtime_meta = self._run(state, SessionRuntimeMeta())
         # 【首次请求 13：保存结果】_run 已完成 05—12 并返回经过校验的快照，才执行入库。
         # 默认仓库为内存实现，不是 Neo4j；任何前置算法/校验异常都会使程序跳过本次入库。
-        self.repository.create(SessionRecord(session_id=state.session_id, latest_snapshot=snapshot))
+        self.repository.create(
+            SessionRecord(
+                session_id=state.session_id,
+                latest_snapshot=snapshot,
+                runtime_meta=runtime_meta,
+            )
+        )
         # 回到 api/sessions.py 的 return service.create_session(request)，继续第 14 步。
         return snapshot
 
@@ -127,8 +139,26 @@ class SessionService:
             raise AnswerInterpreterUnavailable("回答解析失败，原会话未修改") from exc
 
         updated = self._merge_answer(state, pending.question, request, interpretation)
-        # 【回答 3】_merge_answer 在本类中，追加 DialogueTurn 并校验来源，返回新 QueryState。
-        snapshot = self._run(updated)
+        # 工作流成功前不提交无法回答/账本/纠正；在副本 meta 上累积，成功后再与快照同写。
+        working_meta = record.runtime_meta.model_copy(deep=True)
+        working_meta.unable_condition_ids = list(
+            dict.fromkeys(
+                [
+                    *working_meta.unable_condition_ids,
+                    *interpretation.unable_condition_ids,
+                ]
+            )
+        )
+        working_meta.declined_condition_ids = list(
+            dict.fromkeys(
+                [
+                    *working_meta.declined_condition_ids,
+                    *interpretation.declined_condition_ids,
+                ]
+            )
+        )
+        self._merge_corrections(working_meta, state, interpretation)
+        snapshot, runtime_meta = self._run(updated, working_meta)
         # 【回答 4】和首次问题走同一个 _run → workflow.run，重新执行规则到解释的链路。
         # _run 失败会中断本次保存，仓库仍保留原快照；不是先改库再尝试恢复。
         # 这两个步骤在本方法中确实执行过；旧的单轮工作流不再冒充已解析回答。
@@ -143,6 +173,7 @@ class SessionService:
             latest_snapshot=snapshot,
             updated_at=datetime.now(UTC),
             answer_receipts=receipts,
+            runtime_meta=runtime_meta,
         )
         try:
             self.repository.save(candidate, expected_revision=record.revision)
@@ -181,6 +212,22 @@ class SessionService:
                 if update.status != ConditionStatus.UNKNOWN and not referenced_fact_ids:
                     raise ValueError("非 UNKNOWN 的条件更新必须引用用户事实")
 
+            known_facts = {item.fact_id for item in state.user_facts}
+            new_fact_ids = {item.fact_id for item in interpretation.new_facts}
+            for correction in interpretation.corrections:
+                if correction.target_fact_id not in known_facts:
+                    raise ValueError("纠正目标事实必须属于当前会话")
+                if (
+                    correction.replacement_fact_id is not None
+                    and correction.replacement_fact_id not in new_fact_ids
+                ):
+                    raise ValueError("纠正替换事实必须来自本轮回答解析")
+                if (
+                    correction.condition_id is not None
+                    and correction.condition_id not in known_conditions
+                ):
+                    raise ValueError("纠正条件必须属于当前会话")
+
             conditions = {item.condition_id: item for item in state.condition_states}
             conditions.update(
                 {item.condition_id: item for item in interpretation.condition_updates}
@@ -206,53 +253,96 @@ class SessionService:
         except (ValueError, AttributeError, TypeError) as exc:
             raise InvalidComponentOutput("回答解析结果不符合合同或证据引用约束") from exc
 
-    def _run(self, state: QueryState) -> WorkflowSnapshot:
+    @staticmethod
+    def _merge_corrections(
+        meta: SessionRuntimeMeta,
+        state: QueryState,
+        interpretation: AnswerInterpretation,
+    ) -> None:
+        """将本轮纠正写入 meta 副本，并失效受影响投影账本条目（成功后才与快照同存）。"""
+        known = {item.fact_id for item in state.user_facts}
+        existing = {
+            (item.target_fact_id, item.replacement_fact_id, item.condition_id)
+            for item in meta.corrections
+        }
+        for item in interpretation.corrections:
+            if item.target_fact_id not in known:
+                raise InvalidAnswer("纠正目标事实不存在或不属于当前会话")
+            key = (item.target_fact_id, item.replacement_fact_id, item.condition_id)
+            if key in existing:
+                continue
+            meta.corrections.append(
+                CorrectionLink(
+                    target_fact_id=item.target_fact_id,
+                    replacement_fact_id=item.replacement_fact_id,
+                    condition_id=item.condition_id,
+                    reason=item.reason,
+                )
+            )
+            existing.add(key)
+            meta.projection_ledger = [
+                entry
+                for entry in meta.projection_ledger
+                if not (
+                    entry.fact_id == item.target_fact_id
+                    and (
+                        item.condition_id is None or entry.condition_id == item.condition_id
+                    )
+                )
+            ]
+
+    def _run(
+        self, state: QueryState, runtime_meta: SessionRuntimeMeta | None = None
+    ) -> tuple[WorkflowSnapshot, SessionRuntimeMeta]:
         # 【首次请求 05：进入单轮】这是服务层守卫，下一行 workflow.run 才进入 A—E。
         # 【系统守卫】给算法副本并检查输出，防止算法改写会话身份或既有原话。
+        meta = (runtime_meta or SessionRuntimeMeta()).model_copy(deep=True)
         try:
-            snapshot = self.workflow.run(state.model_copy(deep=True))
-            # 【首次请求 12：校验返回结果】第 11 步回到这里，先验快照合同，后验身份和证据。
-            # 检查 session_id/初始问题/历史未被改写，新增事实有原话来源，非未知条件有事实引用。
-            # 这些属于会话一致性检查，不等于审核模型的法律判断或证明引文语义正确。
-            snapshot = WorkflowSnapshot.model_validate(snapshot.model_dump())
-            actual = snapshot.query_state
-            # 投影器可以更新条件，但不能改写会话身份、历史对话和已有原始证据。
-            if (
-                actual.session_id != state.session_id
-                or actual.initial_query != state.initial_query
-                or actual.created_at != state.created_at
-                or actual.dialogue_history != state.dialogue_history
-            ):
-                raise ValueError("工作流修改了受保护的会话字段")
-            facts = {item.fact_id: item for item in actual.user_facts}
-            if any(facts.get(item.fact_id) != item for item in state.user_facts):
-                raise ValueError("工作流丢失或改写了既有用户证据")
-            answers_by_turn = {
-                turn.turn_id: turn.answer
-                for turn in actual.dialogue_history
-                if turn.answer is not None
-            }
-            existing_fact_ids = {item.fact_id for item in state.user_facts}
-            for fact in actual.user_facts:
-                if fact.fact_id in existing_fact_ids:
-                    continue
-                source_text = (
-                    actual.initial_query
-                    if fact.source_turn == 0
-                    else answers_by_turn.get(fact.source_turn)
-                )
-                if source_text is None or fact.text not in source_text:
-                    raise ValueError("工作流新增事实必须逐字来自初始问题或对应回答")
-            for condition in actual.condition_states:
-                referenced_fact_ids = {
-                    *condition.supporting_fact_ids,
-                    *(item.fact_id for item in condition.evidence),
+            with p4_request_context(meta):
+                snapshot = self.workflow.run(state.model_copy(deep=True))
+                # 【首次请求 12：校验返回结果】第 11 步回到这里，先验快照合同，后验身份和证据。
+                # 检查 session_id/初始问题/历史未被改写，新增事实有原话来源，非未知条件有事实引用。
+                # 这些属于会话一致性检查，不等于审核模型的法律判断或证明引文语义正确。
+                snapshot = WorkflowSnapshot.model_validate(snapshot.model_dump())
+                actual = snapshot.query_state
+                # 投影器可以更新条件，但不能改写会话身份、历史对话和已有原始证据。
+                if (
+                    actual.session_id != state.session_id
+                    or actual.initial_query != state.initial_query
+                    or actual.created_at != state.created_at
+                    or actual.dialogue_history != state.dialogue_history
+                ):
+                    raise ValueError("工作流修改了受保护的会话字段")
+                facts = {item.fact_id: item for item in actual.user_facts}
+                if any(facts.get(item.fact_id) != item for item in state.user_facts):
+                    raise ValueError("工作流丢失或改写了既有用户证据")
+                answers_by_turn = {
+                    turn.turn_id: turn.answer
+                    for turn in actual.dialogue_history
+                    if turn.answer is not None
                 }
-                if condition.status != ConditionStatus.UNKNOWN and not referenced_fact_ids:
-                    raise ValueError("非 UNKNOWN 条件状态必须引用用户事实")
-            # 校验全部通过才回到 create_session 的 snapshot = self._run(state)，继续第 13 步。
-            # 补充回答也复用本函数，但返回 submit_answer，由其保存回答回执和新版本。
-            return snapshot
+                existing_fact_ids = {item.fact_id for item in state.user_facts}
+                for fact in actual.user_facts:
+                    if fact.fact_id in existing_fact_ids:
+                        continue
+                    source_text = (
+                        actual.initial_query
+                        if fact.source_turn == 0
+                        else answers_by_turn.get(fact.source_turn)
+                    )
+                    if source_text is None or fact.text not in source_text:
+                        raise ValueError("工作流新增事实必须逐字来自初始问题或对应回答")
+                for condition in actual.condition_states:
+                    referenced_fact_ids = {
+                        *condition.supporting_fact_ids,
+                        *(item.fact_id for item in condition.evidence),
+                    }
+                    if condition.status != ConditionStatus.UNKNOWN and not referenced_fact_ids:
+                        raise ValueError("非 UNKNOWN 条件状态必须引用用户事实")
+                # 校验全部通过才回到 create_session 的 snapshot = self._run(state)，继续第 13 步。
+                # 补充回答也复用本函数，但返回 submit_answer，由其保存回答回执和新版本。
+                final_meta = current_runtime_meta() or meta
+                return snapshot, final_meta.model_copy(deep=True)
         except (
             ValidationError,
             WorkflowInvariantError,

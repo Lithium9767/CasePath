@@ -41,6 +41,12 @@ class ExplanationPlan(ContractModel): # 交给LLM和P5的结构化最终解释�
     evidence_actions: list[EvidenceAction] = Field(default_factory=list) # 建议用户保存或补充的证据
     citations: list[CitationRecord] = Field(default_factory=list) # 解释引用的法条和案例原文
     disclaimer: str = "该解释基于当前提供的信息，不替代律师针对完整材料出具的法律意见。" # 统一提示
+    # 案例候选结构化摘要（公共合同，避免前端解析解释正文）。
+    fused_case_count: int = Field(default=0, ge=0)
+    undetermined_case_count: int = Field(default=0, ge=0)
+    role_assigned_case_count: int = Field(default=0, ge=0)
+    undetermined_reason_summary: list[str] = Field(default_factory=list)
+    question_stop_reason: str | None = None
 
     @model_validator(mode="after")
     def validate_internal_references(self) -> ExplanationPlan:

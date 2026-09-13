@@ -15,7 +15,6 @@ from casepath.adapters.retrieval.rule_relevance import (
     RelevanceItem,
     RelevantRuleRetriever,
 )
-from casepath.application.errors import InvalidComponentOutput
 from casepath.contracts import ComparisonBundle, ConditionStatus, QueryState, RetrievalBundle
 
 
@@ -46,11 +45,13 @@ def test_relevance_filter_preserves_uncertain_and_rejects_invalid_ids(invalid):
 
     retriever = RelevantRuleRetriever(Retriever(), catalog, Model())
     state = QueryState(session_id="filter", initial_query="健身房退款")
+    kept = [ref.object_id for ref in retriever.retrieve(state)]
     if invalid:
-        with pytest.raises(InvalidComponentOutput):
-            retriever.retrieve(state)
+        # 虚构 rule_id 被丢弃；遗漏候选按 BACKGROUND 补回，UNRELATED 仍排除。
+        assert ids[1] not in kept
+        assert ids[0] in kept
     else:
-        assert [ref.object_id for ref in retriever.retrieve(state)] == [ids[0]]
+        assert kept == [ids[0]]
 
 
 def test_empty_retrieval_does_not_project_entire_catalog():

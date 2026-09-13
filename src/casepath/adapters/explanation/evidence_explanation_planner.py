@@ -59,6 +59,36 @@ def _rule_titles(bundle: RetrievalBundle, catalog: RetrievalCatalog) -> list[str
     return titles
 
 
+def _case_pool_summary(bundle: RetrievalBundle) -> dict[str, object]:
+    from casepath.adapters.retrieval.retrieval_catalog import current_round
+    from casepath.application.runtime_meta import current_runtime_meta
+
+    round_evidence = current_round()
+    role_n = (
+        len(bundle.support_case_refs)
+        + len(bundle.limiting_case_refs)
+        + len(bundle.boundary_case_refs)
+    )
+    undetermined_n = bundle.undetermined_case_count
+    if undetermined_n == 0 and round_evidence is not None:
+        undetermined_n = len(round_evidence.undetermined_case_ids)
+    fused_n = bundle.fused_case_count
+    if fused_n == 0 and round_evidence is not None:
+        fused_n = len(round_evidence.fused_case_ids)
+    reasons = list(bundle.undetermined_reason_summary)
+    if not reasons and round_evidence is not None:
+        reasons = sorted(set(round_evidence.undetermined_reasons.values()))
+    meta = current_runtime_meta()
+    stop = meta.last_stop_reason if meta is not None else None
+    return {
+        "fused_case_count": fused_n,
+        "undetermined_case_count": undetermined_n,
+        "role_assigned_case_count": role_n,
+        "undetermined_reason_summary": reasons,
+        "question_stop_reason": stop,
+    }
+
+
 def _main_explanation(
     state: QueryState,
     bundle: RetrievalBundle,
@@ -78,19 +108,35 @@ def _main_explanation(
         parts.append("已召回候选规则，但本地目录尚未解析到标题。")
     else:
         parts.append("这一轮没有稳定召回可用规则，不能把检索空结果写成没有法律依据。")
-    case_n = (
-        len(bundle.support_case_refs)
-        + len(bundle.limiting_case_refs)
-        + len(bundle.boundary_case_refs)
-    )
+    summary = _case_pool_summary(bundle)
+    case_n = int(summary["role_assigned_case_count"])
+    undetermined_n = int(summary["undetermined_case_count"])
     if case_n:
         parts.append(
             f"检索到{case_n}件可对照案例，分别用于支持、限制或划清边界，不是对本案的预判。"
+        )
+    elif undetermined_n:
+        parts.append(
+            f"检索到{undetermined_n}件相关候选案例，但条件证据尚不足以确定支持/限制角色；"
+            "这不等于没有案例。"
         )
     else:
         parts.append(
             "现有规则依据仍可讨论，但可比对的案例证据不足；缺少案例不等于没有相关法律依据。"
         )
+    stop = summary["question_stop_reason"]
+    if stop == "USER_UNABLE_TO_ANSWER":
+        parts.append("部分关键事实你暂时无法补充，解释将保留相应未知条件。")
+    elif stop == "USER_DECLINED":
+        parts.append("你已表示暂不回答部分问题，相关条件将保持未知。")
+    elif stop == "ALL_ALREADY_ANSWERED":
+        parts.append("当前没有新的关键事实需要追问；这不等于证据已经充分。")
+    elif stop == "NO_KEY_MISSING_FACT":
+        parts.append("当前没有识别到需要追问的关键缺失事实。")
+    elif stop == "QUESTION_BUDGET_REACHED":
+        parts.append("本轮追问预算已用尽，解释基于当前已收集事实。")
+    elif stop == "GENERATION_FAILED":
+        parts.append("追问生成未能完成，不能据此认为信息已经充分。")
     unresolved = [
         _label(catalog, item.condition_id)
         for item in state.condition_states
@@ -117,6 +163,7 @@ class EvidenceExplanationPlanner:
             # 澄清轮只给事实回顾，不等待长解释，也不伪装为生成失败后的成功降级。
             # 问题由 workflow.next_question 返回；完整法律解释留到澄清结束。
             fact = state.user_facts[-1].text if state.user_facts else state.initial_query
+            summary = _case_pool_summary(bundle)
             return ExplanationPlan(
                 session_id=state.session_id,
                 main_explanation="我看到你说：“"
@@ -130,6 +177,11 @@ class EvidenceExplanationPlanner:
                     for item in state.condition_states
                     if item.status.value in {"UNKNOWN", "CONFLICTING"}
                 ],
+                fused_case_count=int(summary["fused_case_count"]),
+                undetermined_case_count=int(summary["undetermined_case_count"]),
+                role_assigned_case_count=int(summary["role_assigned_case_count"]),
+                undetermined_reason_summary=list(summary["undetermined_reason_summary"]),
+                question_stop_reason=summary["question_stop_reason"],
             )
         if self.language_model is not None:
             from casepath.adapters.explanation.grounded_explanation import generate_explanation
@@ -201,6 +253,7 @@ class EvidenceExplanationPlanner:
             )
             for condition_id in unresolved[:4]
         ]
+        summary = _case_pool_summary(bundle)
         return ExplanationPlan(
             session_id=state.session_id,
             main_explanation=_main_explanation(state, bundle, self.catalog),
@@ -213,4 +266,9 @@ class EvidenceExplanationPlanner:
             unresolved_condition_ids=unresolved,
             evidence_actions=actions,
             citations=unique_citations,
+            fused_case_count=int(summary["fused_case_count"]),
+            undetermined_case_count=int(summary["undetermined_case_count"]),
+            role_assigned_case_count=int(summary["role_assigned_case_count"]),
+            undetermined_reason_summary=list(summary["undetermined_reason_summary"]),
+            question_stop_reason=summary["question_stop_reason"],
         )

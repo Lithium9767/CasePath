@@ -50,7 +50,7 @@ from .rule import (
     RuleException,
     RuleRecord,
 )
-from .session import AnswerInterpretation, CreateSessionRequest
+from .session import AnswerInterpretation, CorrectionOperation, CreateSessionRequest
 from .source import LegalSourceRecord, ProvisionRecord
 from .workflow import WorkflowSnapshot
 
@@ -77,6 +77,7 @@ __all__ = [
     "ConditionGroupRole",
     "ConditionStatus",
     "ContractModel",
+    "CorrectionOperation",
     "CourtFinding",
     "CreateSessionRequest",
     "DecisionItem",

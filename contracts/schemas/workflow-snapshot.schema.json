@@ -464,6 +464,43 @@
           "default": "该解释基于当前提供的信息，不替代律师针对完整材料出具的法律意见。",
           "title": "Disclaimer",
           "type": "string"
+        },
+        "fused_case_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Fused Case Count",
+          "type": "integer"
+        },
+        "undetermined_case_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Undetermined Case Count",
+          "type": "integer"
+        },
+        "role_assigned_case_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Role Assigned Case Count",
+          "type": "integer"
+        },
+        "undetermined_reason_summary": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Undetermined Reason Summary",
+          "type": "array"
+        },
+        "question_stop_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question Stop Reason"
         }
       },
       "required": [
@@ -752,6 +789,33 @@
           ],
           "default": null,
           "title": "Degradation Reason"
+        },
+        "fused_case_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Fused Case Count",
+          "type": "integer"
+        },
+        "undetermined_case_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Undetermined Case Count",
+          "type": "integer"
+        },
+        "undetermined_case_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Undetermined Case Ids",
+          "type": "array"
+        },
+        "undetermined_reason_summary": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Undetermined Reason Summary",
+          "type": "array"
         }
       },
       "title": "RetrievalBundle",

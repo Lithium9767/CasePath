@@ -24,9 +24,9 @@ from casepath.adapters.retrieval.retrieval_catalog import (
     RetrievalContext,
     RoundEvidence,
     bind_context,
-    bind_round,
     require_context,
     scored_reference,
+    set_round,
     weighted_rrf,
 )
 from casepath.application.errors import RetrieverUnavailable
@@ -273,7 +273,12 @@ class HybridCypherRuleRetriever:
             )
         # 图扩展保留为低权重边界候选，不能靠任意邻接顺序占据解释头部。
         limit = min(self.settings.rule_top_k, len(results))
-        return results[:limit]
+        limited = results[:limit]
+        # 无外层用途分层时写入默认 ACTIVE scope；RelevantRuleRetriever 会覆盖。
+        from casepath.adapters.retrieval.rule_relevance import bind_default_scope_from_refs
+
+        bind_default_scope_from_refs(limited, self.catalog)
+        return limited
 
 
 def _known_states(state: QueryState) -> dict[str, ConditionStatus]:
@@ -314,18 +319,34 @@ def _compare_conditions(
     catalog: RetrievalCatalog,
     rule_ids: set[str],
 ) -> CaseComparison:
-    # B 提供用户状态，P3 提供案例认定；只比较候选规则涉及的条件。
-    allowed = {key for rid in rule_ids if rid in catalog.rules
-               for key in catalog.rules[rid].condition_ids}
-    statuses: dict[str, set[ConditionStatus]] = {}
-    for item in case.assessments:
-        if item.span_ids or item.finding_ids:
-            statuses.setdefault(item.condition_id, set()).add(item.status)
+    # B 提供用户状态；案例认定经共享聚合，不取第一条。
+    from casepath.adapters.conditions.case_condition_evidence import aggregate_case_condition
+    from casepath.adapters.retrieval.retrieval_catalog import current_scope
+
+    scope = current_scope()
+    if scope is not None:
+        allowed = {
+            key
+            for rid in rule_ids
+            if rid in scope.active_rule_ids and rid in catalog.rules
+            for key in catalog.rules[rid].condition_ids
+        }
+    else:
+        allowed = {
+            key
+            for rid in rule_ids
+            if rid in catalog.rules
+            for key in catalog.rules[rid].condition_ids
+        }
     same, different, unknown = [], [], []
     for key in sorted(allowed):
         user = known.get(key, ConditionStatus.UNKNOWN)
-        values = statuses.get(key, set())
-        other = next(iter(values)) if len(values) == 1 else ConditionStatus.UNKNOWN
+        summary = aggregate_case_condition(
+            case_id=case.case_id,
+            condition_id=key,
+            assessments=case.assessments,
+        )
+        other = summary.status if summary.has_usable_evidence else ConditionStatus.UNKNOWN
         if user not in _DECISIVE or other not in _DECISIVE:
             unknown.append(key)
         elif user == other:
@@ -343,17 +364,25 @@ def _core_group_comparison(
     rule_ids: set[str],
 ) -> tuple[int, int]:
     """先按组求值再比较，不将 ANY 中非决定性的单项差异计为冲突。"""
+    from casepath.adapters.conditions.case_condition_evidence import aggregate_case_condition
+
+    member_ids = {
+        key
+        for rule_id in rule_ids
+        if rule_id in catalog.rules
+        for group in catalog.rules[rule_id].groups
+        if group.role == "CORE"
+        for key in group.member_ids
+    }
     case_states: dict[str, ConditionStatus] = {}
-    # 同一条件若出现不同案例认定，保留冲突；没有认定/原文引用的条目不进入组比较。
-    for item in case.assessments:
-        if not (item.span_ids or item.finding_ids):
-            continue
-        previous = case_states.get(item.condition_id)
-        case_states[item.condition_id] = (
-            ConditionStatus.CONFLICTING
-            if previous is not None and previous != item.status
-            else item.status
+    for key in member_ids:
+        summary = aggregate_case_condition(
+            case_id=case.case_id,
+            condition_id=key,
+            assessments=case.assessments,
         )
+        if summary.has_usable_evidence:
+            case_states[key] = summary.status
     agree = conflict = 0
     for rule_id in sorted(rule_ids):
         rule = catalog.rules.get(rule_id)
@@ -379,6 +408,24 @@ def _core_group_comparison(
     return agree, conflict
 
 
+def _undetermined_reason(
+    *,
+    has_assessments: bool,
+    has_usable_evidence: bool,
+    rule_linked: bool,
+    claim_aligned: bool,
+) -> str:
+    if not has_assessments:
+        return "NO_ASSESSMENT"
+    if not has_usable_evidence:
+        return "INSUFFICIENT_EVIDENCE"
+    if not rule_linked:
+        return "NO_REASONING_LINK"
+    if not claim_aligned:
+        return "TARGET_MISMATCH"
+    return "INSUFFICIENT_EVIDENCE"
+
+
 def _assign_role(
     case: CaseDocument,
     known: dict[str, ConditionStatus],
@@ -386,15 +433,16 @@ def _assign_role(
     catalog: RetrievalCatalog,
     user_claims: set[str],
     comparison: CaseComparison | None = None,
-) -> tuple[str | None, list[str], list[str]]:
+) -> tuple[str | None, list[str], list[str], str | None]:
     """支持/限制必须结合目标规则、请求、决定性条件差异和理由依据。
 
     未知、不适用不得当成明确相反条件。不能仅因图通道或单条件一致而标成支持。
+    返回 (role, reasons, spans, undetermined_reason_code)。
     """
 
     if not case.assessments:
         # 角色判断比召回更严格：文本相似但没有条件认定时，允许召回，但角色保持未定。
-        return None, [], []
+        return None, [], [], "NO_ASSESSMENT"
     case_claims = {item.claim_type for item in case.claims}
     if user_claims and case_claims:
         claim_aligned = bool(user_claims & case_claims)
@@ -414,9 +462,12 @@ def _assign_role(
     diagnostic_diff = 0
     spans: list[str] = []
     reasons: list[str] = []
+    has_usable_evidence = False
     for assessment in case.assessments:
         user_status = known.get(assessment.condition_id, ConditionStatus.UNKNOWN)
         has_evidence = bool(assessment.span_ids or assessment.finding_ids)
+        if has_evidence:
+            has_usable_evidence = True
         roles = _condition_roles(catalog, assessment.condition_id, rule_ids)
         core = any(role == "CORE" for role in roles)
         diagnostic = any(role == "DIAGNOSTIC" for role in roles)
@@ -449,7 +500,7 @@ def _assign_role(
     if core_agree and core_conflict and (rule_linked or claim_aligned) and spans:
         # 角色是针对当前用户/候选规则的比较结果，不是案例永久的“好案/坏案”标签。
         # 此处按顺序判定：核心既一致又冲突 → 严格支持 → 核心限制 → 诊断边界 → 未定。
-        return "boundary", reasons + ["核心条件组同时存在一致与冲突"], spans
+        return "boundary", reasons + ["核心条件组同时存在一致与冲突"], spans, None
     if (
         rule_linked
         and claim_aligned
@@ -459,12 +510,22 @@ def _assign_role(
         and not rejected
         and spans
     ):
-        return "support", reasons + ["目标规则、请求与决定性条件同时对齐"], spans
+        return "support", reasons + ["目标规则、请求与决定性条件同时对齐"], spans, None
     if core_conflict and (rule_linked or claim_aligned) and spans:
-        return "limiting", reasons + ["决定性核心条件相反，限制当前解释"], spans
+        return "limiting", reasons + ["决定性核心条件相反，限制当前解释"], spans, None
     if diagnostic_diff and (rule_linked or claim_aligned):
-        return "boundary", reasons, spans
-    return None, reasons, spans
+        return "boundary", reasons, spans, None
+    return (
+        None,
+        reasons,
+        spans,
+        _undetermined_reason(
+            has_assessments=True,
+            has_usable_evidence=has_usable_evidence,
+            rule_linked=rule_linked,
+            claim_aligned=claim_aligned,
+        ),
+    )
 
 
 class HybridCypherCaseRetriever:
@@ -628,84 +689,117 @@ class HybridCypherCaseRetriever:
         cited: list[str] = []
         used: set[str] = set()
         undetermined: set[str] = set()
+        undetermined_reasons: dict[str, str] = {}
         channels_by_case: dict[str, tuple[str, ...]] = {}
-        for score, case_id, reasons, components in pool:
-            if case_id in used or case_id in undetermined:
-                continue
-            case = self.catalog.cases[case_id]
-            role, role_reasons, spans = roles_by_case[case_id]
-            channels = [name for name, ids in ranked.items() if case_id in ids]
-            channels_by_case[case_id] = tuple(channels)
-            graph_paths = []
-            for hit in paths.get(case_id, ()):
-                if _valid_path(hit.path_nodes, hit.path_edges):
-                    graph_paths.append(
-                        RetrievalPath(
-                            node_ids=list(hit.path_nodes),
-                            edge_types=list(hit.path_edges),
-                            score=score,
-                            source_span_ids=list(hit.span_ids),
+        import time
+
+        from casepath.adapters.diagnostics.stage_events import emit_stage_event
+
+        started = time.perf_counter()
+        succeeded = False
+        try:
+            for score, case_id, reasons, components in pool:
+                if case_id in used or case_id in undetermined:
+                    continue
+                case = self.catalog.cases[case_id]
+                role, role_reasons, spans, undetermined_code = roles_by_case[case_id]
+                channels = [name for name, ids in ranked.items() if case_id in ids]
+                channels_by_case[case_id] = tuple(channels)
+                graph_paths = []
+                for hit in paths.get(case_id, ()):
+                    if _valid_path(hit.path_nodes, hit.path_edges):
+                        graph_paths.append(
+                            RetrievalPath(
+                                node_ids=list(hit.path_nodes),
+                                edge_types=list(hit.path_edges),
+                                score=score,
+                                source_span_ids=list(hit.span_ids),
+                            )
                         )
-                    )
-            if role is None:
-                # 仍记录在本轮融合池/未定集合，不强行凑三类案例；公共输出暂不包含该引用。
-                undetermined.add(case_id)
-                continue
-            used.add(case_id)
-            # 先通过角色资格判定，再限制每类数量；不把溢出的支持案例改标成其他角色。
-            # 每类在池中的相对顺序按比较覆盖度、RRF及稳定ID确定。
-            role_refs = {"support": support, "limiting": limiting, "boundary": boundary}[role]
-            if len(role_refs) >= self.settings.case_role_top_k:
-                continue
-            ref = scored_reference(
-                case_id,
-                score,
-                channels=channels,
-                components=components,
-                reasons=reasons + role_reasons,
-                span_ids=list(dict.fromkeys([*case.span_ids, *spans])),
-                paths=graph_paths,
+                if role is None:
+                    # 仍记录在本轮融合池/未定集合，不强行凑三类案例；公共输出暂不包含该引用。
+                    undetermined.add(case_id)
+                    undetermined_reasons[case_id] = undetermined_code or "INSUFFICIENT_EVIDENCE"
+                    continue
+                used.add(case_id)
+                # 先通过角色资格判定，再限制每类数量；不把溢出的支持案例改标成其他角色。
+                # 每类在池中的相对顺序按比较覆盖度、RRF及稳定ID确定。
+                role_refs = {"support": support, "limiting": limiting, "boundary": boundary}[role]
+                if len(role_refs) >= self.settings.case_role_top_k:
+                    continue
+                ref = scored_reference(
+                    case_id,
+                    score,
+                    channels=channels,
+                    components=components,
+                    reasons=reasons + role_reasons,
+                    span_ids=list(dict.fromkeys([*case.span_ids, *spans])),
+                    paths=graph_paths,
+                )
+                cited.extend(ref.source_span_ids)
+                role_refs.append(ref)
+            fused_ids = tuple(case_id for _, case_id, _, _ in pool)
+            set_round(
+                # 把本轮路径和认定交给后续比较器复用，避免再查一套不一致的图结果。
+                # 注意 D/E 使用公共角色候选，不等于对融合池的所有未定案例也进行了模拟。
+                RoundEvidence(
+                    context=context,
+                    assessments_by_case={
+                        key: tuple(value)
+                        for key, value in assessments_by_case.items()
+                        if key in fused_ids
+                    },
+                    paths_by_case={
+                        key: tuple((hit.path_nodes, hit.path_edges, hit.span_ids) for hit in value)
+                        for key, value in paths.items()
+                        if key in fused_ids
+                    },
+                    graph_only_ids=frozenset(
+                        set(graph_ids) - set(ranked["bm25"]) - set(ranked["vector"])
+                    ),
+                    cite_only_ids=frozenset(
+                        set(cite_ids)
+                        - set(ranked["bm25"])
+                        - set(ranked["vector"])
+                        - set(graph_ids)
+                        - set(apply_ids)
+                    ),
+                    fused_case_ids=fused_ids,
+                    undetermined_case_ids=frozenset(undetermined),
+                    channels_by_case=channels_by_case,
+                    undetermined_reasons=dict(undetermined_reasons),
+                    compared_rule_ids=tuple(rule_ids),
+                )
             )
-            cited.extend(ref.source_span_ids)
-            role_refs.append(ref)
-        fused_ids = tuple(case_id for _, case_id, _, _ in pool)
-        bind_round(
-            # 把本轮路径和认定交给后续比较器复用，避免再查一套不一致的图结果。
-            # 注意 D/E 使用公共角色候选，不等于对融合池的所有未定案例也进行了模拟。
-            RoundEvidence(
-                context=context,
-                assessments_by_case={
-                    key: tuple(value)
-                    for key, value in assessments_by_case.items()
-                    if key in fused_ids
-                },
-                paths_by_case={
-                    key: tuple((hit.path_nodes, hit.path_edges, hit.span_ids) for hit in value)
-                    for key, value in paths.items()
-                    if key in fused_ids
-                },
-                graph_only_ids=frozenset(
-                    set(graph_ids) - set(ranked["bm25"]) - set(ranked["vector"])
+            degraded = len(support) + len(limiting) + len(boundary) <= 1
+            succeeded = True
+            return RetrievalBundle(
+                rule_refs=rule_refs,
+                support_case_refs=support,
+                limiting_case_refs=limiting,
+                boundary_case_refs=boundary,
+                cited_span_ids=list(dict.fromkeys(cited)),
+                degraded=degraded,
+                degradation_reason=(
+                    "深度案例不足，角色分组仅用于工程路径验证。" if degraded else None
                 ),
-                cite_only_ids=frozenset(
-                    set(cite_ids)
-                    - set(ranked["bm25"])
-                    - set(ranked["vector"])
-                    - set(graph_ids)
-                    - set(apply_ids)
-                ),
-                fused_case_ids=fused_ids,
-                undetermined_case_ids=frozenset(undetermined),
-                channels_by_case=channels_by_case,
+                fused_case_count=len(fused_ids),
+                undetermined_case_count=len(undetermined),
+                undetermined_case_ids=sorted(undetermined),
+                undetermined_reason_summary=sorted(set(undetermined_reasons.values())),
             )
-        )
-        degraded = len(support) + len(limiting) + len(boundary) <= 1
-        return RetrievalBundle(
-            rule_refs=rule_refs,
-            support_case_refs=support,
-            limiting_case_refs=limiting,
-            boundary_case_refs=boundary,
-            cited_span_ids=list(dict.fromkeys(cited)),
-            degraded=degraded,
-            degradation_reason="深度案例不足，角色分组仅用于工程路径验证。" if degraded else None,
-        )
+        finally:
+            emit_stage_event(
+                stage="C_case_retrieval",
+                duration_ms=(time.perf_counter() - started) * 1000,
+                counts={
+                    "fused": len(pool),
+                    "support": len(support),
+                    "limiting": len(limiting),
+                    "boundary": len(boundary),
+                    "undetermined": len(undetermined),
+                },
+                reason_codes=sorted(set(undetermined_reasons.values())),
+                identifiers={"undetermined_case_ids": sorted(undetermined)[:50]},
+                succeeded=succeeded,
+            )

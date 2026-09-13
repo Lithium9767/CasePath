@@ -68,16 +68,25 @@ class RuntimeSettings(BaseModel):
     llm_max_completion_tokens: int = Field(default=2048, ge=1)
     llm_structured_output: StructuredOutputMode = StructuredOutputMode.JSON_OBJECT
     # 可按阶段覆盖；未填写的字段由 LLMStagePolicy 的安全默认值补齐。
-    llm_stage_policies: dict[Literal["relevance", "projection", "explanation", "question", "query_expansion"], LLMStagePolicy] = (
-        Field(
-            default_factory=lambda: {
-                "query_expansion": LLMStagePolicy(max_tokens=400, timeout_seconds=20, max_retries=0),
-                "question": LLMStagePolicy(max_tokens=500, timeout_seconds=30, max_retries=0),
-                "relevance": LLMStagePolicy(max_tokens=1000),
-                "projection": LLMStagePolicy(max_tokens=1400),
-                "explanation": LLMStagePolicy(max_tokens=1800, timeout_seconds=60),
-            }
-        )
+    llm_stage_policies: dict[
+        Literal[
+            "relevance",
+            "projection",
+            "explanation",
+            "question",
+            "query_expansion",
+            "missing_facts",
+        ],
+        LLMStagePolicy,
+    ] = Field(
+        default_factory=lambda: {
+            "query_expansion": LLMStagePolicy(max_tokens=400, timeout_seconds=20, max_retries=0),
+            "question": LLMStagePolicy(max_tokens=500, timeout_seconds=30, max_retries=0),
+            "missing_facts": LLMStagePolicy(max_tokens=2000, timeout_seconds=45, max_retries=0),
+            "relevance": LLMStagePolicy(max_tokens=1000),
+            "projection": LLMStagePolicy(max_tokens=1400),
+            "explanation": LLMStagePolicy(max_tokens=1800, timeout_seconds=60),
+        }
     )
 
     @field_validator(

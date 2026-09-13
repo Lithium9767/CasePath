@@ -1,11 +1,13 @@
 """P4 实现区：把用户回答投影为事实和条件更新。
 
-选项采用 `condition_id + 完整选项 → 状态`。自由回答先处理否定作用范围，
-无法可靠判断时保持 UNKNOWN。不用一套通用肯定词判断所有条件。
+动态事实问题不直接「是→条件满足」。无法回答是回答属性，不是条件否定。
 事实必须逐字摘自本轮回答。虚构原话或未知 condition_id 直接拒绝。
+明确纠正（含金额更正）写入 corrections；普通相反描述不自动纠正。
 """
 
 from __future__ import annotations
+
+import re
 
 from casepath.adapters.conditions.semantic_condition_projector import (
     _aggregate,
@@ -17,14 +19,20 @@ from casepath.contracts import (
     AnswerRequest,
     ConditionEvidence,
     ConditionStatus,
+    CorrectionOperation,
     QueryState,
     QuestionCandidate,
     UserFact,
 )
 
 _UNKNOWN = ("不清楚", "不知道", "不了解", "不确定", "说不清")
+_DECLINED = ("暂不回答", "不想说", "拒答")
 _BARE_NO = frozenset({"没有", "否", "不是", "尚未", "无"})
 _BARE_YES = frozenset({"是", "对"})
+_CORRECTION_MARKERS = ("说错了", "更正", "纠正", "改成", "应为", "其实是", "应该是")
+_AMOUNT = re.compile(r"(\d+(?:\.\d+)?)\s*元?")
+_MONEY_CUES = ("元", "交了", "付了", "付的", "支付", "付款", "充了", "金额", "费用")
+_AMOUNT_CORRECTION_CUES = ("金额", "元", "交了", "付了", "付的", "费用")
 _FREE_TEXT: dict[str, dict[ConditionStatus, tuple[str, ...]]] = {
     "cond.payment_made": {
         ConditionStatus.NOT_SATISFIED: (
@@ -68,6 +76,21 @@ def _longest_hits(text: str, phrases: tuple[str, ...]) -> str | None:
     return max(found, key=len)
 
 
+def _classify_disposition(selected: str, answer: str) -> str:
+    """区分整句无法回答、拒绝，以及「不清楚但还有事实」的混合回答。"""
+    text = answer.strip()
+    choice = selected.strip()
+    if choice in _DECLINED or text in _DECLINED:
+        return "DECLINED"
+    if choice in _UNKNOWN or text in _UNKNOWN:
+        return "UNABLE"
+    if any(token == text for token in _UNKNOWN):
+        return "UNABLE"
+    if any(token in text for token in _UNKNOWN) and len(text) > max(len(token) for token in _UNKNOWN) + 2:
+        return "MIXED"
+    return "FACTS_PROVIDED"
+
+
 def _status(pending: QuestionCandidate, request: AnswerRequest) -> ConditionStatus:
     # 先用 condition_id + 完整选项解释回答，再处理不知道、裸是/否及条件专用自由文本。
     # 这是确定性解释器，不调用 LLM；无法识别保留 UNKNOWN，不猜测用户意思。
@@ -77,11 +100,13 @@ def _status(pending: QuestionCandidate, request: AnswerRequest) -> ConditionStat
         mapped = option_status(pending.condition_id, selected)
         if mapped is not None:
             return mapped
+        if selected in _UNKNOWN or selected in _DECLINED:
+            return ConditionStatus.UNKNOWN
         return ConditionStatus.UNKNOWN
     mapped = option_status(pending.condition_id, answer)
     if mapped is not None:
         return mapped
-    if any(token == answer or token in answer for token in _UNKNOWN):
+    if any(token == answer or token in answer for token in (*_UNKNOWN, *_DECLINED)):
         return ConditionStatus.UNKNOWN
     if pending.condition_id == "cond.contract_terminated" and answer in (_BARE_NO | _BARE_YES):
         # 日常沟通问题的“是/没有”不足以认定法律关系是否已结束。
@@ -104,6 +129,93 @@ def _status(pending: QuestionCandidate, request: AnswerRequest) -> ConditionStat
     return ConditionStatus.UNKNOWN
 
 
+def _explicit_correction(
+    state: QueryState,
+    *,
+    answer: str,
+    replacement: UserFact,
+    condition_id: str,
+) -> list[CorrectionOperation]:
+    """仅在用户明确更正时产生纠正；普通矛盾描述返回空。
+
+    段落事实按「事实 ID + 条件」粒度退出旧映射，不整条删除段落中的其他事实断言。
+    目标选择优先本条件已有映射；金额纠正不得仅因“含数字”误伤课时等无关事实。
+    无法唯一/可靠锁定目标时返回空，而不是猜测。
+    """
+    if not any(marker in answer for marker in _CORRECTION_MARKERS):
+        return []
+    # 金额对象必须区分；暂未有独立已退款条件时，保守不自动撤销旧证据。
+    balance_correction = any(word in answer for word in ("余额", "剩余", "未消费"))
+    refund_correction = any(word in answer for word in ("已退款", "已退", "退了", "退还了"))
+    if refund_correction:
+        return []
+    if balance_correction:
+        condition_id = "cond.unperformed_balance"
+    linked_ids = {
+        evidence.fact_id
+        for item in state.condition_states
+        if item.condition_id == condition_id
+        for evidence in item.evidence
+    }
+    facts_by_id = {item.fact_id: item for item in state.user_facts}
+    linked_facts = [facts_by_id[fid] for fid in linked_ids if fid in facts_by_id]
+    answer_amounts = _AMOUNT.findall(answer)
+    amount_correction = bool(answer_amounts) and any(
+        cue in answer for cue in _AMOUNT_CORRECTION_CUES
+    )
+
+    targets: list[UserFact] = []
+    if amount_correction:
+        payment_linked_ids = {
+            evidence.fact_id
+            for item in state.condition_states
+            if item.condition_id == (
+                "cond.unperformed_balance" if balance_correction else "cond.payment_made"
+            )
+            for evidence in item.evidence
+        }
+        payment_linked = [facts_by_id[fid] for fid in payment_linked_ids if fid in facts_by_id]
+        # 1) 优先付款条件已有映射，且含与新金额冲突的旧数字
+        for fact in payment_linked or linked_facts:
+            fact_amounts = _AMOUNT.findall(fact.text)
+            if fact_amounts and any(amount not in answer_amounts for amount in fact_amounts):
+                targets.append(fact)
+        # 2) 无已映射目标时，仅回退到带金钱线索且金额冲突的事实，不用裸数字事实
+        if not targets:
+            if balance_correction:
+                return []  # 不扫描其他付款事实来猜测余额目标。
+            for fact in state.user_facts:
+                if not any(cue in fact.text for cue in _MONEY_CUES):
+                    continue
+                fact_amounts = _AMOUNT.findall(fact.text)
+                if fact_amounts and any(amount not in answer_amounts for amount in fact_amounts):
+                    targets.append(fact)
+    else:
+        # 非金额明确纠正：只能纠正本条件已引用的事实，禁止扫描会话里任意最近事实
+        targets = list(linked_facts)
+
+    if not targets:
+        return []
+    if len(targets) != 1:
+        # 多个候选没有可靠指代时，不以时间最近代替语义定位。
+        return []
+    target = targets[0]
+    # 金额纠正绑定付款条件，而不是“当前被问到的任意条件”。
+    link_condition = condition_id
+    if amount_correction and not balance_correction and any(
+        item.condition_id == "cond.payment_made" for item in state.condition_states
+    ):
+        link_condition = "cond.payment_made"
+    return [
+        CorrectionOperation(
+            target_fact_id=target.fact_id,
+            replacement_fact_id=replacement.fact_id,
+            condition_id=link_condition,
+            reason="用户明确纠正本轮相关事实",
+        )
+    ]
+
+
 class SemanticAnswerInterpreter:
     def interpret(
         self,
@@ -122,36 +234,60 @@ class SemanticAnswerInterpreter:
         if quote not in answer_request.answer:
             raise ValueError("新事实必须逐字摘自本轮回答")
         turn_id = max((turn.turn_id for turn in state.dialogue_history), default=0) + 1
+        selected = (answer_request.selected_option or "").strip()
+        disposition = _classify_disposition(selected, quote)
+        fact = UserFact(
+            fact_id=f"fact.answer.{turn_id}.{pending_question.condition_id}",
+            text=quote,
+            source_turn=turn_id,
+        )
+        corrections = _explicit_correction(
+            state,
+            answer=quote,
+            replacement=fact,
+            condition_id=pending_question.condition_id,
+        )
+        if disposition == "DECLINED":
+            # 拒绝补充：不改条件状态，也不把拒答当反对证据。
+            return AnswerInterpretation(
+                disposition="DECLINED",
+                declined_condition_ids=[pending_question.condition_id],
+                new_facts=[fact],
+            )
+        if disposition == "UNABLE":
+            # 单独「不清楚」：保留审计事实，条件状态交给 B 保持旧证据，不在此写否定。
+            return AnswerInterpretation(
+                disposition="UNABLE",
+                unable_condition_ids=[pending_question.condition_id],
+                new_facts=[fact],
+            )
         if pending_question.question_id.startswith("question.fact."):
             # 动态问题问的是具体事实，“有”不等于目标法律条件满足。
-            # 只保存原话；SessionService保存问题上下文后，B统一解释本轮回答。
-            return AnswerInterpretation(new_facts=[UserFact(
-                fact_id=f"fact.answer.{turn_id}.{pending_question.condition_id}",
-                text=quote, source_turn=turn_id,
-            )])
+            return AnswerInterpretation(
+                disposition=disposition,
+                new_facts=[fact],
+                corrections=corrections,
+            )
         existing_texts = {
             (item.condition_id, fact_id)
             for item in state.condition_states
             for fact_id in item.supporting_fact_ids
         }
         same = [
-            fact
-            for fact in state.user_facts
-            if fact.text == quote
-            and (pending_question.condition_id, fact.fact_id) in existing_texts
+            prior
+            for prior in state.user_facts
+            if prior.text == quote
+            and (pending_question.condition_id, prior.fact_id) in existing_texts
         ]
         if same:
-            # 同条件已经引用相同原话时，不重复增加事实和分数；对话回执仍由服务层负责。
-            return AnswerInterpretation()
+            return AnswerInterpretation(disposition=disposition, corrections=corrections)
         status = _status(pending_question, answer_request)
-        fact = UserFact(
-            fact_id=f"fact.answer.{turn_id}.{pending_question.condition_id}",
-            text=quote,
-            source_turn=turn_id,
-        )
         if status is ConditionStatus.UNKNOWN:
-            # 没回答清当前问题，不代表整段回答没有其他有用事实。
-            return AnswerInterpretation(new_facts=[fact])
+            return AnswerInterpretation(
+                disposition=disposition,
+                new_facts=[fact],
+                corrections=corrections,
+            )
         relation = "SUPPORTS" if status is ConditionStatus.SATISFIED else "OPPOSES"
         old = next(
             item
@@ -167,6 +303,9 @@ class SemanticAnswerInterpreter:
                 reason="本轮问题选项/自由回答映射；分数未经过标注集校准",
             ),
         ]
+        # 明确纠正时，旧目标事实不参与本轮条件聚合。
+        corrected_targets = {item.target_fact_id for item in corrections}
+        evidence = [item for item in evidence if item.fact_id not in corrected_targets]
         update = _aggregate(
             pending_question.condition_id,
             evidence,
@@ -174,6 +313,8 @@ class SemanticAnswerInterpreter:
         )
         update.last_updated_turn = turn_id
         return AnswerInterpretation(
+            disposition=disposition,
             new_facts=[fact],
             condition_updates=[update],
+            corrections=corrections,
         )

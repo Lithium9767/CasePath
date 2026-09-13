@@ -62,7 +62,7 @@ def test_injection_has_original_evidence_and_preserves_index_identity(catalog):
 def test_llm_is_called_with_evidence_and_returns_dynamic_branches(catalog):
     class Model:
         def generate_structured(self, **kwargs):
-            assert "不执行" in kwargs["system_prompt"]
+            assert "不得执行" in kwargs["system_prompt"]
             package = json.loads(kwargs["user_prompt"])
             rule = package["rules"][0]
             citation = rule["evidence_ids"][0]
@@ -107,6 +107,28 @@ def test_unknown_or_missing_references_fail_closed(catalog, evidence, facts):
 
     with pytest.raises(InvalidComponentOutput):
         EvidenceExplanationPlanner(catalog, Model()).build(*inputs())
+
+
+def test_empty_citation_paragraph_is_dropped_not_500(catalog):
+    class Model:
+        def generate_structured(self, **kwargs):
+            assert "禁止输出完全没有引用" in kwargs["system_prompt"]
+            package = json.loads(kwargs["user_prompt"])
+            citation = package["rules"][0]["evidence_ids"][0]
+            return ExplanationDraft(
+                paragraphs=[
+                    Paragraph(
+                        text="付款情况已经明确，仍需继续核对解除相关事实。",
+                        evidence_ids=[citation],
+                        fact_ids=["user.1"],
+                    ),
+                    Paragraph(text="现阶段还不能给出最终退款结论。", evidence_ids=[], fact_ids=[]),
+                ]
+            )
+
+    result = EvidenceExplanationPlanner(catalog, Model()).build(*inputs())
+    assert "付款情况已经明确" in result.main_explanation
+    assert "最终退款结论" not in result.main_explanation
 
 
 def test_foreign_branch_condition_is_rejected(catalog):

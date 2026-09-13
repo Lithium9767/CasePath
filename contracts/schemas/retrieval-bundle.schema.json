@@ -189,6 +189,33 @@
       ],
       "default": null,
       "title": "Degradation Reason"
+    },
+    "fused_case_count": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Fused Case Count",
+      "type": "integer"
+    },
+    "undetermined_case_count": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Undetermined Case Count",
+      "type": "integer"
+    },
+    "undetermined_case_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Undetermined Case Ids",
+      "type": "array"
+    },
+    "undetermined_reason_summary": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Undetermined Reason Summary",
+      "type": "array"
     }
   },
   "title": "RetrievalBundle",

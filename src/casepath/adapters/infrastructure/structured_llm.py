@@ -158,12 +158,14 @@ class OpenAICompatibleStructuredLanguageModel:
         try:
             # 不把截断的 JSON 当成随机解析错误；不记录正文、密钥或供应商错误原文。
             if getattr(completion.choices[0], "finish_reason", None) == "length":
-                # 多轮条件映射可能随事实增长超出首次预算。仅明确截断时扩容一次，
-                # 不接受残缺JSON，不对网络/其他校验错误盲目重试，上限8192 tokens。
-                if stage == "projection" and _retry_token_limit is None and limit < 8192:
-                    expanded_limit = min(limit * 2, 8192)
+                # 多轮条件映射 / 缺失事实识别可能随上下文增长超出首次预算。
+                # 仅明确截断时扩容一次，不接受残缺JSON，不对网络/其他校验错误盲目重试，上限8192。
+                expandable = {"projection", "missing_facts"}
+                if stage in expandable and _retry_token_limit is None and limit < 8192:
+                    expanded_limit = min(max(limit * 2, 2048), 8192)
                     logging.getLogger("uvicorn.error").warning(
-                        "LLM stage=projection reason=output_truncated retry_tokens=%s",
+                        "LLM stage=%s reason=output_truncated retry_tokens=%s",
+                        stage,
                         expanded_limit,
                     )
                     return self.generate_structured(

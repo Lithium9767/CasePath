@@ -490,6 +490,15 @@ def test_dynamic_question_without_card_and_answer_is_raw(bad):
         calls = 0
         def generate_structured(self, **kwargs):
             self.calls += 1
+            if kwargs["stage"] == "missing_facts":
+                from casepath.adapters.questioning.missing_facts import (
+                    MissingFactDraft,
+                    MissingFactIdentifyBatch,
+                )
+                return MissingFactIdentifyBatch(items=[MissingFactDraft(
+                    condition_ids=[key], description="是否找到书面遗嘱", status="MISSING",
+                    why_needed="核实文件",
+                )])
             assert kwargs["stage"] == "question"
             return QuestionDraft(condition_id="invalid" if bad else key, askable=True,
                                  question="家里有没有找到书面遗嘱？", reason="核实文件")
@@ -503,7 +512,7 @@ def test_dynamic_question_without_card_and_answer_is_raw(bad):
     if bad:
         with pytest.raises(QuestionGenerationFailed):
             policy.select(state, bundle, ComparisonBundle())
-        assert model.calls == 2
+        assert model.calls == 3
         return
     question = policy.select(state, bundle, ComparisonBundle())
     assert question.condition_id == key
@@ -553,7 +562,7 @@ def test_case_budgets_are_independent_and_do_not_fill_roles(monkeypatch, role):
 
     monkeypatch.setattr(
         "casepath.adapters.retrieval.hybrid_cypher._assign_role",
-        lambda *args: (role, [], []),
+        lambda *args: (role, [], [], None if role else "INSUFFICIENT_EVIDENCE"),
     )
     settings = HybridCypherSettings(case_recall_top_k=7, case_rerank_pool_size=2,
                                    case_role_top_k=1)
@@ -591,7 +600,12 @@ def test_role_selection_precedes_global_truncation(monkeypatch):
 
     monkeypatch.setattr(
         "casepath.adapters.retrieval.hybrid_cypher._assign_role",
-        lambda case, *args: ("limiting" if case.case_id == contrast else "support", [], []),
+        lambda case, *args: (
+            "limiting" if case.case_id == contrast else "support",
+            [],
+            [],
+            None,
+        ),
     )
     settings = HybridCypherSettings(case_rerank_pool_size=2, case_role_top_k=1,
                                    graph_weight=0, cites_weight=0)
@@ -1026,10 +1040,11 @@ def test_llm_cannot_attach_empty_or_wrong_fact_evidence(quote, fact_id):
                 ]
             )
 
+    # 非法引句丢弃该条映射，不打崩请求，也不据此写成付款已支持。
     state = SemanticConditionProjector(_mapping_catalog(), Model()).project(
         QueryState(session_id="guard", initial_query="咨询一下，已经付款"), _mapping_refs()
     )
-    assert _status_of(state, "cond.payment_made") is ConditionStatus.UNKNOWN
+    assert _status_of(state, "cond.payment_made") is not ConditionStatus.SATISFIED
 
 
 def test_live_projection_does_not_run_lexical_baseline(monkeypatch):
@@ -1060,6 +1075,7 @@ def test_live_projection_does_not_run_lexical_baseline(monkeypatch):
     ],
 )
 def test_llm_repeated_quote_requires_explicit_fact_id(fact_id, expected):
+    from casepath.application.runtime_meta import current_runtime_meta
     from casepath.contracts import UserFact
 
     class Model:
@@ -1077,17 +1093,24 @@ def test_llm_repeated_quote_requires_explicit_fact_id(fact_id, expected):
                 ]
             )
 
-    state = SemanticConditionProjector(_mapping_catalog(), Model()).project(
-        QueryState(
+    source = QueryState(
             session_id="guard",
             initial_query="交款",
             user_facts=[
                 UserFact(fact_id="f1", text="交款", source_turn=0),
                 UserFact(fact_id="f2", text="交款", source_turn=0),
             ],
-        ),
-        _mapping_refs(),
-    )
+        )
+    projector = SemanticConditionProjector(_mapping_catalog(), Model())
+    if fact_id is None:
+        result = projector.project(source, _mapping_refs())
+        assert _status_of(result, "cond.payment_made") is ConditionStatus.UNKNOWN
+        assert not any(
+            item.condition_id == "cond.payment_made"
+            for item in current_runtime_meta().projection_ledger
+        )
+        return
+    state = projector.project(source, _mapping_refs())
     payment = next(
         item for item in state.condition_states if item.condition_id == "cond.payment_made"
     )
