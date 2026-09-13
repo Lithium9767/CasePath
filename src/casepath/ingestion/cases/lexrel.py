@@ -1,4 +1,4 @@
-"""Convert LexRel 服务合同关系 samples into CasePath L1 and deep contracts."""
+"""Convert pinned LexRel civil-relation samples into CasePath L1/deep contracts."""
 
 from __future__ import annotations
 
@@ -25,6 +25,7 @@ from .extract import (
 )
 from .ids import (
     CLAIM_TYPE_SERVICE_TERMINATION_REFUND,
+    EXPECTED_LEXREL_RETRIEVAL_CASE_COUNT,
     EXPECTED_LEXREL_SERVICE_CASE_COUNT,
     LEXREL_CASE_ID_PREFIX,
     REVIEWED_L2_CASE_IDS,
@@ -38,6 +39,21 @@ from .sections import parse_requested_amount
 
 RELATION_TYPE = "服务合同关系"
 CAUSE = "服务合同纠纷"
+RELATION_CAUSES = {
+    "借款合同关系": "借款合同纠纷",
+    "保证合同关系": "保证合同纠纷",
+    "夫妻关系": "婚姻家庭纠纷",
+    "机动车交通事故侵权责任法律关系": "机动车交通事故责任纠纷",
+    "财产保险合同关系": "财产保险合同纠纷",
+    "除房屋外的买卖合同关系": "买卖合同纠纷",
+    "抵押合同关系": "抵押合同纠纷",
+    "房屋买卖合同关系": "房屋买卖合同纠纷",
+    "追偿权关系": "追偿权纠纷",
+    "劳务合同关系": "劳务合同纠纷",
+    "租赁合同关系": "租赁合同纠纷",
+    "物业服务合同关系": "物业服务合同纠纷",
+    RELATION_TYPE: CAUSE,
+}
 UNANNOTATED_REMEDY = "原数据未标注具体诉请"
 _REQUEST_RE = re.compile(r"请求(?:法院)?(?:依法)?(?:判令)?[：:]?|诉讼请求[：:]?|诉请|主张|要求")
 _REMEDY_ACTION_RE = re.compile(
@@ -82,34 +98,42 @@ def _first_content_line(content: str) -> str:
     return _first_sentence(content)
 
 
-def _title(uniqid: str) -> str:
-    # Relation participants have no plaintiff/defendant role or ordering contract.
-    return f"LexRel服务合同关系案例 {uniqid}"
+def _title(relation_type: str, uniqid: str) -> str:
+    # LexRel only labels relation participants. It does not identify plaintiff/defendant roles.
+    return f"LexRel{relation_type}案例 {uniqid}"
 
 
-def _relation_payload(sample: dict[str, Any]) -> dict[str, Any]:
+def _relation_payload(sample: dict[str, Any], relation_type: str) -> dict[str, Any]:
     relation = sample.get("relation") or {}
-    items = relation.get(RELATION_TYPE) or []
+    items = relation.get(relation_type) or []
     if not items or not isinstance(items[0], dict):
-        raise ValueError(f"sample {sample.get('uniqid')} has no {RELATION_TYPE}")
+        raise ValueError(f"sample {sample.get('uniqid')} has no {relation_type}")
     return items[0]
 
 
-def convert_sample(sample: dict[str, Any]) -> tuple[CaseIndexRecord, CaseRecord]:
+def convert_sample(
+    sample: dict[str, Any],
+    relation_type: str = RELATION_TYPE,
+) -> tuple[CaseIndexRecord, CaseRecord]:
     uniqid = str(sample.get("uniqid") or "").strip()
     if not uniqid:
         raise ValueError("LexRel sample is missing uniqid")
     facts_text = str(sample.get("input") or "").strip()
     if not facts_text:
         raise ValueError(f"LexRel sample {uniqid} has empty input facts")
-    payload = _relation_payload(sample)
+    if relation_type not in RELATION_CAUSES:
+        raise ValueError(f"unsupported LexRel relation type: {relation_type}")
+    payload = _relation_payload(sample, relation_type)
+    relation = sample.get("relation") or {}
+    relation_labels = [relation_type, *sorted(key for key in relation if key != relation_type)]
     object_ = str(payload.get("客体") or "")
     content = str(payload.get("内容") or "")
     case_id = case_id_for(uniqid)
-    title = _title(uniqid)
+    cause = RELATION_CAUSES[relation_type]
+    title = _title(relation_type, uniqid)
     explicit_remedy = _requested_remedy(facts_text)
-    case = {"title": title, "case_cause": CAUSE}
-    refund = bool(explicit_remedy) and (
+    case = {"title": title, "case_cause": cause}
+    refund = relation_type == RELATION_TYPE and bool(explicit_remedy) and (
         is_service_termination_refund(case, explicit_remedy)
         or (
             case_id in SERVICE_REFUND_RULE_CASE_IDS
@@ -122,11 +146,11 @@ def convert_sample(sample: dict[str, Any]) -> tuple[CaseIndexRecord, CaseRecord]
         case_no=None,
         court=None,
         judgment_date=None,
-        cause=CAUSE,
-        keywords=[RELATION_TYPE, "LexRel"],
+        cause=cause,
+        keywords=[*relation_labels, "LexRel", "民事案例"],
         facts_text=facts_text,
         reasoning_text="",
-        summary=(object_ or _first_content_line(content) or CAUSE)[:400],
+        summary=(object_ or _first_content_line(content) or cause)[:400],
         related_provision_ids=related_provision_ids_from_text(facts_text, content, object_),
         maturity=MaturityLevel.L1,
     )
@@ -140,15 +164,23 @@ def convert_sample(sample: dict[str, Any]) -> tuple[CaseIndexRecord, CaseRecord]
             "",
             book,
         )
-        if uses_refund_condition_template(case_id)
+        if relation_type == RELATION_TYPE and uses_refund_condition_template(case_id)
         else []
     )
+    if explicit_remedy:
+        requested_remedy = explicit_remedy
+    elif relation_type == RELATION_TYPE:
+        requested_remedy = UNANNOTATED_REMEDY
+    else:
+        requested_remedy = (
+            f"与{object_.strip() or relation_type}有关的民事请求（原数据未标注具体诉请）"
+        )[:240]
     claim = ClaimRecord(
         claim_id=entity_id(case_id, "claim", 1),
-        claim_type=CLAIM_TYPE_SERVICE_TERMINATION_REFUND if refund else CAUSE,
+        claim_type=CLAIM_TYPE_SERVICE_TERMINATION_REFUND if refund else cause,
         claimant=None,
         respondent=None,
-        requested_remedy=explicit_remedy or UNANNOTATED_REMEDY,
+        requested_remedy=requested_remedy,
         amount=parse_requested_amount(explicit_remedy),
         invoked_rule_ids=[RULE_SERVICE_TERMINATION_REFUND] if refund else [],
     )
@@ -159,7 +191,7 @@ def convert_sample(sample: dict[str, Any]) -> tuple[CaseIndexRecord, CaseRecord]
         case_no=None,
         court=None,
         judgment_date=None,
-        cause=CAUSE,
+        cause=cause,
         maturity=maturity,
         claims=[claim],
         findings=findings,
@@ -168,10 +200,11 @@ def convert_sample(sample: dict[str, Any]) -> tuple[CaseIndexRecord, CaseRecord]
         decisions=[],
         source_spans=book.spans,
     )
-    record = apply_case_overlay(record, facts_text, "")
-    # Keep the source-anchored condition bridges, but an overlay must not turn
-    # a payment/balance or hypothetical remedy into the source's actual claim.
-    record.claims = [claim]
+    if relation_type == RELATION_TYPE:
+        record = apply_case_overlay(record, facts_text, "")
+        # Keep the source-anchored condition bridges, but an overlay must not turn
+        # a payment/balance or hypothetical remedy into the source's actual claim.
+        record.claims = [claim]
     return index, record
 
 
@@ -200,6 +233,40 @@ def load_service_contract_cases(
         raise ValueError(
             "unexpected LexRel 服务合同关系 count: "
             f"expected {EXPECTED_LEXREL_SERVICE_CASE_COUNT}, received {len(lightweight)}"
+        )
+    order = lambda item: item.case_id
+    return sorted(lightweight, key=order), sorted(deep, key=order)
+
+
+def load_retrieval_cases(path: Path) -> tuple[list[CaseIndexRecord], list[CaseRecord]]:
+    """Load the balanced retrieval subset with an explicit primary relation per sample."""
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, list):
+        raise TypeError("LexRel retrieval input must be a JSON array")
+    lightweight: list[CaseIndexRecord] = []
+    deep: list[CaseRecord] = []
+    seen_ids: set[str] = set()
+    seen_facts: set[str] = set()
+    for item in payload:
+        if not isinstance(item, dict) or not isinstance(item.get("sample"), dict):
+            raise TypeError("LexRel retrieval item must contain a sample object")
+        relation_type = str(item.get("primary_relation_type") or "").strip()
+        sample = item["sample"]
+        index, record = convert_sample(sample, relation_type)
+        normalized_facts = re.sub(r"\s+", "", index.facts_text)
+        if index.case_id in seen_ids:
+            raise ValueError(f"duplicate LexRel case_id: {index.case_id}")
+        if normalized_facts in seen_facts:
+            raise ValueError(f"duplicate LexRel facts: {index.case_id}")
+        seen_ids.add(index.case_id)
+        seen_facts.add(normalized_facts)
+        lightweight.append(index)
+        deep.append(record)
+    if len(lightweight) != EXPECTED_LEXREL_RETRIEVAL_CASE_COUNT:
+        raise ValueError(
+            "unexpected LexRel retrieval count: "
+            f"expected {EXPECTED_LEXREL_RETRIEVAL_CASE_COUNT}, received {len(lightweight)}"
         )
     order = lambda item: item.case_id
     return sorted(lightweight, key=order), sorted(deep, key=order)

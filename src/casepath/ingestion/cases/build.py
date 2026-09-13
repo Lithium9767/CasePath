@@ -18,6 +18,9 @@ from .cleaner import CaseCleaner
 from .ids import (
     DATASET_ID,
     EXPECTED_LEXREL_REPOSITORY_URL,
+    EXPECTED_LEXREL_RETRIEVAL_PATH,
+    EXPECTED_LEXREL_RETRIEVAL_RECORD_COUNT,
+    EXPECTED_LEXREL_RETRIEVAL_SHA256,
     EXPECTED_LEXREL_REVISION,
     EXPECTED_LEXREL_SERVICE_PATH,
     EXPECTED_LEXREL_SERVICE_RECORD_COUNT,
@@ -30,7 +33,7 @@ from .ids import (
     GENERATOR,
     REVIEWED_L2_CASE_IDS,
 )
-from .lexrel import load_service_contract_cases
+from .lexrel import load_retrieval_cases, load_service_contract_cases
 from .manifest import CaseDatasetManifest
 from .spc_supplement import (
     COUNT as SPC_COUNT,
@@ -66,7 +69,7 @@ LIMITATIONS = [
     (
         "Stage 2 v7 incorporates six source-checked SPC editorial summaries as L1-only "
         "records. They are not verbatim judgment text, have no invented claims or source "
-        "spans, and do not enter the 54 deep records. Unknown final judgment dates stay null."
+        "spans, and do not enter the 150 deep records. Unknown final judgment dates stay null."
     ),
     (
         "LexRel relation subjects do not establish litigant roles, and abstract relation "
@@ -92,11 +95,11 @@ LIMITATIONS = [
         "related_provision_ids and are not retained as raw citations in this dataset."
     ),
     (
-        "Every legal-rag civil case and every LexRel expert-annotated 服务合同关系 "
-        "sample remains a deep CaseRecord for text retrieval. Refund-rule condition "
+        "Every legal-rag civil case and a balanced subset of LexRel expert-annotated "
+        "civil relations remains a deep CaseRecord for text retrieval. Refund-rule condition "
         "bridges are limited to SERVICE_REFUND_COMPARISON_CASE_IDS. The gym refund "
         "rule is invoked only for prepaid-closure / 解除+返还 cases in that set. "
-        "LexRel train splits are unused."
+        "LexRel train splits are unused; the retrieval subset is capped per relation type."
     ),
     (
         "Holdings, reasoning steps, and court findings are omitted when they cannot "
@@ -191,11 +194,11 @@ def _stage_rules(final_data_root: Path, staged_data_root: Path) -> None:
     shutil.copytree(source_rules, target_rules)
 
 
-def _lexrel_input_path(data_root: Path) -> Path:
-    candidate = data_root / "inputs" / Path(EXPECTED_LEXREL_SERVICE_PATH).name
+def _lexrel_input_path(data_root: Path, expected_path: str) -> Path:
+    candidate = data_root / "inputs" / Path(expected_path).name
     if candidate.is_file():
         return candidate
-    return Path(__file__).resolve().parents[4] / EXPECTED_LEXREL_SERVICE_PATH
+    return Path(__file__).resolve().parents[4] / expected_path
 
 
 def _spc_input_path(data_root: Path) -> Path:
@@ -208,15 +211,25 @@ def _spc_input_path(data_root: Path) -> Path:
 def _merge_lexrel_cases(
     lightweight: list[CaseIndexRecord],
     deep: list[CaseRecord],
-    lexrel_path: Path,
+    service_path: Path,
+    retrieval_path: Path,
 ) -> tuple[list[CaseIndexRecord], list[CaseRecord]]:
-    lexrel_digest = sha256_file(lexrel_path)
-    if lexrel_digest != EXPECTED_LEXREL_SERVICE_SHA256:
+    service_digest = sha256_file(service_path)
+    if service_digest != EXPECTED_LEXREL_SERVICE_SHA256:
         raise ValueError(
             "unexpected LexRel service-contract hash: "
-            f"expected {EXPECTED_LEXREL_SERVICE_SHA256}, received {lexrel_digest}"
+            f"expected {EXPECTED_LEXREL_SERVICE_SHA256}, received {service_digest}"
         )
-    lexrel_l1, lexrel_deep = load_service_contract_cases(lexrel_path)
+    retrieval_digest = sha256_file(retrieval_path)
+    if retrieval_digest != EXPECTED_LEXREL_RETRIEVAL_SHA256:
+        raise ValueError(
+            "unexpected LexRel retrieval-subset hash: "
+            f"expected {EXPECTED_LEXREL_RETRIEVAL_SHA256}, received {retrieval_digest}"
+        )
+    service_l1, service_deep = load_service_contract_cases(service_path)
+    retrieval_l1, retrieval_deep = load_retrieval_cases(retrieval_path)
+    lexrel_l1 = [*service_l1, *retrieval_l1]
+    lexrel_deep = [*service_deep, *retrieval_deep]
     seen = {item.case_id for item in lightweight}
     for item in lexrel_l1:
         if item.case_id in seen:
@@ -257,12 +270,14 @@ def build_dataset(
 
     cleaner = CaseCleaner(input_path, markdown_dir)
     lightweight, deep = cleaner.build_records()
-    lexrel_path = _lexrel_input_path(final_data_root)
+    service_path = _lexrel_input_path(final_data_root, EXPECTED_LEXREL_SERVICE_PATH)
+    retrieval_path = _lexrel_input_path(final_data_root, EXPECTED_LEXREL_RETRIEVAL_PATH)
     spc_path = _spc_input_path(final_data_root)
     lightweight, deep = _merge_lexrel_cases(
         lightweight,
         deep,
-        lexrel_path,
+        service_path,
+        retrieval_path,
     )
     lightweight = sorted([*lightweight, *load_spc_cases(spc_path)], key=lambda item: item.case_id)
     validate_records(lightweight, deep, provisions, rules)
@@ -305,6 +320,13 @@ def build_dataset(
                     revision=EXPECTED_LEXREL_REVISION,
                 ),
                 ManifestFile(
+                    path=EXPECTED_LEXREL_RETRIEVAL_PATH,
+                    sha256=EXPECTED_LEXREL_RETRIEVAL_SHA256,
+                    record_count=EXPECTED_LEXREL_RETRIEVAL_RECORD_COUNT,
+                    repository_url=EXPECTED_LEXREL_REPOSITORY_URL,
+                    revision=EXPECTED_LEXREL_REVISION,
+                ),
+                ManifestFile(
                     path=SPC_INPUT_PATH,
                     sha256=SPC_INPUT_SHA256,
                     record_count=SPC_COUNT,
@@ -336,7 +358,8 @@ def build_dataset(
         validation = validate_canonical_cases(staged_data_root)
         for source_path, expected in (
             (input_path, digest),
-            (lexrel_path, EXPECTED_LEXREL_SERVICE_SHA256),
+            (service_path, EXPECTED_LEXREL_SERVICE_SHA256),
+            (retrieval_path, EXPECTED_LEXREL_RETRIEVAL_SHA256),
             (spc_path, SPC_INPUT_SHA256),
         ):
             if not source_path.is_file() or sha256_file(source_path) != expected:

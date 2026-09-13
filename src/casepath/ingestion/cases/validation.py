@@ -30,6 +30,9 @@ from .ids import (
     EXPECTED_CIVIL_CASE_COUNT,
     EXPECTED_DEEP_CASE_COUNT,
     EXPECTED_LEXREL_REPOSITORY_URL,
+    EXPECTED_LEXREL_RETRIEVAL_PATH,
+    EXPECTED_LEXREL_RETRIEVAL_RECORD_COUNT,
+    EXPECTED_LEXREL_RETRIEVAL_SHA256,
     EXPECTED_LEXREL_REVISION,
     EXPECTED_LEXREL_SERVICE_PATH,
     EXPECTED_LEXREL_SERVICE_RECORD_COUNT,
@@ -118,25 +121,30 @@ def validate_records(
     l1_by_id = {item.case_id: item for item in lightweight}
     deep_ids = [item.case_id for item in deep]
     _require(len(deep_ids) == len(set(deep_ids)), "deep case_id values must be unique", errors)
+    normalized_fact_owners: dict[str, str] = {}
 
     child_ids: dict[str, str] = {}
     resolved_citations = 0
-    normalized_facts: set[str] = set()
     for record in lightweight:
-        facts = re.sub(r"\s+", "", record.facts_text)
-        _require(bool(facts), f"{record.case_id} has empty facts_text", errors)
-        _require(facts not in normalized_facts, "duplicate normalized case facts", errors)
-        normalized_facts.add(facts)
-        _require(
-            len(record.keywords) == len(set(record.keywords)),
-            f"{record.case_id} has duplicate keywords",
-            errors,
-        )
         _require(
             record.contract_version == "1.3",
             f"{record.case_id} is not CaseIndexRecord v1.3",
             errors,
         )
+        _require(
+            len(record.keywords) == len(set(record.keywords)),
+            f"{record.case_id} has duplicate keywords",
+            errors,
+        )
+        normalized_facts = re.sub(r"\s+", "", record.facts_text)
+        _require(bool(normalized_facts), f"{record.case_id} has empty facts_text", errors)
+        duplicate_owner = normalized_fact_owners.get(normalized_facts)
+        _require(
+            duplicate_owner is None,
+            f"{record.case_id} duplicates facts from {duplicate_owner}",
+            errors,
+        )
+        normalized_fact_owners.setdefault(normalized_facts, record.case_id)
         for provision_id in record.related_provision_ids:
             resolved_citations += 1
             _require(
@@ -299,10 +307,17 @@ def _require_manifest_identity(manifest: CaseDatasetManifest) -> None:
 
 
 def _validate_manifest_input(manifest: CaseDatasetManifest, manifest_root: Path) -> None:
-    expected_paths = {EXPECTED_PROCESSED_CASES_PATH, EXPECTED_LEXREL_SERVICE_PATH, SPC_INPUT_PATH}
+    expected_paths = {
+        EXPECTED_PROCESSED_CASES_PATH,
+        EXPECTED_LEXREL_SERVICE_PATH,
+        EXPECTED_LEXREL_RETRIEVAL_PATH,
+        SPC_INPUT_PATH,
+    }
     inputs = {Path(item.path).as_posix(): item for item in manifest.inputs}
     if len(inputs) != len(manifest.inputs) or set(inputs) != expected_paths:
-        raise ValueError("manifest must record unique processed-cases, LexRel and SPC inputs")
+        raise ValueError(
+            "manifest must record unique processed-cases, LexRel service/retrieval and SPC inputs"
+        )
     item = inputs[EXPECTED_PROCESSED_CASES_PATH]
     if (
         Path(item.path).as_posix() != EXPECTED_PROCESSED_CASES_PATH
@@ -327,6 +342,17 @@ def _validate_manifest_input(manifest: CaseDatasetManifest, manifest_root: Path)
     lexrel_path = manifest_root / lexrel.path
     if lexrel_path.is_file() and sha256_file(lexrel_path) != lexrel.sha256:
         raise ValueError(f"manifest hash mismatch for {lexrel.path}")
+    retrieval = inputs[EXPECTED_LEXREL_RETRIEVAL_PATH]
+    if (
+        retrieval.sha256 != EXPECTED_LEXREL_RETRIEVAL_SHA256
+        or retrieval.record_count != EXPECTED_LEXREL_RETRIEVAL_RECORD_COUNT
+        or retrieval.repository_url != EXPECTED_LEXREL_REPOSITORY_URL
+        or retrieval.revision != EXPECTED_LEXREL_REVISION
+    ):
+        raise ValueError("manifest input metadata mismatch for lexrel_retrieval_cases.json")
+    retrieval_path = manifest_root / EXPECTED_LEXREL_RETRIEVAL_PATH
+    if retrieval_path.is_file() and sha256_file(retrieval_path) != retrieval.sha256:
+        raise ValueError(f"manifest hash mismatch for {retrieval.path}")
     spc = inputs[SPC_INPUT_PATH]
     if (
         spc.sha256 != SPC_INPUT_SHA256
