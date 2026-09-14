@@ -30,7 +30,7 @@ from casepath.contracts import (
 from casepath.ingestion.graph.projection import digest
 from casepath.ingestion.laws.jsonl import read_jsonl
 
-_TOKEN = re.compile(r"[0-9A-Za-z_]+|[\u4e00-\u9fff]")
+_TOKEN = re.compile(r"[0-9A-Za-z_]+|[\u4e00-\u9fff]+")
 _CONTEXT: ContextVar[RetrievalContext | None] = ContextVar(
     "casepath_retrieval_context", default=None
 )
@@ -182,55 +182,88 @@ class RetrievalCatalog:
 
 
 def tokenize(text: str) -> list[str]:
-    parts = _TOKEN.findall(text.lower())
-    tokens = list(parts)
-    han = [p for p in parts if len(p) == 1 and "\u4e00" <= p <= "\u9fff"]
-    tokens.extend(a + b for a, b in pairwise(han))
+    """字符及相邻双字基线；标点、空白、数字和拉丁字串都是汉字邻接边界。"""
+    tokens: list[str] = []
+    for part in _TOKEN.findall(text.lower()):
+        if "\u4e00" <= part[0] <= "\u9fff":
+            tokens.extend(part)
+            tokens.extend(a + b for a, b in pairwise(part))
+        else:
+            tokens.append(part)
     return tokens
 
 
 class BM25Index:
-    """自建 BM25；k1/b 为工程默认值，需开发集校准后才能当论文超参。"""
+    """倒排 BM25 字符基线；相邻双字为主，单字只作低权重的词面回退。
 
-    def __init__(self, documents: dict[str, str], *, k1: float = 1.2, b: float = 0.75) -> None:
+    查询保留相对词频（词频/总词数）：整句重复不加分，句内主题重复仍有权重。
+    k1/b/单字权重均为可解释工程默认值，不声称经盲测优化或是 BM25F。
+    """
+
+    def __init__(
+        self,
+        documents: dict[str, str],
+        *,
+        k1: float = 1.2,
+        b: float = 0.75,
+        han_unigram_weight: float = 0.25,
+    ) -> None:
         # 建立词项统计：少见词的 IDF 更高，长文通过长度归一化避免天然占优。
-        # 此实现把文档分词结果留在内存，search 时遍历文档，并非 Neo4j 的全文索引接口。
-        if k1 <= 0 or not 0 <= b <= 1:
+        # 索引时缓存词频和长度项；搜索仅访问命中词的倒排，不反复重建全库 Counter。
+        if (
+            not all(math.isfinite(value) for value in (k1, b, han_unigram_weight))
+            or k1 <= 0
+            or not 0 <= b <= 1
+            or not 0 < han_unigram_weight <= 1
+        ):
             raise ValueError("BM25 parameters must be valid")
         self.k1 = k1
         self.b = b
+        self.han_unigram_weight = han_unigram_weight
         self.ids = sorted(documents)
         self.tokens = {oid: tokenize(documents[oid]) for oid in self.ids}
         self.n = len(self.ids)
         lengths = [len(self.tokens[oid]) or 1 for oid in self.ids]
         self.avgdl = sum(lengths) / len(lengths) if lengths else 1.0
-        df: Counter[str] = Counter()
+        postings: dict[str, list[tuple[str, int]]] = defaultdict(list)
+        self._length_norm: dict[str, float] = {}
         for oid in self.ids:
-            df.update(set(self.tokens[oid]))
+            for term, frequency in Counter(self.tokens[oid]).items():
+                postings[term].append((oid, frequency))
+            dl = len(self.tokens[oid]) or 1
+            self._length_norm[oid] = self.k1 * (1.0 - self.b + self.b * dl / self.avgdl)
+        self._postings = {term: tuple(rows) for term, rows in postings.items()}
         self.idf = {
-            term: math.log((self.n - freq + 0.5) / (freq + 0.5) + 1.0) for term, freq in df.items()
+            term: math.log((self.n - len(rows) + 0.5) / (len(rows) + 0.5) + 1.0)
+            for term, rows in self._postings.items()
         }
 
     def search(self, query: str, top_k: int) -> list[tuple[str, float]]:
-        if top_k <= 0:
+        if type(top_k) is not int or top_k <= 0:
             raise ValueError("top_k must be positive")
         q_terms = tokenize(query)
         if not q_terms or not self.ids:
             return []
-        scored: list[tuple[str, float]] = []
-        for oid in self.ids:
-            tf = Counter(self.tokens[oid])
-            dl = len(self.tokens[oid]) or 1
-            score = 0.0
-            for term in q_terms:
-                if term not in tf:
-                    continue
-                freq = tf[term]
-                denom = freq + self.k1 * (1.0 - self.b + self.b * dl / self.avgdl)
-                # freq 是词频，dl 是本文长度，avgdl 是平均长度；k1 控制词频饱和，b 控制长度惩罚。
-                score += self.idf.get(term, 0.0) * (freq * (self.k1 + 1.0) / denom)
-            if score > 0:
-                scored.append((oid, score))
+        query_frequencies: dict[str, int] = defaultdict(int)
+        for term in q_terms:
+            query_frequencies[term] += 1
+        scores: dict[str, float] = defaultdict(float)
+        for term, query_frequency in query_frequencies.items():
+            # 归一化保留句内相对重点；重复整句只同比增加分子和分母，不刷分。
+            query_weight = query_frequency / len(q_terms)
+            # 不使用领域停用词表；“不”等否定单字仍保留，其邻接双字不被删掉。
+            weight = (
+                self.han_unigram_weight
+                if len(term) == 1 and "\u4e00" <= term <= "\u9fff"
+                else 1.0
+            )
+            for oid, frequency in self._postings.get(term, ()):
+                denominator = frequency + self._length_norm[oid]
+                scores[oid] += (
+                    query_weight * weight * self.idf[term]
+                    * frequency * (self.k1 + 1.0) / denominator
+                )
+        scored = [(oid, score) for oid, score in scores.items() if score > 0]
         scored.sort(key=lambda item: (-item[1], item[0]))
         return scored[:top_k]
 
@@ -282,25 +315,43 @@ def scored_reference(
     )
 
 
+def _distinct_search_chunks(chunks: Iterable[str]) -> list[str]:
+    """只移除逐字重复或被其他字段完整包含的片段，不合并不同法律命题。"""
+    unique = list(dict.fromkeys(" ".join(chunk.split()) for chunk in chunks if chunk.strip()))
+    return [
+        chunk for chunk in unique
+        if not any(chunk != other and chunk in other for other in unique)
+    ]
+
+
 def _rule_search_text(rule: RuleRecord, provision_text: dict[str, str]) -> str:
-    # 【c 索引文本】一规则一文本：标题、请求类型、条件、相关法条和原文引句。
+    # 【c 索引文本】只使用已有规范字段；不从测试问题补写同义词或新法律条件。
     # BM25 与 embedding 共用 search_text；不是对图中每个节点做图嵌入。
     chunks = [rule.title, *rule.claim_types]
     for condition in rule.conditions:
+        # 当前合同没有 user_question 字段，predicate 本身已有可回答的事实问题。
         chunks.extend([condition.label, condition.predicate])
+    for exception in rule.exceptions:
+        chunks.extend([exception.label, exception.predicate, exception.effect])
+    for consequence in rule.consequences:
+        chunks.extend([consequence.consequence_type, consequence.description])
     for ref in rule.provisions:
         chunks.append(provision_text.get(ref.provision_id, ""))
         chunks.append(ref.title)
     for span in rule.source_spans:
         chunks.append(span.quote)
-    return "\n".join(chunk for chunk in chunks if chunk)
+    # 完整法条仍在；已包含于法条的 span/条件短句不再复制一次制造额外词频。
+    return "\n".join(_distinct_search_chunks(chunks))
 
 
 def _case_search_text(light: CaseIndexRecord, deep: CaseRecord | None) -> str:
-    # 一案一文本：标题/案由/关键词及提取的查明 predicate，并非整篇案例都参与向量计算。
-    # 完整说理与裁判结果可以在解释证据包使用，和检索文本范围是两回事。
-    # 轻量案例不用 facts_text/summary 全文：其中可能混有裁判主文和结果。
-    parts = [light.title, light.cause or "", *light.keywords]
+    from casepath.adapters.retrieval.case_facts import extract_case_fact_prefix
+
+    # 一案一文本：保留已有标题/案由/关键词/查明，并纳入事实正文的保守前缀。
+    # 不追加 summary、说理、裁判、条件状态或支持/限制角色；已识别的裁判后缀截断。
+    # 既有元数据和查明仍可能含法律标签，不能将此改动宣称为全数据无泄漏。
+    facts = extract_case_fact_prefix(light.facts_text)
+    parts = [light.title, light.cause or "", *light.keywords, facts]
     if deep is not None:
         parts.extend(item.predicate for item in deep.findings)
     return "\n".join(part for part in parts if part)
@@ -583,10 +634,24 @@ def validate_rule_scope(scope: RuleScope, catalog: RetrievalCatalog) -> None:
 class MemoryHybridSearch:
     """同一对象空间上的全文检索；向量通道由调用方按同一 ID 集合补齐。"""
 
-    def __init__(self, catalog: RetrievalCatalog) -> None:
+    def __init__(
+        self, catalog: RetrievalCatalog, *, case_han_unigram_weight: float = 0.25,
+        case_feedback: bool = False,
+    ) -> None:
+        if type(case_feedback) is not bool:
+            raise ValueError("case_feedback must be a boolean")
         self.catalog = catalog
         self.rule_index = BM25Index({key: doc.search_text for key, doc in catalog.rules.items()})
-        self.case_index = BM25Index({key: doc.search_text for key, doc in catalog.cases.items()})
+        self.case_index = BM25Index(
+            {key: doc.search_text for key, doc in catalog.cases.items()},
+            han_unigram_weight=case_han_unigram_weight,
+        )
+        self.case_feedback = case_feedback
+        self._case_feedback_index = None
+        if case_feedback:
+            from casepath.adapters.retrieval.local_feedback import LocalFeedbackIndex
+
+            self._case_feedback_index = LocalFeedbackIndex(self.case_index)
 
     def search(
         self,
@@ -601,16 +666,26 @@ class MemoryHybridSearch:
         if context.index_version != self.catalog.index_version:
             raise ValueError("search index version does not match the request context")
         index = self.rule_index if target == "rule" else self.case_index
-        hits = index.search(text, top_k)
+        terms = ()
+        if target == "case" and self._case_feedback_index is not None:
+            result = self._case_feedback_index.search(text, top_k)
+            hits, terms = result.hits, result.terms
+        else:
+            hits = index.search(text, top_k)
         return [
             scored_reference(
                 oid,
                 score,
                 channels=["bm25"],
                 components=[
-                    ScoreComponent(name="bm25", value=score, explanation="自建BM25原文检索")
+                    ScoreComponent(
+                        name="bm25", value=score,
+                        explanation=("BM25正文检索加0.2弱反馈；归一化词法分，非概率"
+                                     if terms else "自建BM25原文检索"),
+                    )
                 ],
-                reasons=["全文通道命中"],
+                reasons=["全文通道命中", *(["本地反馈词（非用户事实）：" + "、".join(terms)]
+                                          if terms else [])],
             )
             for oid, score in hits
         ]

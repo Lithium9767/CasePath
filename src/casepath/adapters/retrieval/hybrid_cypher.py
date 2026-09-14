@@ -7,17 +7,20 @@
 
 from __future__ import annotations
 
+import math
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Literal, Protocol
 
 from casepath.adapters.conditions.condition_logic import group_truth
+from casepath.adapters.retrieval.evaluation_trace import record_retrieval_ranking
 from casepath.adapters.retrieval.graph_navigator import (
     GraphHit,
     GraphNavigator,
     MemoryGraphNavigator,
 )
 from casepath.adapters.retrieval.retrieval_catalog import (
+    BM25Index,
     CaseAssessment,
     CaseDocument,
     RetrievalCatalog,
@@ -69,10 +72,16 @@ class HybridCypherSettings:
     claim_weight: float = 0.8
     graph_weight: float = 1.0
     cites_weight: float = 0.5
+    # Recall and final output are separate budgets; fusion needs headroom.
+    rule_recall_top_k: int = 50
+    # Inferred claims are optional lexical hypotheses, never extra user facts.
+    case_hypothesis_weight: float = 0.35
+    case_query_mode: Literal["legacy", "separated"] = "legacy"
 
     def __post_init__(self) -> None:
         numeric = [
             self.rule_top_k,
+            self.rule_recall_top_k,
             self.case_recall_top_k,
             self.case_rerank_pool_size,
             self.case_role_top_k,
@@ -90,6 +99,10 @@ class HybridCypherSettings:
         ]
         if min(weights) < 0:
             raise ValueError("HybridCypher weights must be non-negative")
+        if not math.isfinite(self.case_hypothesis_weight) or not 0 <= self.case_hypothesis_weight <= 1:
+            raise ValueError("case hypothesis weight must be finite and in [0, 1]")
+        if self.case_query_mode not in {"legacy", "separated"}:
+            raise ValueError("unknown case query mode")
 
 
 class HybridCandidateSearch(Protocol):
@@ -112,6 +125,30 @@ def _query_text(state: QueryState) -> str:
     parts.extend(item.claim_type for item in state.candidate_claims)
     parts.extend(item.requested_remedy for item in state.candidate_claims)
     return "\n".join(part for part in parts if part)
+
+
+def _case_query_variants(state: QueryState) -> tuple[str, str]:
+    """Keep direct user statements separate from inferred claim vocabulary.
+
+    Only remove B's identifiable copy of the initial statement. Later answers,
+    negations and different speakers are not globally deduplicated or rewritten.
+    The generic fallback's first-40-character summary is not a new search intent.
+    """
+    parts = [state.initial_query]
+    for fact in state.user_facts:
+        if (fact.fact_id == "fact.initial.query" and fact.source_turn == 0
+                and fact.text == state.initial_query):
+            continue
+        parts.append(fact.text)
+    primary = "\n".join(part for part in parts if part)
+    hypotheses = []
+    for claim in state.candidate_claims:
+        if claim.claim_type == "民事咨询":
+            continue
+        for text in (claim.claim_type, claim.requested_remedy):
+            if text and text not in primary and text not in hypotheses:
+                hypotheses.append(text)
+    return primary, "\n".join(hypotheses)
 
 
 def _claim_rank(state: QueryState, catalog: RetrievalCatalog) -> list[str]:
@@ -139,6 +176,41 @@ def _raw_scores(refs: list[ScoredReference]) -> dict[tuple[str, str], float]:
 
 def _valid_path(nodes: tuple[str, ...] | list[str], edges: tuple[str, ...] | list[str]) -> bool:
     return len(nodes) >= 2 and len(edges) == len(nodes) - 1 and all(nodes) and all(edges)
+
+
+def _fuse_case_candidates(
+    ranked: dict[str, list[str]], settings: HybridCypherSettings,
+) -> dict[str, float]:
+    """Rank query matches; retain unordered graph hits as a fallback tier.
+
+    Graph navigators enumerate edges, not query relevance. Their row order and
+    repeated, correlated paths must not vote against a direct query match.
+    Graph-only cases remain eligible for the existing evidence/role selection.
+    """
+    scores = weighted_rrf(
+        {name: ranked.get(name, []) for name in ("bm25", "vector", "claim_lexical")},
+        weights={"bm25": settings.fulltext_weight, "vector": settings.vector_weight,
+                 "claim_lexical": settings.case_hypothesis_weight * settings.fulltext_weight},
+        k=settings.rrf_k,
+    )
+    graph_weights = {
+        "graph": settings.graph_weight,
+        "applies": 0.6,
+        "cites": settings.cites_weight,
+    }
+    priors: dict[str, float] = {}
+    for channel, weight in graph_weights.items():
+        if weight <= 0:
+            continue
+        for case_id in set(ranked[channel]):
+            # Related graph channels are evidence, not independent ranked votes.
+            priors[case_id] = max(priors.get(case_id, 0.0), weight)
+    ceiling = min(scores.values()) / 2 if scores else 1 / (settings.rrf_k + 1)
+    normalizer = max(graph_weights.values())
+    for case_id in sorted(priors):
+        if case_id not in scores:
+            scores[case_id] = ceiling * priors[case_id] / normalizer
+    return scores
 
 
 # 先从多个通道召回候选，再用图关系扩展，最后统一融合、重排。
@@ -183,7 +255,10 @@ class HybridCypherRuleRetriever:
                 query,
                 target="rule",
                 context=context,
-                top_k=min(self.settings.rule_top_k, max(1, len(self.catalog.rules))),
+                top_k=min(
+                    max(self.settings.rule_top_k, self.settings.rule_recall_top_k),
+                    max(1, len(self.catalog.rules)),
+                ),
             )
         except Exception as exc:
             raise RetrieverUnavailable("规则全文通道不可用") from exc
@@ -278,6 +353,19 @@ class HybridCypherRuleRetriever:
         from casepath.adapters.retrieval.rule_relevance import bind_default_scope_from_refs
 
         bind_default_scope_from_refs(limited, self.catalog)
+        # Offline observer only: preserve the exact existing channel/final order.
+        for channel, ids in ranked.items():
+            record_retrieval_ranking(f"a.channel.{channel}", ids)
+        record_retrieval_ranking(
+            "a.fused",
+            (item.object_id for item in results),
+            scores=(item.score for item in results),
+        )
+        record_retrieval_ranking(
+            "a.final",
+            (item.object_id for item in limited),
+            scores=(item.score for item in limited),
+        )
         return limited
 
 
@@ -547,6 +635,8 @@ class HybridCypherCaseRetriever:
         self.navigator = navigator or (
             graph if isinstance(graph, GraphNavigator) else MemoryGraphNavigator(catalog)
         )
+        # Auxiliary expansion is local lexical search only: no second embedding/LLM call.
+        self._hypothesis_index: BM25Index | None = None
 
     def retrieve(
         self,
@@ -562,7 +652,10 @@ class HybridCypherCaseRetriever:
         rule_ids = [item.object_id for item in rule_refs if item.object_id in self.catalog.rules]
         if not rule_ids:
             raise RetrieverUnavailable("没有可检索的候选规则，拒绝空成功")
-        query = _query_text(state)
+        query, hypothesis = (
+            _case_query_variants(state) if self.settings.case_query_mode == "separated"
+            else (_query_text(state), "")
+        )
         try:
             # 然后先做文本/向量案例搜索：
             hybrid = self.search.search(
@@ -573,6 +666,15 @@ class HybridCypherCaseRetriever:
             )
         except Exception as exc:
             raise RetrieverUnavailable("案例全文通道不可用") from exc
+        hypothesis_hits = []
+        if hypothesis and self.settings.case_hypothesis_weight > 0 and self.settings.fulltext_weight > 0:
+            if self._hypothesis_index is None:
+                self._hypothesis_index = BM25Index(
+                    {key: case.search_text for key, case in self.catalog.cases.items()}
+                )
+            hypothesis_hits = self._hypothesis_index.search(
+                hypothesis, self.settings.case_recall_top_k
+            )
         condition_ids: list[str] = []
         for rule_id in rule_ids:
             condition_ids.extend(self.catalog.rules[rule_id].condition_ids)
@@ -582,7 +684,8 @@ class HybridCypherCaseRetriever:
         # 这些图候选不要求先被 BM25 命中，因此能补回词面不相似的案例。
         apply_hits = self.navigator.cases_applying_rules(context, rule_ids)
         cite_hits = self.navigator.cases_citing_provisions(context, rule_ids)
-        graph_ids = list(dict.fromkeys(item.case_id for item in graph_hits))
+        # Stable budget selection, not a relevance rank from graph row order.
+        graph_ids = sorted({item.case_id for item in graph_hits})
         if len(graph_ids) > self.settings.per_condition_limit * max(1, len(condition_ids)):
             graph_ids = graph_ids[: self.settings.per_condition_limit * len(condition_ids)]
         cite_ids = list(dict.fromkeys(item.case_id for item in cite_hits))
@@ -593,18 +696,9 @@ class HybridCypherCaseRetriever:
             "graph": graph_ids,
             "applies": apply_ids,
             "cites": cite_ids,
+            "claim_lexical": [key for key, _ in hypothesis_hits],
         }
-        fused = weighted_rrf(
-            ranked,
-            weights={
-                "bm25": self.settings.fulltext_weight, # 1.0
-                "graph": self.settings.graph_weight, # 1.0
-                "applies": 0.6, # 辅助关联
-                "vector": self.settings.vector_weight, # 1.0
-                "cites": self.settings.cites_weight, # 辅助关联 0.5
-            },
-            k=self.settings.rrf_k,
-        )
+        fused = _fuse_case_candidates(ranked, self.settings)
 
         known = _known_states(state)
         user_claims = {item.claim_type for item in state.candidate_claims}
@@ -626,6 +720,7 @@ class HybridCypherCaseRetriever:
         comparisons = {}
         roles_by_case = {}
         raw_case_scores = _raw_scores(hybrid)
+        raw_case_scores.update({(key, "claim_lexical"): score for key, score in hypothesis_hits})
         for case_id, rrf_score in fused.items():
             case = self.catalog.cases.get(case_id)
             if case is None:
@@ -642,7 +737,10 @@ class HybridCypherCaseRetriever:
                        f"未知或证据不足：{list(comparison.unknown)}"]
             # 公共 score 保留检索相关性，不再混入正负相容性；角色内部按覆盖度重排。
             components = [
-                ScoreComponent(name="rrf", value=rrf_score, explanation="混合与图通道RRF"),
+                ScoreComponent(
+                    name="rrf", value=rrf_score,
+                    explanation="查询通道RRF；仅图命中为低位补召回，不以图遍历顺序投票",
+                ),
                 ScoreComponent(name="comparison_coverage", value=comparison.coverage,
                                explanation="明确且有证据的共同条件占比，非概率"),
                 ScoreComponent(name="same_conditions", value=len(comparison.same),
@@ -650,13 +748,14 @@ class HybridCypherCaseRetriever:
                 ScoreComponent(name="different_conditions", value=len(comparison.different),
                                explanation="明确不同的条件数，不作为负分"),
             ]
-            for channel in ("bm25", "vector"):
+            for channel in ("bm25", "vector", "claim_lexical"):
                 if (case_id, channel) in raw_case_scores:
                     components.append(
                         ScoreComponent(
                             name=channel,
                             value=raw_case_scores[(case_id, channel)],
-                            explanation="召回通道原始分数",
+                            explanation=("候选诉求的低权词法辅助分，非用户事实或法律证据"
+                                         if channel == "claim_lexical" else "召回通道原始分数"),
                         )
                     )
             scored_cases.append((final, case_id, reasons, components))
@@ -756,11 +855,13 @@ class HybridCypherCaseRetriever:
                     },
                     graph_only_ids=frozenset(
                         set(graph_ids) - set(ranked["bm25"]) - set(ranked["vector"])
+                        - set(ranked["claim_lexical"])
                     ),
                     cite_only_ids=frozenset(
                         set(cite_ids)
                         - set(ranked["bm25"])
                         - set(ranked["vector"])
+                        - set(ranked["claim_lexical"])
                         - set(graph_ids)
                         - set(apply_ids)
                     ),
@@ -773,7 +874,7 @@ class HybridCypherCaseRetriever:
             )
             degraded = len(support) + len(limiting) + len(boundary) <= 1
             succeeded = True
-            return RetrievalBundle(
+            bundle = RetrievalBundle(
                 rule_refs=rule_refs,
                 support_case_refs=support,
                 limiting_case_refs=limiting,
@@ -788,6 +889,27 @@ class HybridCypherCaseRetriever:
                 undetermined_case_ids=sorted(undetermined),
                 undetermined_reason_summary=sorted(set(undetermined_reasons.values())),
             )
+            # Only successful retrievals emit snapshots. In particular c.fused
+            # precedes role filtering; public role lists are not a global rank.
+            for channel, ids in ranked.items():
+                record_retrieval_ranking(f"c.channel.{channel}", ids)
+            record_retrieval_ranking(
+                "c.fused",
+                (row[1] for row in scored_cases),
+                scores=(row[0] for row in scored_cases),
+            )
+            record_retrieval_ranking(
+                "c.pool", (row[1] for row in pool), scores=(row[0] for row in pool)
+            )
+            for role, refs in (("support", support), ("limiting", limiting),
+                               ("boundary", boundary)):
+                record_retrieval_ranking(
+                    f"c.{role}",
+                    (item.object_id for item in refs),
+                    scores=(item.score for item in refs),
+                )
+            record_retrieval_ranking("c.undetermined", bundle.undetermined_case_ids)
+            return bundle
         finally:
             emit_stage_event(
                 stage="C_case_retrieval",

@@ -1,0 +1,157 @@
+{
+  "manifest_version": "1.0",
+  "dataset_id": "casepath.ac_retrieval.silver.v1",
+  "created_on": "2026-09-14",
+  "repository_revision": "7b9ff532a0654209b4858b9009d0baef54368763",
+  "hash_policy": "SHA-256 of UTF-8 bytes after CRLF-to-LF normalization; no other whitespace normalization.",
+  "files": {
+    "ac_queries.jsonl": {
+      "sha256": "72427f00e71e86f0e4f15f2a6cd158887dc33f8939fa8d8f9e210694a7ecf158",
+      "bytes_lf": 59773,
+      "records": 47
+    }
+  },
+  "candidate_snapshots": [
+    {
+      "path": "data/canonical/rules/rules.jsonl",
+      "sha256": "7cbd7dbb15daf03d542ce1a953e2fbc0eafa1fd96db48a027e6c3dfbee710ba9",
+      "bytes_lf": 3539651,
+      "records": 776
+    },
+    {
+      "path": "data/canonical/rules/provisions.jsonl",
+      "sha256": "56dff29fcff3cc669c4a1cbefcf00e638f3a0a9549f000096553179a7d815250",
+      "bytes_lf": 1292777,
+      "records": 1260
+    },
+    {
+      "path": "data/canonical/rules/source_spans.jsonl",
+      "sha256": "372d63b587fafe6f62b7eec9cab83abf61fccfc0524e733d7d46d60e6ec3ed33",
+      "bytes_lf": 1081018,
+      "records": 3272
+    },
+    {
+      "path": "data/canonical/cases/cases_l1.jsonl",
+      "sha256": "17c8e74c717063e7619ac74438b54ca4f49c728213cbdaa2890b19b3965392bd",
+      "bytes_lf": 508607,
+      "records": 156
+    }
+  ],
+  "annotation_sources": [
+    {
+      "path": "data/inputs/lexrel_service_contract.json",
+      "sha256": "2b62543e8c61eb44664a1066a8a32311c026601ee02c7e4963799e1087a3285e",
+      "bytes_lf": 16956,
+      "records": 9
+    },
+    {
+      "path": "data/inputs/lexrel_retrieval_cases.json",
+      "sha256": "3e7ef52e191217816c97b2fbcab075089e165b65b30dcbaef7d05c684aa95d24",
+      "bytes_lf": 225599,
+      "records": 96
+    },
+    {
+      "path": "data/inputs/spc_civil_code_first_batch.jsonl",
+      "sha256": "57205d17755ddbc8db470df229c62bb49c83f7584bf7778a766ba7ab66a868a4",
+      "bytes_lf": 6791,
+      "records": 6
+    },
+    {
+      "path": "data/evaluation/case_retrieval_qrels.jsonl",
+      "sha256": "d88fd2f3526df9ce021e28fddb4fa4bf54bc59739e58550572bca5eea34b0bae",
+      "bytes_lf": 10034,
+      "records": 13
+    }
+  ],
+  "counts": {
+    "queries": 47,
+    "A": 28,
+    "C": 19,
+    "A_domains": {
+      "人格权": 4,
+      "侵权责任": 4,
+      "合同": 4,
+      "婚姻家庭": 4,
+      "总则": 4,
+      "物权": 4,
+      "继承": 4
+    },
+    "A_distinct_judged_rules": 62,
+    "C_relation_queries": 13,
+    "C_known_item_queries": 6,
+    "C_lexrel_labeled_candidates": 105,
+    "C_other_candidates_without_relation_labels": 51,
+    "positive_judgments": 241
+  },
+  "relevance_grades": {
+    "0": "Explicitly judged not relevant if present; no exhaustive negative labeling is claimed.",
+    "1": "A: broad background norm. C LexRel: binary same-relation weak positive, NOT low expert relevance.",
+    "2": "A: materially useful supplementary/boundary rule. C known-item: analogous issue with a substantive factual distinction.",
+    "3": "A: core rule for the stated issue. C known-item: direct matching curated source case."
+  },
+  "annotation_families": {
+    "curated_silver_non_exhaustive": {
+      "module": "A",
+      "query_prefix": "A.",
+      "queries": 28,
+      "judgments_exhaustive": false,
+      "description": "Original hypothetical fact questions grounded in the repository rules and official 2020 Civil Code text; grades are curated judgments, not independent expert gold. Different applicable rules may remain unlabeled."
+    },
+    "weak_relation_label_non_exhaustive": {
+      "module": "C",
+      "query_prefix": "C.lexrel.",
+      "queries": 13,
+      "judgments_exhaustive": false,
+      "description": "Preserve the 13 pre-existing natural-language topics; recompute qrels ONLY from independent relation annotations in the 9+96 pinned input records, trimming outer whitespace without semantic aliases. Exact for this label definition over 105 LexRel records, not exhaustive legal relevance over 156 candidates."
+    },
+    "curated_known_item_silver_non_exhaustive": {
+      "module": "C",
+      "query_prefix": "C.spc.",
+      "queries": 6,
+      "judgments_exhaustive": false,
+      "description": "Paraphrased fact scenarios based on six already indexed SPC editorial summaries. Known-item retrieval checks, not held-out queries or independent similar-case gold. One sport-training analogy is additionally graded 2."
+    }
+  },
+  "official_sources": [
+    {
+      "url": "https://www.court.gov.cn/zixun/xiangqing/233181.html",
+      "title": "中华人民共和国民法典",
+      "publication_date": "2020-06-01",
+      "adopted_on": "2020-05-28",
+      "effective_from": "2021-01-01",
+      "checked_on": "2026-09-14",
+      "scope": "Statute text supporting query topics; this fixed-version benchmark does not purport to track all later laws or judicial interpretations."
+    },
+    {
+      "url": "https://www.court.gov.cn/zixun/xiangqing/347181.html",
+      "title": "人民法院贯彻实施民法典典型案例（第一批）",
+      "publication_date": "2022-02-25",
+      "checked_on": "2026-09-14",
+      "sections": [
+        4,
+        6,
+        7,
+        8,
+        10,
+        13
+      ]
+    }
+  ],
+  "policies": {
+    "runtime_input": "Only query_text is submitted as user facts. Do not pass qrels, source_refs, domain, judgment_basis or target IDs to A/B/C. Score after retrieval.",
+    "unjudged": "Unlabeled candidates contribute gain 0 in this closed evaluation; this is a scoring convention, NOT a finding that they are legally irrelevant. Recall is recall of the annotated positives.",
+    "isolation": "Do not build case search text from relation-enriched title, cause, keywords, summary, reasoning, or qrels. The runner records the facts-only search view hash separately; no copied LexRel corpus is added by this benchmark.",
+    "self_exclusion": "SPC questions are paraphrased known-item scenarios rather than source-case-to-peer queries, so target cases remain eligible. exclude_ids is empty. Future source-case-to-peer protocols must exclude their own source ID before top-k.",
+    "selection": "Query topics and qrels were prepared without consulting retrieval ranks; this is a frozen diagnostic/development benchmark, not a statistically representative blinded test set.",
+    "metric_groups": "Report A, C relation-label and C known-item metrics separately. Gains 2^grade-1; Recall relevant iff grade>0. Mixed C/all scores, if emitted, are diagnostic aggregates with incompatible judgment semantics explicitly disclosed.",
+    "limitations": [
+      "Seven domains with four A queries each do not exhaust 776 rules or 1260 articles.",
+      "Rule relevance is not proof of the rule's maturity, semantic completeness, applicability or the legal correctness of an eventual answer.",
+      "LexRel same-relation labels can overinclude cases that do not satisfy the full query and miss differently annotated but relevant cases.",
+      "Only 105 of 156 C candidates have LexRel relation labels; the other 51 are not hard negatives.",
+      "Six SPC tasks are known-item checks, so their scores can be easier than novel similar-case retrieval.",
+      "No author identity, bank account, contact information, raw LexRel case text or returned ranking is copied into these query/manifest files.",
+      "A later relevance adjudication should use pooled retrieval plus independent blinded reviewers and version the qrels before comparing systems."
+    ]
+  }
+}

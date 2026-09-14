@@ -61,6 +61,7 @@ class HybridCypherP4Factory:
         embedding_model: EmbeddingModel | None = None,
         vector_index: VectorIndex | None = None,
         calibrator=None,
+        case_feedback: bool = False,
     ) -> None:
         self._catalog = catalog
         self._data_root = data_root or Path("data")
@@ -71,6 +72,9 @@ class HybridCypherP4Factory:
         # 向量索引已有规则
         self._vector_index = vector_index
         self._calibrator = calibrator
+        if type(case_feedback) is not bool:
+            raise ValueError("case_feedback must be a boolean")
+        self._case_feedback = case_feedback
         # 【默认入口未启用】configured.py 不传此参数；这只是可注入的校准扩展点。
         # 不注入时不会执行 transform，LLM 原始置信度也不能解释成统计正确率。
 
@@ -94,13 +98,16 @@ class HybridCypherP4Factory:
         # 取得catalog
         catalog = self._catalog_or_load()
         # 默认检索方式没有向量就先用内存/BM25。
-        search = MemoryHybridSearch(catalog)
+        search = MemoryHybridSearch(catalog, case_feedback=self._case_feedback)
         # 【不是废代码】无向量时直接使用；VectorHybridSearch 内部也使用它做 BM25。
         # 如果有embedding，使用向量检索
         vector_enabled = self._embedding_model is not None
         if vector_enabled:
             # 使用向量检索
-            search = VectorHybridSearch(catalog, self._embedding_model, self._vector_index)
+            search = VectorHybridSearch(
+                catalog, self._embedding_model, self._vector_index,
+                case_feedback=self._case_feedback,
+            )
         # A先生成检索术语，C复用；原始查询保留，扩展绝不写入用户事实。
         if language_model is not None:
             search = ExpandedQuerySearch(search, language_model)
@@ -159,7 +166,10 @@ class HybridCypherP4Factory:
                 available=True,
                 mode=graph_mode,
                 degraded=True,
-                reason=retriever_reason,
+                reason=retriever_reason + (
+                    "多句事实叙述启用本地低权词法反馈，不增加模型调用、不作为法律证据。"
+                    if self._case_feedback else ""
+                ),
             ),
             _capability(
                 "vector_search",

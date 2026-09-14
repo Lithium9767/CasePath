@@ -1,0 +1,4189 @@
+{
+  "candidate_counts": {
+    "cases": 105,
+    "rules": 776
+  },
+  "case_search_text_sha256": {
+    "lexrel.006ffa55-8ac9-4dc3-bc54-c38435cca87d": "f7d451049b08636aa51cb3a66b0db1eaa137cc25c4c9d411c24794099c2a5749",
+    "lexrel.00ba86cd-a8f3-4ec2-9650-4e76457eb258": "ce8161832f04232dc32adcbf939ab7094ff27bfa599be80e080e4842110a7da5",
+    "lexrel.010d89e4-1af0-4b25-a475-8e039bb67b2e": "147aee8eae5ef7fb97feedbf9d52d860a381cdb973ef28b3ac12dc7dbbb8105b",
+    "lexrel.0114c02d-dd97-4d79-8bfc-0c60323a0f7a": "455a4a0b9d6caf02b02c96cdcebc1ffb8950d12a79a9dc3bb47716d34e02cd61",
+    "lexrel.017038e2-4159-4c52-ab1a-d3d774a6b56e": "b1f3245b48956ae36f8c2e64a7342c94fd35d9138b396f1708a470fb7b4db6ac",
+    "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58": "8e553229b9057f7810bf4727a6455e83b154b3c931f3fef28deec28d4820d7b9",
+    "lexrel.01a7d159-6001-4cdb-8897-0e52749493cf": "bdfe242d5670987b9696d8b929cb7d29f25246ca84916003056215fbc156677b",
+    "lexrel.01a9ed6c-a219-4e01-a335-548eba28069e": "aeb1c5391c695cdb935faf13cfd2e1dc0f56ec5624ba3e0e1d834d4ef591ad1b",
+    "lexrel.01b49f1c-4a9c-4971-b1e3-206d69e8bada": "1919e714355c8b22c063e2b18f16494b5dde4cb88802f8c1b687a4b79c583334",
+    "lexrel.01e7082e-6292-49c1-adf1-5508618012c2": "0a99f21a18c78ff7c4d6e1ffefd3cc69f49545f405020686e4c9496ee7d5384a",
+    "lexrel.02c7c1df-dadd-4d2e-b70e-091c0890531a": "f0708af987fe94b82a19b6b7d25cebbf3d234e9afd1cabf3f4591829e780a425",
+    "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2": "1c86047b0ed00d371aaf1b5600ab0d0e01cb5c9507e718b7947da907ae3b2e1b",
+    "lexrel.0323a0ef-d71c-419b-aa0d-620a9137e614": "6c3dfbe627e4347a353f7c6ea8b794d5c5b92e6e797e897572a805691af613f6",
+    "lexrel.0534c690-cfb9-469f-9748-dde5f769b456": "b8ffb1b9b3fb67a03f3a2abb9da29007f9caf7f0ed76a4d1e5a509f7c6963fda",
+    "lexrel.06464300-c6d8-48cb-b322-dc2780d7d0a0": "7aaddc00bb2a7985ce38cc9f0a4ed1d47eafbad8d5bfb98d920d66fd4fcecb1e",
+    "lexrel.068127fc-523f-47b0-a517-41ad7e7643d5": "71f1d0aabd71b45339c710c3416b6dd5290db64ed0298fc91e89dd5ba3a738cf",
+    "lexrel.071d3b57-4a23-4723-8c69-6f309efe62d8": "5a7c2172fa16f879ca45f2c1976f334bfa1ae2ef65196c3c60db7850cb78452f",
+    "lexrel.080c1b33-465c-4f25-91ff-7eeab8aa0803": "ea12b8a295dbb06326a70552c590c9b2d69de38f8aed2af2b1f7b3602df1ae2a",
+    "lexrel.0823adb6-166b-4aff-8c6b-776ab2551b99": "61b85e028ee7f1bc1e9c2e55dd6af2906db81790201af89d9d1d450fa7f04066",
+    "lexrel.082566c1-214f-4e53-bd93-1f364d199f15": "4d5c9bdde3f4d4e3dffc0883ea7bb07f57caea0eb78083a29c4c5769bb50258a",
+    "lexrel.087429b6-869a-404c-bc00-0a37ce1399cd": "3eaec7068caecca3bf6967c028e7ef909245d58c765774451c591789cd4f8bef",
+    "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca": "d97e604802acb448217e3bb54e165e900a5e277bc695662c27c523350c2cf0f5",
+    "lexrel.08d64180-6634-4a0e-ac43-3a1a87ee8d08": "a53445443ac6331c09016554852d78aba159a4bf7c4a3a5a54bc10a0e0ac8562",
+    "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9": "8c62e96065f242aacb5e84ddfecf5cf0ee0109822d2f0af07d6688b951a15f4f",
+    "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640": "150656930e84981197d11b9cec7e1d049fb6591eb78860554f4aab414e8ad948",
+    "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb": "a11dcb92e128952a410a38d9b42bbf71b297e700cdf00bdff5dcd6cafd5d3834",
+    "lexrel.0a41e121-1f80-4167-a11c-8da3b2a51e6d": "a27a4bb456ec9a66d133fbc9d02f97517b09ea20015d7097a69852d9a97905a2",
+    "lexrel.0a61fa3c-0d06-42f1-99a8-6cb14936acd8": "3b0e52b998a90996fa897fc530949e7b33a4f0576d78d5b2127ca83c0402868b",
+    "lexrel.0aa937fc-a1f7-404c-b880-c39c12227120": "319b289182bb081660867cd4fb0888fcb4259b4044a23c4656ced16976029ee1",
+    "lexrel.0b1b0a70-2daa-482c-887f-0ed90e6f0482": "814be80cc34b4089f97fcc088479c330dccbc27ca2b0226892cd7fa3ef208585",
+    "lexrel.0c1221b2-11bf-40d9-9f54-cae0edc83fdb": "eed3f34923e0f5d0487a69e7934306647c96d3e87ee6cc7712c9e32252510688",
+    "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40": "20b4e8116cadba65e14b68c0f522c2bc7a0454b30a73deb877adc468f25bb7f8",
+    "lexrel.0c5001c2-fdb1-48ba-9a0f-36beea55dede": "121069d48d74a455245013e71bf4f39e5aaffc52598d46fa78ec2ff4082afb72",
+    "lexrel.0c73cefb-f1f8-4cf6-8005-68fe9b8ac3c0": "ea23b072d1ab6202eb34505107179aeb32e70605fbaa5bc50b05afe6f678216c",
+    "lexrel.0ca7defb-1f9e-4f1e-80df-777b40978c0c": "00303ab115ca29c16f4ad4e9be7c3dacf6ccf2f3967c28e7e4ba5c049f2032f9",
+    "lexrel.0caead6c-7c70-4b44-910a-5b8bf8d7d376": "274b6c0e37e2338814dc6c5fa997a01411f5490cbe063d924d38ae999954a54f",
+    "lexrel.0d05f3e5-91ce-4e47-a98a-454dc1e2789f": "ffa7ac613a7c908572a342ce5d82909f86de6462bd382c71cf898ba067a7bdf9",
+    "lexrel.0d4fb34c-2355-41ba-821e-ed8dc98447ee": "81dc989a7415e6d44303ce27f0e9529e4165da9974ca5686935f79df1cd8dc55",
+    "lexrel.0daece4f-ad34-433c-a081-4f1aa74e60e9": "0724a46fb0f155a041f3726435d7ca65bd3a15944821a8773dcf4a2c519bbf71",
+    "lexrel.0e1eb7bf-758a-4fcc-907b-59823d88f00c": "340d21eb37395143dd03447fe303f32641301d41503d9ea80e586f6c60e0a43b",
+    "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2": "b58c313a069c1aca3b90a201254d55625badfb9210a61189fcc33b666cbafb78",
+    "lexrel.0ebe9c47-5d7a-4804-88d6-bdfd2d642917": "1086cbe609e127dcbb2e8923b3274c5b1aaa4930181273679db8326b1689a6a5",
+    "lexrel.0eded59f-6c34-40b3-bf86-12514d9ca8a4": "d5fec14b9058d57433518f7787b431546f41439eac7b9f6bfa85021ef80e92e9",
+    "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2": "d8226c39ec4f5f94e3fc7853348a3fb55f25a33f072ffdd0bda53410d62f0fbf",
+    "lexrel.102f10d1-ca09-4ed1-ae2e-f45007ce3038": "747e19177010f3e942a1a5a4a3f1c27a60f6fe7bd35b732f0c3c708f0e5427a3",
+    "lexrel.106d406b-0c43-461b-908c-f3479d454bdc": "4bf35d3264ac285f49b5d7ca417fb0facc0f307e28b79d2d26889b31ca0fe2d8",
+    "lexrel.11569b8f-6c32-4355-9ce2-dab7c2897a94": "018412e7458f07da69bee9e15fd3d1fc90550e6ed62edea616efb67191ee9359",
+    "lexrel.118f1445-e256-43e6-b828-97ff030fdd51": "0683b9de52583514f3ab58fde421979f6a0356904a37087ed7ab05787dedb236",
+    "lexrel.11feaa80-68b2-45fb-811a-25e179fbf677": "8108f9a8ac4031f7748f50ca44c9bc8fe05c828b1b858144600c6a9c74af832e",
+    "lexrel.1222a756-e7cb-431e-af61-b8f30f0f2219": "ee3e9cbc20a7180dc1986857af8d37135a6fea081b0bf54df2868e170f1742dc",
+    "lexrel.1361fe7d-e6e9-4dd3-b720-41d166606013": "065c0382a4ef99860cec5c93829dbbb3476e5f386b6ee29ea667802a716abc51",
+    "lexrel.13d3c173-4e22-4f04-935e-fda7431cfd94": "8d3517fb082ec21a0c829b846fd947724f2c411ad1ad8a6f4fc70304137db477",
+    "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487": "9897ceba1fc5989d56de2dfa0430b2917dee47b4723e46c7ec01867474eecd08",
+    "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792": "19b1be3ddb518f9212206d6816e148989ef163c2e4d3624af5ce5a90a31e12f3",
+    "lexrel.1505ad06-02b5-4676-901b-31a664539f6b": "0a8549b99cdbe07281a4ca3174018376514eb90b29245edccd495318e02e4f5f",
+    "lexrel.151b69d3-eb5a-4839-9df7-7c6f72e00291": "a0141c8357508696de6aa9ff1aba94cb6372d94a6cab87aae735f83a9d2dd76e",
+    "lexrel.152bc590-4b5f-49c9-92f8-369f4a0fcc2b": "2e9a541c19ab4dc8d764dcacc6e053ba66bb8a692dff5b610c95d8416426c9b1",
+    "lexrel.16716740-8026-4b70-9b46-25a3ae791ff0": "a04ef357f2bd4c1168728bccd283f023d6eb9c1157f7cf37d7b770bfac113b31",
+    "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c": "e6d4819809ac69a4b39ebec9eac4bf01711a88e8888bd44d7a0de447e4bd1252",
+    "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a": "732e736669fbb2dd8e7d2c0df6279a2908c8533591eb33fc382fbd97eb568a2d",
+    "lexrel.17abe2fa-007d-48e2-a8a9-ae05092f0429": "059159cf6287b6c567a3c7dbde7bdf177b9334cad9e57d70869185466513d2b6",
+    "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5": "95275f121bf9b73c14d083270093716eef7d845d054232e4273c0694d61185b5",
+    "lexrel.199e60db-7e3c-4b93-9536-3652e7485ff1": "1c5fbb061ca0f2dc0c94c0f4ffe884ae8d1cab9cd7321d0e463351e42d90db2a",
+    "lexrel.19ee23f9-6aab-42d9-9618-6d30e27b0338": "7a6aa856a0023f28aca0d591b111e438704776c2acf7c6ed9b6ca7c9f840b2e3",
+    "lexrel.1aa97247-6757-4a79-adb9-e872f06342d1": "aaebc3810ee3247a9847b46992f262329014efc697152405a49bef2c7c924d26",
+    "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb": "4ad25ea0ccb9b7e0c0021ced0504b2e8a2661c547ea100742aa9b4d1df996514",
+    "lexrel.1e5b0a23-5f82-4de2-b487-8fdb5ca6989f": "1181ff4d7ed0094ea6d9aa59ebbb496be56fb016c87dd68cb9e1869869c7e41d",
+    "lexrel.1ec928ab-bb1e-4131-bafc-e17593454e1b": "bf2f3602bee35314563813fcf332fdd77e99d632e5179025b4e6e87ff2c566fc",
+    "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505": "408badf11a35601d02877f0a46734d0cd5b1cf8b428c554d3b8abde3b3a582a7",
+    "lexrel.203ea54c-b6b6-440d-9822-9586326714bb": "6b2b8014da5f5b095b930e823064543c29898943a0c11622278811cba36bfaa3",
+    "lexrel.2093ca35-88c1-4cdc-b856-b857f04c5bbd": "a2641f2647b0860d8862bbf1c205a59107c4594d8873bd1b334033556589e22c",
+    "lexrel.20ac88c0-ddc4-40dc-9701-b0a3600858d9": "ab9a59a61a574b823e641632748d8141982d36b47d45a41b4afb8bf17e0217e8",
+    "lexrel.22c67685-32c8-4c11-9cb4-9110f6f605db": "1e3d36b0794fe1110acdfb47abb02b3d5499227f9cd999f10d7430e3c7c6175b",
+    "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da": "7262b07b1c6fd7b354344a7e4ee6e5b0f93b45d82ce5cce8743492eb4eb3f66b",
+    "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c": "af02a81e7213d386b29cce394de97ac346664f0a686f7d83b5df886b1392c309",
+    "lexrel.252a0418-a93e-4ddb-8343-15b3a7fe8680": "b1d7da2f377365b2da6f231e4fe93b77df2f3a3613a29f33f7f466cdd93d3d41",
+    "lexrel.25d4826f-a5dd-4f84-a2b9-c553fe3d7f29": "2bea5ab8de54f1ad1b1f3a89118f9ee928f1fc0e963e8788487e461c3dc41f84",
+    "lexrel.26f9dc81-2eb0-4add-8f50-18ca43aba532": "912f31d867f62b6e6992133aef6c21eff3ba19229728588033a161ff66865f26",
+    "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7": "66621ba9fcf2c41a14cf69b02688f3da43a427c28a17ed673ec5555a933178bf",
+    "lexrel.274d7b2b-e3d9-4d82-8ae1-74b010f23261": "621f3aac4457f3ef121115521adc333f67e5ca9d04c35ce4521c7a899332ab18",
+    "lexrel.29d8ac1c-bd87-4547-b647-cd2c68b086db": "3c22f55288a1e9f7f0d9c662e68a1e5a0aa78388a19633ca4d712e8c72b13f30",
+    "lexrel.2a256119-5a3b-4d20-8051-96e1abba2da1": "b47ef2697cff8752f32bafbd8cb1777b6e92502faf9e79e5a5d44071bed9d442",
+    "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc": "84b3c7d7840822574980d4a025074b7a837c933f49d5667bd866ad3845e0a430",
+    "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004": "02c48e656995cfa33bbc825e19c863d4f427ed4eb884ec08cf71f17fa24c64da",
+    "lexrel.2dacc190-2ac1-498d-88df-307cef80792d": "dead072afe353b9e43c64036ba3134f6717083dd357ac18105367ce8a3d83605",
+    "lexrel.31eee4ac-820d-4dae-a14f-595cae51c2c3": "272a0258c23608de0e5fb4d723ccd33ae8059007dc7f4abd4770b72a8d0e46a0",
+    "lexrel.3309ce95-f2bc-43d8-bdd6-6330c808e350": "bbd7f9b8ee324915573512fe6f5156fbe48980c664cf2f245dd5ffdf2abd1cf9",
+    "lexrel.34242265-7233-4c98-8604-20d0c7f67ceb": "ce25328687cc17d6fdc0fc68569380f0eae3b84b6e93909d7f6cd54a1ea1a39c",
+    "lexrel.39cd82f8-ed66-4362-914d-13f3350c4174": "7090e8b10203f127381395fa2abd6e3caaca0dc76faeec8fd5ca680324e8844e",
+    "lexrel.3b46376f-5d5d-4de8-a2dd-4230bce5f82f": "5340ec023ecded7299a6a65b2ac468cd99ab805e7b465cc7118d65c9d1a15595",
+    "lexrel.3bafa03b-acdc-4c4f-bfcb-46633ac3ec65": "05c577a7769b3c3b3cfb942c8ab392c82bd0b88732f13f3108ac5c07f49dba3d",
+    "lexrel.3f3de2a0-b276-494c-8695-99ff70cf242b": "066dfa9ac9b57f4bf6dc102527b7e8f82ec83a88ea6b074c8e73ad652de91db4",
+    "lexrel.4252f64f-37b5-4736-948e-89098f4de830": "86d33ae83c9b807cd61572fe6e939f4f6d94e2e23d496c493b0aaeaac1572a8b",
+    "lexrel.55d87466-4e50-4e16-bfd3-7ff06aaeaad6": "cd910e97f51cb28392f5141d444b9d4d550c304c4d3870f2b2836d34d071d069",
+    "lexrel.611325f8-073b-4e66-b496-533c62d9cb41": "067353f384c16826a4960b3a89af7668704b7921c79add57eaaef994d42f17ec",
+    "lexrel.6362b0e7-e276-4efc-8124-d72a04e0db51": "8d9630fde63dc25e0d20f8601cf01f42b616cbcbd19b59eb6ab4b784c9e584a2",
+    "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04": "c9b92f740a9e219725ccff22660980df5354d062fd672c4fbf21567d89819124",
+    "lexrel.652b45ea-7e0f-431a-9741-f39948b68452": "f23af03e705dee6e09be4bb374176fb0a4c9599e77a103ddd39543a3a027f418",
+    "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa": "1554e4b48d55fc1a45fd80eae8c08bca3f12931dee805a7ea19b34c6e6046592",
+    "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9": "95a810e70e18acba0de37992b402ae28548907f30f0c6fc214bda505c22991d7",
+    "lexrel.829d6968-3b55-43c8-9e18-9d6ccccfd391": "361d635e9bb794b15cafd7654fbe48aa10a988ddb5e4bfd1fdd78598e60a0680",
+    "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e": "b023824e903ba598cef150675841033a666e10c646a674a8dd1f79907dcf8934",
+    "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b": "6a4e2cc6d1e767208351892aa3fa7756ce59f264717c1a72148788b36b69dbb7",
+    "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332": "8128b85a5bef6e23afece5c3c918afd886283bad0b757c5fdaae402ef9652f9b",
+    "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c": "4405f176dcdea3efa78f6d676d2cd752eeebe870b8cdf3827454efa0e4cbfade"
+  },
+  "case_text_view": "facts",
+  "comparison_policy": "C1 changes the candidate universe from mixed 156 to labeled 105. A score difference versus an existing mixed-156 report is NOT an algorithm gain.",
+  "evaluation_index_version": "8d0a39f3a737ee57f00a1baea9e66e03a31ab2ccc820a2f8fd495a66b5432dfb",
+  "excluded_topics": [
+    {
+      "query_id": "C.lexrel.marriage",
+      "relation_type": "夫妻关系"
+    },
+    {
+      "query_id": "C.lexrel.traffic",
+      "relation_type": "机动车交通事故侵权责任法律关系"
+    },
+    {
+      "query_id": "C.lexrel.recourse",
+      "relation_type": "追偿权关系"
+    }
+  ],
+  "implementation_sha256": {
+    "src/casepath/__init__.py": "900cf8c8d631f707384234f3956098c70f9dead9192348e990d05d68797bbc5e",
+    "src/casepath/adapters/__init__.py": "3904cc3d142a7adb7a6c75853086ce2033ed10b4bf4c8ce84690547f0de83422",
+    "src/casepath/adapters/conditions/__init__.py": "7399a0c5f51b2d09151dd8a4d0fb468a4b93438a90b021a6294fc39d29b79830",
+    "src/casepath/adapters/conditions/case_condition_evidence.py": "08917c019e02ef7d2f286164c4d5ad540ee11f7c9c7b038b06034240a694a8c9",
+    "src/casepath/adapters/conditions/condition_comparator.py": "ddf48a8814a3bbcc5af4d07d6238667a5b65413451f9546945ecf1165543d96f",
+    "src/casepath/adapters/conditions/condition_logic.py": "2a2a13348049f947802bb5cda553018beabcf13d5b655a805418cfb6168d1519",
+    "src/casepath/adapters/conditions/confidence_calibration.py": "1e9f2fe851455b090ee12548cf2f3d2cec71f2f4f66bc35fa360d39474d51bfb",
+    "src/casepath/adapters/conditions/semantic_answer_interpreter.py": "a067ed35cbf58fd53ae03c0ba73ac518a45a52feefbd0ee0101ca213cfc2295e",
+    "src/casepath/adapters/conditions/semantic_condition_projector.py": "dcd96bf104a4c0612b6cc77f51bf65d0c268c6a5464e401b8861a2e41056bdf8",
+    "src/casepath/adapters/demo/__init__.py": "0064ece9984655c64609499ed172688769e3f0d58f82b96330e18e97dab64808",
+    "src/casepath/adapters/demo/answer_interpreter.py": "10608f032adbac6ed9ca117f74db97e4c1bd8f03c15c516825e41143942ffb10",
+    "src/casepath/adapters/demo/components.py": "e992b5c96a554808b1bb39c79d1c51ba6cdb8ff5c88ba1b8cc7f3cae0486520a",
+    "src/casepath/adapters/demo/wiring.py": "6e59f4a6420ada693eefa843ad3599631eee13a70166ab3ec8e0c4b1e3c70b4f",
+    "src/casepath/adapters/diagnostics/__init__.py": "b51cd95d499e0d20b71015204958bbec9d1339e3a8305d95c19a2ee5631e81bb",
+    "src/casepath/adapters/diagnostics/stage_events.py": "2185107a41783e3f8f6d5bd6139c07fe496d5892a4a8caff12c0b7540d688c07",
+    "src/casepath/adapters/explanation/__init__.py": "188cb4536bd84db9a23226ef8e53e01a61a0337a0ac3b0eccdd48a67e67b178d",
+    "src/casepath/adapters/explanation/evidence_explanation_planner.py": "8c5995c6eb777f1442af9c0accb5887982e802845d61b61c0094320c713f8fd9",
+    "src/casepath/adapters/explanation/grounded_explanation.py": "bed0b0519983b5083b81bcb750903a61950b19b598756d0b0ca4d9d4605ff78f",
+    "src/casepath/adapters/infrastructure/__init__.py": "05ac3510bf9cf7ce7fba62a513ad90cc4524c917c25912d2328910c9c8293364",
+    "src/casepath/adapters/infrastructure/embedding_client.py": "e9fb5b309be93ecd8b3088f072ee0ff6ae64a65f4586da5195e188647bd3d63c",
+    "src/casepath/adapters/infrastructure/memory_session_repository.py": "557a541f57d56cad7d20eb9623a1ca18a9161746086324f05f4e2ed8fd7031fe",
+    "src/casepath/adapters/infrastructure/neo4j_gateway.py": "b20f94e464e710fd725e4be393f786c0ff5a81227a3d1977ca8a9956ec69f198",
+    "src/casepath/adapters/infrastructure/neo4j_writer.py": "31415db68fc5801cf11a9a33515a597d7700fb7335dcd67c897fc21bab77894a",
+    "src/casepath/adapters/infrastructure/structured_llm.py": "0c20e7545610eea008252353f66047daf3616ecf7d17eb133384009abc849989",
+    "src/casepath/adapters/p4_factory.py": "dcfdc5051503fae0d8d90fc53b9dfe86d72f39346f1a37914a83a53212f0038c",
+    "src/casepath/adapters/questioning/__init__.py": "c4497bb61bcdd9e8cd949656ee32525377319f9b28ac92a267b229d8d8ed1fa3",
+    "src/casepath/adapters/questioning/key_condition_policy.py": "3749dbfe10b31071882dbd5bb8a91dce4de1e3512f8224e36618766dec814a82",
+    "src/casepath/adapters/questioning/missing_facts.py": "bea3e5d762656be6e48aa8f8480c232f8030704f25ca88018ef9bf7adbdd13b7",
+    "src/casepath/adapters/questioning/question_cards.py": "b5e587db34044f038758b5d0e5ee34ebaeb700f9bcc051b6767905d4811ee42d",
+    "src/casepath/adapters/retrieval/__init__.py": "ad19fb662b815937d6d150762f81814c79da7cedf1fde7170275bc09fa982857",
+    "src/casepath/adapters/retrieval/case_facts.py": "8e7bafac99110f92d5a499e47b2ee46bffd0b33438f6a7552d25c3027de814ed",
+    "src/casepath/adapters/retrieval/evaluation_trace.py": "3a91916430d58b5eca6148b4676a5ec7f8b8652971bd57c56d6bcd7a97195859",
+    "src/casepath/adapters/retrieval/graph_navigator.py": "66fc5eaee56a06ebad58bddca199cee3ad1504d38f31e4cdb9f0da31d4403cd1",
+    "src/casepath/adapters/retrieval/hybrid_cypher.py": "0efbd92cfa60b7ab384e59d6835730713d03692d04d03214f6cdefef2dd304bc",
+    "src/casepath/adapters/retrieval/query_expansion.py": "81b2a12b06cc43dd10cee87143a24833486731130418e436da23fe51fad59029",
+    "src/casepath/adapters/retrieval/retrieval_catalog.py": "1578e68c4345f1a5b9ab9ffe2ea1e596c2711435d6ee58ce2f460e43c61538bf",
+    "src/casepath/adapters/retrieval/rule_relevance.py": "8470f456473cea9207f99b845facbe33e0f3e8a030c792535ffcee90a84bb110",
+    "src/casepath/adapters/retrieval/vector_search.py": "dfcdda17f29f0616c0974a87e067f340af9c1c8c9a9521d2e8b62c33cae84a9e",
+    "src/casepath/adapters/runtime/__init__.py": "159931044447063e2525a4e0f3e9ceb47b702f8c1218ea2364ceab1d13909b21",
+    "src/casepath/adapters/runtime/request_context.py": "2ccb15907a2a18afc986c4ee64372cca85d683813779d30c097d9dac358e2bcd",
+    "src/casepath/api/__init__.py": "1a787d3d9769b1460e3fcfb5c68af4cedee5271295eb0d54330a2672d2ba7b30",
+    "src/casepath/api/configured.py": "74f43c25351022e795631f187668f75ac2e81c500b9c91511a390c66610d0cca",
+    "src/casepath/api/errors.py": "fe3f34109e3826843bb5261ed8c504cf57a55b6af5d4237e0986491e377c31e6",
+    "src/casepath/api/main.py": "4c7278f7b33192281cff5bd9fb3cc48857cc1a5df852746c6d347b8ef7ef0e82",
+    "src/casepath/api/sessions.py": "7e87baf5623b2b55baa7d1eefd9ae0c748ae4ba9e65ccb147c2f677e66e3626d",
+    "src/casepath/application/__init__.py": "cb4d56d2415953cb39bc69e62b621512d88db104c349891f18507e675302d767",
+    "src/casepath/application/errors.py": "b797587aac201fe7f89f830d36354c7291df33cda433d3f2758e567e0e8febc5",
+    "src/casepath/application/models.py": "5e342fdc8dc6474ef0359fcb3846dd44fdf8c4599742a113549480470c619796",
+    "src/casepath/application/runtime_meta.py": "14045bc6b5dc6725963b602eebdf519b8e335f7f681fcc1763ea4eeed4d15c53",
+    "src/casepath/application/session_service.py": "65775b50bb7f90d3d282612720786229bfa6c045669996ae9b8166439ce030d3",
+    "src/casepath/bootstrap.py": "c80192a2aea1b77e1864b5b0830ca5bc307bf6a64c35a44ab66bec97ac3bd9cc",
+    "src/casepath/config/__init__.py": "839b662dc8385e200bf85018d4a593030792a24846ea16855c6eeef05f4d723a",
+    "src/casepath/config/embedding.py": "14d42b13d4b75becc3be887fe71d07c8a19b0fe1239a30c3ff5fa48cdfd49d8f",
+    "src/casepath/config/settings.py": "fef0d7bbd8d5fd2a8eb11f182abf296f8c7d2dedda15c156878550f2bb7d21e8",
+    "src/casepath/contracts/__init__.py": "51437883abd6302710a327deea023d8245c565508d167b52481f2961bd67e918",
+    "src/casepath/contracts/api.py": "f23ed83ce293f9ab2b0f54d4340596ce9fa7fd6023e5e7c68429fae5ade316ae",
+    "src/casepath/contracts/base.py": "8abb9b86ea49648bd7d4998d582b7712156e302172868b16668f7f56052400fa",
+    "src/casepath/contracts/case.py": "90a773adf7841eabccebce064a88c02da8c53460c87d7c23ef67f755be80aa38",
+    "src/casepath/contracts/enums.py": "59c1f5ac04a0c0090358f5983b481d0c376e475ccbeb29feb6d5d21910948133",
+    "src/casepath/contracts/explanation.py": "ccd9be6a598c4f41cd1b5561405b6c4a6255fe4f069d0f4fccecaf8f83c4d742",
+    "src/casepath/contracts/query.py": "858be5358d3887462c2c80f3b68e2a899f642dad11e84a52cee1cb6708c88119",
+    "src/casepath/contracts/registry.py": "2824a5515b149ff9093b2b4bf41c0a80ca599c0b69c8d54ace0b938fe424404f",
+    "src/casepath/contracts/retrieval.py": "ffe7b2b701040e992472d4d7ebf29fa42cf5e4a4c0d2653981321e0e1705f68a",
+    "src/casepath/contracts/rule.py": "43df170d642c82d562c9d3feee0e3f9413876b53f428a47207aa91eba80db2b2",
+    "src/casepath/contracts/session.py": "340beaae4bf412f3f942865aa8280e8857a9972f2977f50d3b15ca25a631f919",
+    "src/casepath/contracts/source.py": "308b020b816ce52afa5361bdde906a54fadfcfb7011e4494fa0b8b07bc4c74f2",
+    "src/casepath/contracts/workflow.py": "8c8c8159c37328b2a1a2d9a5cc59f1cc624299f338db15303fc2e2e85d18b986",
+    "src/casepath/demo.py": "bd23ac4cd83c8634a5ce4ef25addfd4b200a7e2731632e0a1567fcd19cd95b1e",
+    "src/casepath/evaluation/__init__.py": "9f11370ac555cf00d8be3b48a2e2e5c506dc3c9f5f5e9d0913eef148ea960a81",
+    "src/casepath/evaluation/ac_retrieval.py": "5c2394eb2e0d52214f4a78c72e4d41c898ac0b66a9967cdc7e3d8e3ff14eb38b",
+    "src/casepath/evaluation/case_text.py": "4395e47949bcd9da9ad9e4fd81fdc48741e49e6385e3a5f2b33ab7185d126d88",
+    "src/casepath/evaluation/condition_benchmark.py": "129af27921659c389cda8ff51b535f8f2307ac58f583b159ef090cecb85d0755",
+    "src/casepath/evaluation/metrics.py": "7db2d7df9f3a5e8d7e11e6a88f77790b81fedaf9856310fe63e25e116b971480",
+    "src/casepath/evaluation/relation_coverage.py": "8630728f777dcd36ee3d1fb88f488a988d0f890c5c7fbcf4661b1cf9532151ce",
+    "src/casepath/ingestion/__init__.py": "a1d64ac7b39e0ec34bc603d3c8b09c7f6d1d969bb088d3350ded574607655d20",
+    "src/casepath/ingestion/cases/__init__.py": "0391e690081f5bcf94f04be9fa2951095055bc1c9b83d76e4a8fc6a98342134b",
+    "src/casepath/ingestion/cases/__main__.py": "554f7afa287a35a918dccb9cfd97eb7f6a357d970a585297df4f177955a58713",
+    "src/casepath/ingestion/cases/branch_handoff.py": "b6076dc9f48f49605f59d024d336013680f2421bd6e215ef4ff7a99d6e8d214b",
+    "src/casepath/ingestion/cases/build.py": "6c5d32bfbc762775da0d3d501f03ca40f295929282a9b9d54d282a89e78fc815",
+    "src/casepath/ingestion/cases/citations.py": "60da0af85d4d0ac131b2da7473853246e0a2aeb89e9fafe9d12472b6b110dc99",
+    "src/casepath/ingestion/cases/classify.py": "910988ad3683f577c486b7c700fad02bb6963e8d6c93aa9ab1086559741cafd9",
+    "src/casepath/ingestion/cases/cleaner.py": "d0d1855735faff5e0a5c2b905837a2e7bbe8357f83e78c560efb0533fda31b37",
+    "src/casepath/ingestion/cases/extract.py": "6647a0f5ded63d693275443648f697a795578427b7755cc132c2e38f62191ec3",
+    "src/casepath/ingestion/cases/ids.py": "33ae3fbb1b5e1151c7ed8dadd1b24f95adaed6cc593b456c828be2897506a865",
+    "src/casepath/ingestion/cases/lexrel.py": "3ba80bb03eef8bfb293b45ed07f618f0ff21bb90bb81e904775a8de9d4fa6bbd",
+    "src/casepath/ingestion/cases/lexrel_retrieval.py": "0811aa7596479a5414fb5d9c0cb5f611761917172dec118a6e67bd31a740865d",
+    "src/casepath/ingestion/cases/manifest.py": "589f5ff1be819f16b83257ed944dce0c44c9d76dc17423adef0d501db092c1d3",
+    "src/casepath/ingestion/cases/refinements.py": "12a4c1ceff9cb9f5df8960a615c6e93c86eed9bf418c57b4b13b66f9e011027c",
+    "src/casepath/ingestion/cases/retrieval_evaluation.py": "53d1a18e77636518acbeec383d50851a2f6ea120687e81fb6aa456678d99e94c",
+    "src/casepath/ingestion/cases/sections.py": "5f07657a9ba02b052e43894e835d652c9f5b0e1db3df5ee68c5398b06df2ca29",
+    "src/casepath/ingestion/cases/spc_supplement.py": "f207dd7540e292f0bdee96bc4100af956430851828c641a924d7ecb6c7666f06",
+    "src/casepath/ingestion/cases/validation.py": "52c4232255da7adff1eee1363f8849d044311a745789323e6dedb9c58fddedb7",
+    "src/casepath/ingestion/data_quality.py": "d956c4164cf855fd2c13cce69cad7b5c8d9633748248e3188b19cf7cbd6123c7",
+    "src/casepath/ingestion/graph/__init__.py": "c02f726cc87b851d971bde3eb0e658fb4b8f5b29df3641dfcf5e57d601c3e11a",
+    "src/casepath/ingestion/graph/__main__.py": "f9f1aebcbb8ca89ecad60b73aa526783db8c4e05d97890eb8e2dba769745e022",
+    "src/casepath/ingestion/graph/projection.py": "106bd9fdbc039530309ff9a55661a3e2677a3dbdca7362d8da39805d99679c6c",
+    "src/casepath/ingestion/laws/__init__.py": "da96f62b7cda8eb8b329e5c24c93138829833065b0cc23f24728f9b48d4b2d2e",
+    "src/casepath/ingestion/laws/civil_code.py": "40a01942be82a775ac989ca3730fa427765fb98d70075e551312afdf3ecf5d24",
+    "src/casepath/ingestion/laws/jsonl.py": "142399a9a5529b477cc98704926b3265de16747971dac99caa695210dfe6e553",
+    "src/casepath/ingestion/laws/manifest.py": "8b7737a7c813275a6c9c2c9a26c026fa98398e22ff1b958cd3308ed2f0735331",
+    "src/casepath/ports/__init__.py": "d9ad93abb7b4c7dc546e4385cc1754b969a9b0215d3bd7ead6fdb4fccf3b66c4",
+    "src/casepath/ports/embedding.py": "c465dfe0c95457526277def8fef729d7db0eae5636ff2acc4aeac68b2c0c3042",
+    "src/casepath/ports/interfaces.py": "467251c80edf127c2cda3f99e76a70d877875ce9ae84eb82d11a00101378488a",
+    "src/casepath/ports/session_repository.py": "8ec525054c2c85538d8f3305e750f1aff284330f9f3d372688c58745ba4ba6e9",
+    "src/casepath/rule_layer/__init__.py": "ee154847b87e5b9c455bf089c03171868bff6265483053bc58732d49248960af",
+    "src/casepath/rule_layer/__main__.py": "554f7afa287a35a918dccb9cfd97eb7f6a357d970a585297df4f177955a58713",
+    "src/casepath/rule_layer/authority_compare.py": "7de92a301e2770388b26778cb017365d8e4dc2e596f7eefdea0fd4c2061a193d",
+    "src/casepath/rule_layer/build.py": "296527e6fb9fbfb38435e2b582dba6bcc2af39395ef9f6755b0880d3724efbd4",
+    "src/casepath/rule_layer/civil_code.py": "924a43dd7d98d54758d5173abc8037ff1f24b94dbb3a48bcc375a22f70be567e",
+    "src/casepath/rule_layer/expansion.py": "7ce15eab0ad8e60001dc54495e41f3224c132afcf4d8574e2ddf58c9e6b9aa16",
+    "src/casepath/rule_layer/ids.py": "e97cbc7e9937b01455a98c041463523af293759c681dd8fc54a2c82f1592a5c5",
+    "src/casepath/rule_layer/source_review.py": "266cd168aba9104bc86893894edd5e71946264b558f0567b8cdd99470aaaac33",
+    "src/casepath/rule_layer/stage2_refinement.py": "c7d1f64090eccb6d111875ac060c933a9d5f62d3a2b51029949c083514d55ae4",
+    "src/casepath/rule_layer/validation.py": "623bc98778cce468da921411fc6f38a8fed32cc6d18dac0fdd4f355835f3d7ea",
+    "src/casepath/workflow/__init__.py": "1256e237ce6dba02832e43a782c350fdcde2cbfc60ea26cbe472394a5d276981",
+    "src/casepath/workflow/engine.py": "cebeefb5c312c902b8515736791a93c3a21e2f009044be8a22a12cdfa63e90f5"
+  },
+  "inputs": {
+    "queries_sha256": "72427f00e71e86f0e4f15f2a6cd158887dc33f8939fa8d8f9e210694a7ecf158",
+    "query_manifest": {
+      "query_digest_policy": "LF-normalized bytes",
+      "sha256": "fc622a3b7c2a673e018457611be7d2b35a28cf49c6d23f8196e02ed1e8619d98"
+    },
+    "sha256": {
+      "canonical/cases/cases_deep.jsonl": "092981f27ad8f21a4670b7eaa6aafd9d09c655a6c3f70db72a18511de0776e03",
+      "canonical/cases/cases_l1.jsonl": "17c8e74c717063e7619ac74438b54ca4f49c728213cbdaa2890b19b3965392bd",
+      "canonical/rules/legal_sources.jsonl": "10fcb635f59e758b257e83971523e68cb4b1ea364374bb05ca261d2bfd41cc1e",
+      "canonical/rules/provisions.jsonl": "56dff29fcff3cc669c4a1cbefcf00e638f3a0a9549f000096553179a7d815250",
+      "canonical/rules/rules.jsonl": "7cbd7dbb15daf03d542ce1a953e2fbc0eafa1fd96db48a027e6c3dfbee710ba9",
+      "canonical/rules/source_spans.jsonl": "372d63b587fafe6f62b7eec9cab83abf61fccfc0524e733d7d46d60e6ec3ed33",
+      "evaluation/case_retrieval_qrels.jsonl": "d88fd2f3526df9ce021e28fddb4fa4bf54bc59739e58550572bca5eea34b0bae",
+      "inputs/lexrel_retrieval_cases.json": "3e7ef52e191217816c97b2fbcab075089e165b65b30dcbaef7d05c684aa95d24",
+      "inputs/lexrel_service_contract.json": "2b62543e8c61eb44664a1066a8a32311c026601ee02c7e4963799e1087a3285e",
+      "manifests/cases.manifest.json": "53625b81e538a2dcc9b555b07a6423949e3dbcec4d203b70b004d996d6016356",
+      "manifests/civil_code.manifest.json": "d56838677ee32cc88ed948c76f207f2cd8cde206dc469837b0993a0e130347c0"
+    }
+  },
+  "limitations": [
+    "10 of the original 13 fixed relation queries, evaluated on all 105 independently labeled LexRel cases; negative distractor candidates are retained.",
+    "This measures relation-type label retrieval, NOT case similarity or legal applicability.",
+    "Label absence means negative only under the supplied dataset's annotation definition.",
+    "Existing mixed-156 reports remain separate diagnostics; their scores are not interchangeable.",
+    "A rules remain complete; actual A/B/C and BM25 run offline without LLM, vector or Neo4j.",
+    "Facts-only text reduces metadata leakage but does not establish universal leakage freedom.",
+    "These repeatedly inspected questions are a development benchmark, not a blind test."
+  ],
+  "metric_definitions": {
+    "empty_ranking": "Recall and precision 0; returned-label coverage undefined (null)",
+    "k": [
+      5,
+      10,
+      20
+    ],
+    "ndcg": "gain=2^grade-1, discount=log2(rank+1); unchanged",
+    "precision": "relevant_retrieved / requested K, including unfilled slots",
+    "qrel_presence_vs_label_coverage": "Existing metrics.judged_returned counts explicit positive qrel entries only. relation_at_k measures independent source-label availability, including source-annotated records without the queried relation.",
+    "recall": "relevant_retrieved / all source-label positives; unchanged",
+    "recall_ceiling": "min(K, positive_count) / positive_count; not normalized Recall",
+    "source_label_coverage": "source-labeled returned candidates / returned candidates",
+    "unjudged_ratio": "returned candidates without independent labels / returned candidates"
+  },
+  "mode": "actual_A_B_C_offline",
+  "pre_scope_case_count": 156,
+  "pre_scope_source_label_coverage": 0.6730769230769231,
+  "protocol": "casepath.c1.lexrel_relation_coverage.v1",
+  "queries": [
+    {
+      "diagnostics": {
+        "cascade_status": "A_B_C_completed",
+        "pool_count": 20,
+        "projected_condition_count": 44,
+        "role_output_ids": {
+          "boundary": [],
+          "limiting": [],
+          "support": []
+        },
+        "rule_count": 20,
+        "undetermined_count": 20
+      },
+      "domain": "LexRel/借款合同关系",
+      "judgment_basis": "weak_relation_label_non_exhaustive: 独立原始 relation 注释含同一关系类型即记1；不是专家相似案判定，也不等同于事实满足查询中的所有要素。仅105条LexRel有此标签，其他51条候选未标注，不据此断言无关。",
+      "module": "C",
+      "qrels_sha256": "95d4adf2c2d510c89cacd1f25d52f3e47e7a71e34884105ea07a9d0c45c76145",
+      "query_id": "C.lexrel.loan",
+      "query_sha256": "11da0cfca76e79fa350e4f72306fab6473be00782d337bbf7ac0a97fee124397",
+      "rankings": {
+        "c.bm25": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 6,
+                "ndcg": 0.5551469705065497,
+                "recall": 0.16666666666666666,
+                "relevant_retrieved": 6,
+                "returned": 10,
+                "unjudged_returned": 4
+              },
+              "20": {
+                "judged_returned": 15,
+                "ndcg": 0.6788434076454569,
+                "recall": 0.4166666666666667,
+                "relevant_retrieved": 15,
+                "returned": 20,
+                "unjudged_returned": 5
+              },
+              "5": {
+                "judged_returned": 3,
+                "ndcg": 0.5296347172140421,
+                "recall": 0.08333333333333333,
+                "relevant_retrieved": 3,
+                "returned": 5,
+                "unjudged_returned": 2
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 36,
+            "positive_count": 36,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.08d64180-6634-4a0e-ac43-3a1a87ee8d08",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.01a7d159-6001-4cdb-8897-0e52749493cf",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.00ba86cd-a8f3-4ec2-9650-4e76457eb258",
+            "lexrel.06464300-c6d8-48cb-b322-dc2780d7d0a0",
+            "lexrel.3b46376f-5d5d-4de8-a2dd-4230bce5f82f"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.6,
+              "recall_ceiling": 0.2777777777777778,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.75,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.6,
+              "recall_ceiling": 0.1388888888888889,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.fused": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 6,
+                "ndcg": 0.5551469705065497,
+                "recall": 0.16666666666666666,
+                "relevant_retrieved": 6,
+                "returned": 10,
+                "unjudged_returned": 4
+              },
+              "20": {
+                "judged_returned": 15,
+                "ndcg": 0.6788434076454569,
+                "recall": 0.4166666666666667,
+                "relevant_retrieved": 15,
+                "returned": 20,
+                "unjudged_returned": 5
+              },
+              "5": {
+                "judged_returned": 3,
+                "ndcg": 0.5296347172140421,
+                "recall": 0.08333333333333333,
+                "relevant_retrieved": 3,
+                "returned": 5,
+                "unjudged_returned": 2
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 36,
+            "positive_count": 36,
+            "ranking_count": 30,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.08d64180-6634-4a0e-ac43-3a1a87ee8d08",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.01a7d159-6001-4cdb-8897-0e52749493cf",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.00ba86cd-a8f3-4ec2-9650-4e76457eb258",
+            "lexrel.06464300-c6d8-48cb-b322-dc2780d7d0a0",
+            "lexrel.3b46376f-5d5d-4de8-a2dd-4230bce5f82f",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.0ca7defb-1f9e-4f1e-80df-777b40978c0c",
+            "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
+            "lexrel.3bafa03b-acdc-4c4f-bfcb-46633ac3ec65",
+            "lexrel.010d89e4-1af0-4b25-a475-8e039bb67b2e",
+            "lexrel.0ebe9c47-5d7a-4804-88d6-bdfd2d642917",
+            "lexrel.0114c02d-dd97-4d79-8bfc-0c60323a0f7a",
+            "lexrel.01b49f1c-4a9c-4971-b1e3-206d69e8bada",
+            "lexrel.19ee23f9-6aab-42d9-9618-6d30e27b0338",
+            "lexrel.0534c690-cfb9-469f-9748-dde5f769b456"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.6,
+              "recall_ceiling": 0.2777777777777778,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.75,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.6,
+              "recall_ceiling": 0.1388888888888889,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.pool": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 6,
+                "ndcg": 0.5551469705065497,
+                "recall": 0.16666666666666666,
+                "relevant_retrieved": 6,
+                "returned": 10,
+                "unjudged_returned": 4
+              },
+              "20": {
+                "judged_returned": 15,
+                "ndcg": 0.6788434076454569,
+                "recall": 0.4166666666666667,
+                "relevant_retrieved": 15,
+                "returned": 20,
+                "unjudged_returned": 5
+              },
+              "5": {
+                "judged_returned": 3,
+                "ndcg": 0.5296347172140421,
+                "recall": 0.08333333333333333,
+                "relevant_retrieved": 3,
+                "returned": 5,
+                "unjudged_returned": 2
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 36,
+            "positive_count": 36,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.08d64180-6634-4a0e-ac43-3a1a87ee8d08",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.01a7d159-6001-4cdb-8897-0e52749493cf",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.00ba86cd-a8f3-4ec2-9650-4e76457eb258",
+            "lexrel.06464300-c6d8-48cb-b322-dc2780d7d0a0",
+            "lexrel.3b46376f-5d5d-4de8-a2dd-4230bce5f82f"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.6,
+              "recall_ceiling": 0.2777777777777778,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.75,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.6,
+              "recall_ceiling": 0.1388888888888889,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        }
+      },
+      "relation_type": "借款合同关系",
+      "settings": {
+        "case_recall_top_k": 30,
+        "case_rerank_pool_size": 20,
+        "case_role_top_k": 3,
+        "cites_weight": 0.5,
+        "claim_weight": 0.8,
+        "fulltext_weight": 1.0,
+        "graph_weight": 1.0,
+        "per_condition_limit": 30,
+        "rrf_k": 60,
+        "rule_recall_top_k": 50,
+        "rule_top_k": 20,
+        "vector_weight": 1.0
+      }
+    },
+    {
+      "diagnostics": {
+        "cascade_status": "A_B_C_completed",
+        "pool_count": 20,
+        "projected_condition_count": 47,
+        "role_output_ids": {
+          "boundary": [],
+          "limiting": [],
+          "support": []
+        },
+        "rule_count": 20,
+        "undetermined_count": 20
+      },
+      "domain": "LexRel/保证合同关系",
+      "judgment_basis": "weak_relation_label_non_exhaustive: 独立原始 relation 注释含同一关系类型即记1；不是专家相似案判定，也不等同于事实满足查询中的所有要素。仅105条LexRel有此标签，其他51条候选未标注，不据此断言无关。",
+      "module": "C",
+      "qrels_sha256": "6e42e1fc6cb491c4ed5cb9aee9ef29d21af299cbcd8243632de801f1d4048e8b",
+      "query_id": "C.lexrel.guarantee",
+      "query_sha256": "3fa7aa95afe246efce5c7f851b176948abc83083d9262ef05ef40cd1f6349f2b",
+      "rankings": {
+        "c.bm25": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 10,
+                "ndcg": 1.0,
+                "recall": 0.47619047619047616,
+                "relevant_retrieved": 10,
+                "returned": 10,
+                "unjudged_returned": 0
+              },
+              "20": {
+                "judged_returned": 16,
+                "ndcg": 0.8650029589108509,
+                "recall": 0.7619047619047619,
+                "relevant_retrieved": 16,
+                "returned": 20,
+                "unjudged_returned": 4
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.23809523809523808,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 21,
+            "positive_count": 21,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7",
+            "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.082566c1-214f-4e53-bd93-1f364d199f15",
+            "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+            "lexrel.0823adb6-166b-4aff-8c6b-776ab2551b99",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58",
+            "lexrel.010d89e4-1af0-4b25-a475-8e039bb67b2e",
+            "lexrel.08d64180-6634-4a0e-ac43-3a1a87ee8d08",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
+            "lexrel.0323a0ef-d71c-419b-aa0d-620a9137e614"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 1.0,
+              "recall_ceiling": 0.47619047619047616,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.8,
+              "recall_ceiling": 0.9523809523809523,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.23809523809523808,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.fused": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 10,
+                "ndcg": 1.0,
+                "recall": 0.47619047619047616,
+                "relevant_retrieved": 10,
+                "returned": 10,
+                "unjudged_returned": 0
+              },
+              "20": {
+                "judged_returned": 16,
+                "ndcg": 0.8650029589108509,
+                "recall": 0.7619047619047619,
+                "relevant_retrieved": 16,
+                "returned": 20,
+                "unjudged_returned": 4
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.23809523809523808,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 21,
+            "positive_count": 21,
+            "ranking_count": 30,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7",
+            "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.082566c1-214f-4e53-bd93-1f364d199f15",
+            "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+            "lexrel.0823adb6-166b-4aff-8c6b-776ab2551b99",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58",
+            "lexrel.010d89e4-1af0-4b25-a475-8e039bb67b2e",
+            "lexrel.08d64180-6634-4a0e-ac43-3a1a87ee8d08",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
+            "lexrel.0323a0ef-d71c-419b-aa0d-620a9137e614",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.29d8ac1c-bd87-4547-b647-cd2c68b086db",
+            "lexrel.02c7c1df-dadd-4d2e-b70e-091c0890531a",
+            "lexrel.01e7082e-6292-49c1-adf1-5508618012c2",
+            "lexrel.252a0418-a93e-4ddb-8343-15b3a7fe8680",
+            "lexrel.1361fe7d-e6e9-4dd3-b720-41d166606013",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.26f9dc81-2eb0-4add-8f50-18ca43aba532"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 1.0,
+              "recall_ceiling": 0.47619047619047616,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.8,
+              "recall_ceiling": 0.9523809523809523,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.23809523809523808,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.pool": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 10,
+                "ndcg": 1.0,
+                "recall": 0.47619047619047616,
+                "relevant_retrieved": 10,
+                "returned": 10,
+                "unjudged_returned": 0
+              },
+              "20": {
+                "judged_returned": 16,
+                "ndcg": 0.8650029589108509,
+                "recall": 0.7619047619047619,
+                "relevant_retrieved": 16,
+                "returned": 20,
+                "unjudged_returned": 4
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.23809523809523808,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 21,
+            "positive_count": 21,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7",
+            "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.082566c1-214f-4e53-bd93-1f364d199f15",
+            "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+            "lexrel.0823adb6-166b-4aff-8c6b-776ab2551b99",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58",
+            "lexrel.010d89e4-1af0-4b25-a475-8e039bb67b2e",
+            "lexrel.08d64180-6634-4a0e-ac43-3a1a87ee8d08",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
+            "lexrel.0323a0ef-d71c-419b-aa0d-620a9137e614"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 1.0,
+              "recall_ceiling": 0.47619047619047616,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.8,
+              "recall_ceiling": 0.9523809523809523,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.23809523809523808,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        }
+      },
+      "relation_type": "保证合同关系",
+      "settings": {
+        "case_recall_top_k": 30,
+        "case_rerank_pool_size": 20,
+        "case_role_top_k": 3,
+        "cites_weight": 0.5,
+        "claim_weight": 0.8,
+        "fulltext_weight": 1.0,
+        "graph_weight": 1.0,
+        "per_condition_limit": 30,
+        "rrf_k": 60,
+        "rule_recall_top_k": 50,
+        "rule_top_k": 20,
+        "vector_weight": 1.0
+      }
+    },
+    {
+      "diagnostics": {
+        "cascade_status": "A_B_C_completed",
+        "pool_count": 20,
+        "projected_condition_count": 51,
+        "role_output_ids": {
+          "boundary": [],
+          "limiting": [],
+          "support": []
+        },
+        "rule_count": 20,
+        "undetermined_count": 20
+      },
+      "domain": "LexRel/财产保险合同关系",
+      "judgment_basis": "weak_relation_label_non_exhaustive: 独立原始 relation 注释含同一关系类型即记1；不是专家相似案判定，也不等同于事实满足查询中的所有要素。仅105条LexRel有此标签，其他51条候选未标注，不据此断言无关。",
+      "module": "C",
+      "qrels_sha256": "e784b8a0c0922e03af31f8c20e97d635337c090e7dcfe3f0343752a72a7d8445",
+      "query_id": "C.lexrel.property_insurance",
+      "query_sha256": "d06a7ca334aa3cdbee3333af7840f36b8fd636207e360f1dc94a92d9c1b4ddeb",
+      "rankings": {
+        "c.bm25": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 9,
+                "ndcg": 0.9266360779006398,
+                "recall": 0.6428571428571429,
+                "relevant_retrieved": 9,
+                "returned": 10,
+                "unjudged_returned": 1
+              },
+              "20": {
+                "judged_returned": 14,
+                "ndcg": 0.9818305476313958,
+                "recall": 1.0,
+                "relevant_retrieved": 14,
+                "returned": 20,
+                "unjudged_returned": 6
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.35714285714285715,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 14,
+            "positive_count": 14,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.02c7c1df-dadd-4d2e-b70e-091c0890531a",
+            "lexrel.01e7082e-6292-49c1-adf1-5508618012c2",
+            "lexrel.0323a0ef-d71c-419b-aa0d-620a9137e614",
+            "lexrel.22c67685-32c8-4c11-9cb4-9110f6f605db",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.199e60db-7e3c-4b93-9536-3652e7485ff1",
+            "lexrel.1361fe7d-e6e9-4dd3-b720-41d166606013",
+            "lexrel.0d05f3e5-91ce-4e47-a98a-454dc1e2789f",
+            "lexrel.29d8ac1c-bd87-4547-b647-cd2c68b086db",
+            "lexrel.3309ce95-f2bc-43d8-bdd6-6330c808e350",
+            "lexrel.252a0418-a93e-4ddb-8343-15b3a7fe8680",
+            "lexrel.151b69d3-eb5a-4839-9df7-7c6f72e00291",
+            "lexrel.25d4826f-a5dd-4f84-a2b9-c553fe3d7f29",
+            "lexrel.2a256119-5a3b-4d20-8051-96e1abba2da1",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.2093ca35-88c1-4cdc-b856-b857f04c5bbd",
+            "lexrel.203ea54c-b6b6-440d-9822-9586326714bb",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.9,
+              "recall_ceiling": 0.7142857142857143,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.7,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.35714285714285715,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.fused": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 9,
+                "ndcg": 0.9266360779006398,
+                "recall": 0.6428571428571429,
+                "relevant_retrieved": 9,
+                "returned": 10,
+                "unjudged_returned": 1
+              },
+              "20": {
+                "judged_returned": 14,
+                "ndcg": 0.9818305476313958,
+                "recall": 1.0,
+                "relevant_retrieved": 14,
+                "returned": 20,
+                "unjudged_returned": 6
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.35714285714285715,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 14,
+            "positive_count": 14,
+            "ranking_count": 30,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.02c7c1df-dadd-4d2e-b70e-091c0890531a",
+            "lexrel.01e7082e-6292-49c1-adf1-5508618012c2",
+            "lexrel.0323a0ef-d71c-419b-aa0d-620a9137e614",
+            "lexrel.22c67685-32c8-4c11-9cb4-9110f6f605db",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.199e60db-7e3c-4b93-9536-3652e7485ff1",
+            "lexrel.1361fe7d-e6e9-4dd3-b720-41d166606013",
+            "lexrel.0d05f3e5-91ce-4e47-a98a-454dc1e2789f",
+            "lexrel.29d8ac1c-bd87-4547-b647-cd2c68b086db",
+            "lexrel.3309ce95-f2bc-43d8-bdd6-6330c808e350",
+            "lexrel.252a0418-a93e-4ddb-8343-15b3a7fe8680",
+            "lexrel.151b69d3-eb5a-4839-9df7-7c6f72e00291",
+            "lexrel.25d4826f-a5dd-4f84-a2b9-c553fe3d7f29",
+            "lexrel.2a256119-5a3b-4d20-8051-96e1abba2da1",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.2093ca35-88c1-4cdc-b856-b857f04c5bbd",
+            "lexrel.203ea54c-b6b6-440d-9822-9586326714bb",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.01a7d159-6001-4cdb-8897-0e52749493cf",
+            "lexrel.068127fc-523f-47b0-a517-41ad7e7643d5",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58",
+            "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487",
+            "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.087429b6-869a-404c-bc00-0a37ce1399cd"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.9,
+              "recall_ceiling": 0.7142857142857143,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.7,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.35714285714285715,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.pool": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 9,
+                "ndcg": 0.9266360779006398,
+                "recall": 0.6428571428571429,
+                "relevant_retrieved": 9,
+                "returned": 10,
+                "unjudged_returned": 1
+              },
+              "20": {
+                "judged_returned": 14,
+                "ndcg": 0.9818305476313958,
+                "recall": 1.0,
+                "relevant_retrieved": 14,
+                "returned": 20,
+                "unjudged_returned": 6
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.35714285714285715,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 14,
+            "positive_count": 14,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.02c7c1df-dadd-4d2e-b70e-091c0890531a",
+            "lexrel.01e7082e-6292-49c1-adf1-5508618012c2",
+            "lexrel.0323a0ef-d71c-419b-aa0d-620a9137e614",
+            "lexrel.22c67685-32c8-4c11-9cb4-9110f6f605db",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.199e60db-7e3c-4b93-9536-3652e7485ff1",
+            "lexrel.1361fe7d-e6e9-4dd3-b720-41d166606013",
+            "lexrel.0d05f3e5-91ce-4e47-a98a-454dc1e2789f",
+            "lexrel.29d8ac1c-bd87-4547-b647-cd2c68b086db",
+            "lexrel.3309ce95-f2bc-43d8-bdd6-6330c808e350",
+            "lexrel.252a0418-a93e-4ddb-8343-15b3a7fe8680",
+            "lexrel.151b69d3-eb5a-4839-9df7-7c6f72e00291",
+            "lexrel.25d4826f-a5dd-4f84-a2b9-c553fe3d7f29",
+            "lexrel.2a256119-5a3b-4d20-8051-96e1abba2da1",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.2093ca35-88c1-4cdc-b856-b857f04c5bbd",
+            "lexrel.203ea54c-b6b6-440d-9822-9586326714bb",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.9,
+              "recall_ceiling": 0.7142857142857143,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.7,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.35714285714285715,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        }
+      },
+      "relation_type": "财产保险合同关系",
+      "settings": {
+        "case_recall_top_k": 30,
+        "case_rerank_pool_size": 20,
+        "case_role_top_k": 3,
+        "cites_weight": 0.5,
+        "claim_weight": 0.8,
+        "fulltext_weight": 1.0,
+        "graph_weight": 1.0,
+        "per_condition_limit": 30,
+        "rrf_k": 60,
+        "rule_recall_top_k": 50,
+        "rule_top_k": 20,
+        "vector_weight": 1.0
+      }
+    },
+    {
+      "diagnostics": {
+        "cascade_status": "A_B_C_completed",
+        "pool_count": 20,
+        "projected_condition_count": 58,
+        "role_output_ids": {
+          "boundary": [],
+          "limiting": [],
+          "support": []
+        },
+        "rule_count": 20,
+        "undetermined_count": 20
+      },
+      "domain": "LexRel/除房屋外的买卖合同关系",
+      "judgment_basis": "weak_relation_label_non_exhaustive: 独立原始 relation 注释含同一关系类型即记1；不是专家相似案判定，也不等同于事实满足查询中的所有要素。仅105条LexRel有此标签，其他51条候选未标注，不据此断言无关。",
+      "module": "C",
+      "qrels_sha256": "60835c7e841dc838f39750873a384ba6e9f8fb54ed55964c47925a4377ed3377",
+      "query_id": "C.lexrel.sale",
+      "query_sha256": "b6150e9351e14c990dc8dd940817d03689993dae942e10557a8d1628f83d6ae2",
+      "rankings": {
+        "c.bm25": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 1,
+                "ndcg": 0.13886244387355454,
+                "recall": 0.1,
+                "relevant_retrieved": 1,
+                "returned": 10,
+                "unjudged_returned": 9
+              },
+              "20": {
+                "judged_returned": 3,
+                "ndcg": 0.24759388357448503,
+                "recall": 0.3,
+                "relevant_retrieved": 3,
+                "returned": 20,
+                "unjudged_returned": 17
+              },
+              "5": {
+                "judged_returned": 1,
+                "ndcg": 0.21398626473452756,
+                "recall": 0.1,
+                "relevant_retrieved": 1,
+                "returned": 5,
+                "unjudged_returned": 4
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 10,
+            "positive_count": 10,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.071d3b57-4a23-4723-8c69-6f309efe62d8",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.0d4fb34c-2355-41ba-821e-ed8dc98447ee",
+            "lexrel.20ac88c0-ddc4-40dc-9701-b0a3600858d9",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+            "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487",
+            "lexrel.152bc590-4b5f-49c9-92f8-369f4a0fcc2b",
+            "lexrel.26f9dc81-2eb0-4add-8f50-18ca43aba532",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.34242265-7233-4c98-8604-20d0c7f67ceb",
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.1,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.15,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.2,
+              "recall_ceiling": 0.5,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.fused": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 1,
+                "ndcg": 0.13886244387355454,
+                "recall": 0.1,
+                "relevant_retrieved": 1,
+                "returned": 10,
+                "unjudged_returned": 9
+              },
+              "20": {
+                "judged_returned": 3,
+                "ndcg": 0.24759388357448503,
+                "recall": 0.3,
+                "relevant_retrieved": 3,
+                "returned": 20,
+                "unjudged_returned": 17
+              },
+              "5": {
+                "judged_returned": 1,
+                "ndcg": 0.21398626473452756,
+                "recall": 0.1,
+                "relevant_retrieved": 1,
+                "returned": 5,
+                "unjudged_returned": 4
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 10,
+            "positive_count": 10,
+            "ranking_count": 30,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.071d3b57-4a23-4723-8c69-6f309efe62d8",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.0d4fb34c-2355-41ba-821e-ed8dc98447ee",
+            "lexrel.20ac88c0-ddc4-40dc-9701-b0a3600858d9",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+            "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487",
+            "lexrel.152bc590-4b5f-49c9-92f8-369f4a0fcc2b",
+            "lexrel.26f9dc81-2eb0-4add-8f50-18ca43aba532",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.34242265-7233-4c98-8604-20d0c7f67ceb",
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.203ea54c-b6b6-440d-9822-9586326714bb",
+            "lexrel.0b1b0a70-2daa-482c-887f-0ed90e6f0482",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.0ebe9c47-5d7a-4804-88d6-bdfd2d642917",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.0a61fa3c-0d06-42f1-99a8-6cb14936acd8",
+            "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.1,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.15,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.2,
+              "recall_ceiling": 0.5,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.pool": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 1,
+                "ndcg": 0.13886244387355454,
+                "recall": 0.1,
+                "relevant_retrieved": 1,
+                "returned": 10,
+                "unjudged_returned": 9
+              },
+              "20": {
+                "judged_returned": 3,
+                "ndcg": 0.24759388357448503,
+                "recall": 0.3,
+                "relevant_retrieved": 3,
+                "returned": 20,
+                "unjudged_returned": 17
+              },
+              "5": {
+                "judged_returned": 1,
+                "ndcg": 0.21398626473452756,
+                "recall": 0.1,
+                "relevant_retrieved": 1,
+                "returned": 5,
+                "unjudged_returned": 4
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 10,
+            "positive_count": 10,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.071d3b57-4a23-4723-8c69-6f309efe62d8",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.0d4fb34c-2355-41ba-821e-ed8dc98447ee",
+            "lexrel.20ac88c0-ddc4-40dc-9701-b0a3600858d9",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+            "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487",
+            "lexrel.152bc590-4b5f-49c9-92f8-369f4a0fcc2b",
+            "lexrel.26f9dc81-2eb0-4add-8f50-18ca43aba532",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.34242265-7233-4c98-8604-20d0c7f67ceb",
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.1,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.15,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.2,
+              "recall_ceiling": 0.5,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        }
+      },
+      "relation_type": "除房屋外的买卖合同关系",
+      "settings": {
+        "case_recall_top_k": 30,
+        "case_rerank_pool_size": 20,
+        "case_role_top_k": 3,
+        "cites_weight": 0.5,
+        "claim_weight": 0.8,
+        "fulltext_weight": 1.0,
+        "graph_weight": 1.0,
+        "per_condition_limit": 30,
+        "rrf_k": 60,
+        "rule_recall_top_k": 50,
+        "rule_top_k": 20,
+        "vector_weight": 1.0
+      }
+    },
+    {
+      "diagnostics": {
+        "cascade_status": "A_B_C_completed",
+        "pool_count": 20,
+        "projected_condition_count": 69,
+        "role_output_ids": {
+          "boundary": [],
+          "limiting": [],
+          "support": []
+        },
+        "rule_count": 20,
+        "undetermined_count": 20
+      },
+      "domain": "LexRel/抵押合同关系",
+      "judgment_basis": "weak_relation_label_non_exhaustive: 独立原始 relation 注释含同一关系类型即记1；不是专家相似案判定，也不等同于事实满足查询中的所有要素。仅105条LexRel有此标签，其他51条候选未标注，不据此断言无关。",
+      "module": "C",
+      "qrels_sha256": "a9175341cd736741ca0e5b5011db211f551bbcc7bbdb0b0d79f3cf71b024f4eb",
+      "query_id": "C.lexrel.mortgage_contract",
+      "query_sha256": "f2bfcb0c37609286b70ad1f37b6021322725118c62f9a46dc5154f5736d1e15d",
+      "rankings": {
+        "c.bm25": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 7,
+                "ndcg": 0.7935840677649109,
+                "recall": 0.6363636363636364,
+                "relevant_retrieved": 7,
+                "returned": 10,
+                "unjudged_returned": 3
+              },
+              "20": {
+                "judged_returned": 10,
+                "ndcg": 0.912291521080749,
+                "recall": 0.9090909090909091,
+                "relevant_retrieved": 10,
+                "returned": 20,
+                "unjudged_returned": 10
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.45454545454545453,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 11,
+            "positive_count": 11,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.39cd82f8-ed66-4362-914d-13f3350c4174",
+            "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.0eded59f-6c34-40b3-bf86-12514d9ca8a4",
+            "lexrel.068127fc-523f-47b0-a517-41ad7e7643d5",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.31eee4ac-820d-4dae-a14f-595cae51c2c3",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.3bafa03b-acdc-4c4f-bfcb-46633ac3ec65",
+            "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.203ea54c-b6b6-440d-9822-9586326714bb"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.7,
+              "recall_ceiling": 0.9090909090909091,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.5,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.45454545454545453,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.fused": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 7,
+                "ndcg": 0.7935840677649109,
+                "recall": 0.6363636363636364,
+                "relevant_retrieved": 7,
+                "returned": 10,
+                "unjudged_returned": 3
+              },
+              "20": {
+                "judged_returned": 10,
+                "ndcg": 0.912291521080749,
+                "recall": 0.9090909090909091,
+                "relevant_retrieved": 10,
+                "returned": 20,
+                "unjudged_returned": 10
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.45454545454545453,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 11,
+            "positive_count": 11,
+            "ranking_count": 33,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.39cd82f8-ed66-4362-914d-13f3350c4174",
+            "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.0eded59f-6c34-40b3-bf86-12514d9ca8a4",
+            "lexrel.068127fc-523f-47b0-a517-41ad7e7643d5",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.31eee4ac-820d-4dae-a14f-595cae51c2c3",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.3bafa03b-acdc-4c4f-bfcb-46633ac3ec65",
+            "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.203ea54c-b6b6-440d-9822-9586326714bb",
+            "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.152bc590-4b5f-49c9-92f8-369f4a0fcc2b",
+            "lexrel.082566c1-214f-4e53-bd93-1f364d199f15",
+            "lexrel.0ebe9c47-5d7a-4804-88d6-bdfd2d642917",
+            "lexrel.08d64180-6634-4a0e-ac43-3a1a87ee8d08",
+            "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.102f10d1-ca09-4ed1-ae2e-f45007ce3038",
+            "lexrel.1ec928ab-bb1e-4131-bafc-e17593454e1b",
+            "lexrel.829d6968-3b55-43c8-9e18-9d6ccccfd391"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.7,
+              "recall_ceiling": 0.9090909090909091,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.5,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.45454545454545453,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.pool": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 7,
+                "ndcg": 0.7935840677649109,
+                "recall": 0.6363636363636364,
+                "relevant_retrieved": 7,
+                "returned": 10,
+                "unjudged_returned": 3
+              },
+              "20": {
+                "judged_returned": 10,
+                "ndcg": 0.912291521080749,
+                "recall": 0.9090909090909091,
+                "relevant_retrieved": 10,
+                "returned": 20,
+                "unjudged_returned": 10
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.45454545454545453,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 11,
+            "positive_count": 11,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.39cd82f8-ed66-4362-914d-13f3350c4174",
+            "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.0eded59f-6c34-40b3-bf86-12514d9ca8a4",
+            "lexrel.068127fc-523f-47b0-a517-41ad7e7643d5",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.31eee4ac-820d-4dae-a14f-595cae51c2c3",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.3bafa03b-acdc-4c4f-bfcb-46633ac3ec65",
+            "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.203ea54c-b6b6-440d-9822-9586326714bb"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.7,
+              "recall_ceiling": 0.9090909090909091,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.5,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.45454545454545453,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        }
+      },
+      "relation_type": "抵押合同关系",
+      "settings": {
+        "case_recall_top_k": 30,
+        "case_rerank_pool_size": 20,
+        "case_role_top_k": 3,
+        "cites_weight": 0.5,
+        "claim_weight": 0.8,
+        "fulltext_weight": 1.0,
+        "graph_weight": 1.0,
+        "per_condition_limit": 30,
+        "rrf_k": 60,
+        "rule_recall_top_k": 50,
+        "rule_top_k": 20,
+        "vector_weight": 1.0
+      }
+    },
+    {
+      "diagnostics": {
+        "cascade_status": "A_B_C_completed",
+        "pool_count": 20,
+        "projected_condition_count": 54,
+        "role_output_ids": {
+          "boundary": [],
+          "limiting": [],
+          "support": []
+        },
+        "rule_count": 20,
+        "undetermined_count": 20
+      },
+      "domain": "LexRel/房屋买卖合同关系",
+      "judgment_basis": "weak_relation_label_non_exhaustive: 独立原始 relation 注释含同一关系类型即记1；不是专家相似案判定，也不等同于事实满足查询中的所有要素。仅105条LexRel有此标签，其他51条候选未标注，不据此断言无关。",
+      "module": "C",
+      "qrels_sha256": "5a2236ef328e382d1b4100532f9ceab7a3579f489117abbecc3143976fe046ec",
+      "query_id": "C.lexrel.house_sale",
+      "query_sha256": "f872bb547da1bf289e20d3b1350f2a5c66e73523f9cb88b931e4049165dba98c",
+      "rankings": {
+        "c.bm25": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 5,
+                "ndcg": 0.6701421017823512,
+                "recall": 0.5555555555555556,
+                "relevant_retrieved": 5,
+                "returned": 10,
+                "unjudged_returned": 5
+              },
+              "20": {
+                "judged_returned": 7,
+                "ndcg": 0.7992246751783418,
+                "recall": 0.7777777777777778,
+                "relevant_retrieved": 7,
+                "returned": 20,
+                "unjudged_returned": 13
+              },
+              "5": {
+                "judged_returned": 4,
+                "ndcg": 0.8539316501572937,
+                "recall": 0.4444444444444444,
+                "relevant_retrieved": 4,
+                "returned": 5,
+                "unjudged_returned": 1
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.20ac88c0-ddc4-40dc-9701-b0a3600858d9",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.0d4fb34c-2355-41ba-821e-ed8dc98447ee",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.152bc590-4b5f-49c9-92f8-369f4a0fcc2b",
+            "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.34242265-7233-4c98-8604-20d0c7f67ceb",
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.1aa97247-6757-4a79-adb9-e872f06342d1",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.5,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.35,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.8,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.fused": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 5,
+                "ndcg": 0.6701421017823512,
+                "recall": 0.5555555555555556,
+                "relevant_retrieved": 5,
+                "returned": 10,
+                "unjudged_returned": 5
+              },
+              "20": {
+                "judged_returned": 7,
+                "ndcg": 0.7992246751783418,
+                "recall": 0.7777777777777778,
+                "relevant_retrieved": 7,
+                "returned": 20,
+                "unjudged_returned": 13
+              },
+              "5": {
+                "judged_returned": 4,
+                "ndcg": 0.8539316501572937,
+                "recall": 0.4444444444444444,
+                "relevant_retrieved": 4,
+                "returned": 5,
+                "unjudged_returned": 1
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 30,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.20ac88c0-ddc4-40dc-9701-b0a3600858d9",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.0d4fb34c-2355-41ba-821e-ed8dc98447ee",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.152bc590-4b5f-49c9-92f8-369f4a0fcc2b",
+            "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.34242265-7233-4c98-8604-20d0c7f67ceb",
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.1aa97247-6757-4a79-adb9-e872f06342d1",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.0534c690-cfb9-469f-9748-dde5f769b456",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.1222a756-e7cb-431e-af61-b8f30f0f2219",
+            "lexrel.082566c1-214f-4e53-bd93-1f364d199f15",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.6362b0e7-e276-4efc-8124-d72a04e0db51",
+            "lexrel.652b45ea-7e0f-431a-9741-f39948b68452",
+            "lexrel.071d3b57-4a23-4723-8c69-6f309efe62d8",
+            "lexrel.0b1b0a70-2daa-482c-887f-0ed90e6f0482",
+            "lexrel.1e5b0a23-5f82-4de2-b487-8fdb5ca6989f"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.5,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.35,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.8,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.pool": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 5,
+                "ndcg": 0.6701421017823512,
+                "recall": 0.5555555555555556,
+                "relevant_retrieved": 5,
+                "returned": 10,
+                "unjudged_returned": 5
+              },
+              "20": {
+                "judged_returned": 7,
+                "ndcg": 0.7992246751783418,
+                "recall": 0.7777777777777778,
+                "relevant_retrieved": 7,
+                "returned": 20,
+                "unjudged_returned": 13
+              },
+              "5": {
+                "judged_returned": 4,
+                "ndcg": 0.8539316501572937,
+                "recall": 0.4444444444444444,
+                "relevant_retrieved": 4,
+                "returned": 5,
+                "unjudged_returned": 1
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.20ac88c0-ddc4-40dc-9701-b0a3600858d9",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.0d4fb34c-2355-41ba-821e-ed8dc98447ee",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.152bc590-4b5f-49c9-92f8-369f4a0fcc2b",
+            "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.34242265-7233-4c98-8604-20d0c7f67ceb",
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.1aa97247-6757-4a79-adb9-e872f06342d1",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.5,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.35,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.8,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        }
+      },
+      "relation_type": "房屋买卖合同关系",
+      "settings": {
+        "case_recall_top_k": 30,
+        "case_rerank_pool_size": 20,
+        "case_role_top_k": 3,
+        "cites_weight": 0.5,
+        "claim_weight": 0.8,
+        "fulltext_weight": 1.0,
+        "graph_weight": 1.0,
+        "per_condition_limit": 30,
+        "rrf_k": 60,
+        "rule_recall_top_k": 50,
+        "rule_top_k": 20,
+        "vector_weight": 1.0
+      }
+    },
+    {
+      "diagnostics": {
+        "cascade_status": "A_B_C_completed",
+        "pool_count": 20,
+        "projected_condition_count": 54,
+        "role_output_ids": {
+          "boundary": [],
+          "limiting": [],
+          "support": []
+        },
+        "rule_count": 20,
+        "undetermined_count": 20
+      },
+      "domain": "LexRel/劳务合同关系",
+      "judgment_basis": "weak_relation_label_non_exhaustive: 独立原始 relation 注释含同一关系类型即记1；不是专家相似案判定，也不等同于事实满足查询中的所有要素。仅105条LexRel有此标签，其他51条候选未标注，不据此断言无关。",
+      "module": "C",
+      "qrels_sha256": "3573be75f19ed46ab28eebb4eed3ec96c6c75a8f431fbcf67d46cb411ab9ec4e",
+      "query_id": "C.lexrel.labor_service",
+      "query_sha256": "0914639fec244f880a2f3ba73cc8881fbdefa3f36776757c3f2a69fbe9870ac5",
+      "rankings": {
+        "c.bm25": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 3,
+                "ndcg": 0.5390031312763821,
+                "recall": 0.375,
+                "relevant_retrieved": 3,
+                "returned": 10,
+                "unjudged_returned": 7
+              },
+              "20": {
+                "judged_returned": 3,
+                "ndcg": 0.5390031312763821,
+                "recall": 0.375,
+                "relevant_retrieved": 3,
+                "returned": 20,
+                "unjudged_returned": 17
+              },
+              "5": {
+                "judged_returned": 3,
+                "ndcg": 0.7227265726449519,
+                "recall": 0.375,
+                "relevant_retrieved": 3,
+                "returned": 5,
+                "unjudged_returned": 2
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 8,
+            "positive_count": 8,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.01a9ed6c-a219-4e01-a335-548eba28069e",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+            "lexrel.1361fe7d-e6e9-4dd3-b720-41d166606013",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.611325f8-073b-4e66-b496-533c62d9cb41",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.01e7082e-6292-49c1-adf1-5508618012c2",
+            "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.3,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.15,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.6,
+              "recall_ceiling": 0.625,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.fused": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 3,
+                "ndcg": 0.5390031312763821,
+                "recall": 0.375,
+                "relevant_retrieved": 3,
+                "returned": 10,
+                "unjudged_returned": 7
+              },
+              "20": {
+                "judged_returned": 3,
+                "ndcg": 0.5390031312763821,
+                "recall": 0.375,
+                "relevant_retrieved": 3,
+                "returned": 20,
+                "unjudged_returned": 17
+              },
+              "5": {
+                "judged_returned": 3,
+                "ndcg": 0.7227265726449519,
+                "recall": 0.375,
+                "relevant_retrieved": 3,
+                "returned": 5,
+                "unjudged_returned": 2
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 8,
+            "positive_count": 8,
+            "ranking_count": 30,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.01a9ed6c-a219-4e01-a335-548eba28069e",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+            "lexrel.1361fe7d-e6e9-4dd3-b720-41d166606013",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.611325f8-073b-4e66-b496-533c62d9cb41",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.01e7082e-6292-49c1-adf1-5508618012c2",
+            "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58",
+            "lexrel.2093ca35-88c1-4cdc-b856-b857f04c5bbd",
+            "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487",
+            "lexrel.29d8ac1c-bd87-4547-b647-cd2c68b086db",
+            "lexrel.0d4fb34c-2355-41ba-821e-ed8dc98447ee",
+            "lexrel.3f3de2a0-b276-494c-8695-99ff70cf242b",
+            "lexrel.152bc590-4b5f-49c9-92f8-369f4a0fcc2b",
+            "lexrel.0534c690-cfb9-469f-9748-dde5f769b456",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.22c67685-32c8-4c11-9cb4-9110f6f605db",
+            "lexrel.26f9dc81-2eb0-4add-8f50-18ca43aba532"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.3,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.15,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.6,
+              "recall_ceiling": 0.625,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.pool": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 3,
+                "ndcg": 0.5390031312763821,
+                "recall": 0.375,
+                "relevant_retrieved": 3,
+                "returned": 10,
+                "unjudged_returned": 7
+              },
+              "20": {
+                "judged_returned": 3,
+                "ndcg": 0.5390031312763821,
+                "recall": 0.375,
+                "relevant_retrieved": 3,
+                "returned": 20,
+                "unjudged_returned": 17
+              },
+              "5": {
+                "judged_returned": 3,
+                "ndcg": 0.7227265726449519,
+                "recall": 0.375,
+                "relevant_retrieved": 3,
+                "returned": 5,
+                "unjudged_returned": 2
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 8,
+            "positive_count": 8,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.01a9ed6c-a219-4e01-a335-548eba28069e",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+            "lexrel.1361fe7d-e6e9-4dd3-b720-41d166606013",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40",
+            "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+            "lexrel.611325f8-073b-4e66-b496-533c62d9cb41",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.01e7082e-6292-49c1-adf1-5508618012c2",
+            "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.3,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.15,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.6,
+              "recall_ceiling": 0.625,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        }
+      },
+      "relation_type": "劳务合同关系",
+      "settings": {
+        "case_recall_top_k": 30,
+        "case_rerank_pool_size": 20,
+        "case_role_top_k": 3,
+        "cites_weight": 0.5,
+        "claim_weight": 0.8,
+        "fulltext_weight": 1.0,
+        "graph_weight": 1.0,
+        "per_condition_limit": 30,
+        "rrf_k": 60,
+        "rule_recall_top_k": 50,
+        "rule_top_k": 20,
+        "vector_weight": 1.0
+      }
+    },
+    {
+      "diagnostics": {
+        "cascade_status": "A_B_C_completed",
+        "pool_count": 20,
+        "projected_condition_count": 45,
+        "role_output_ids": {
+          "boundary": [],
+          "limiting": [],
+          "support": []
+        },
+        "rule_count": 20,
+        "undetermined_count": 20
+      },
+      "domain": "LexRel/租赁合同关系",
+      "judgment_basis": "weak_relation_label_non_exhaustive: 独立原始 relation 注释含同一关系类型即记1；不是专家相似案判定，也不等同于事实满足查询中的所有要素。仅105条LexRel有此标签，其他51条候选未标注，不据此断言无关。",
+      "module": "C",
+      "qrels_sha256": "91448ed55b85f10810aa2dbb770abfd192973fcbad95c5a89c4919e978871637",
+      "query_id": "C.lexrel.lease",
+      "query_sha256": "56309da96593bd2d7c8265be0ce9ce7049f4307c01a507ed0da381ccbafcfa08",
+      "rankings": {
+        "c.bm25": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 5,
+                "ndcg": 0.6054652472515126,
+                "recall": 0.5555555555555556,
+                "relevant_retrieved": 5,
+                "returned": 10,
+                "unjudged_returned": 5
+              },
+              "20": {
+                "judged_returned": 8,
+                "ndcg": 0.7929259440021231,
+                "recall": 0.8888888888888888,
+                "relevant_retrieved": 8,
+                "returned": 20,
+                "unjudged_returned": 12
+              },
+              "5": {
+                "judged_returned": 3,
+                "ndcg": 0.6548086577531307,
+                "recall": 0.3333333333333333,
+                "relevant_retrieved": 3,
+                "returned": 5,
+                "unjudged_returned": 2
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.16716740-8026-4b70-9b46-25a3ae791ff0",
+            "lexrel.1aa97247-6757-4a79-adb9-e872f06342d1",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.080c1b33-465c-4f25-91ff-7eeab8aa0803",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.39cd82f8-ed66-4362-914d-13f3350c4174",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.0aa937fc-a1f7-404c-b880-c39c12227120",
+            "lexrel.1222a756-e7cb-431e-af61-b8f30f0f2219",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.11feaa80-68b2-45fb-811a-25e179fbf677",
+            "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332",
+            "lexrel.0eded59f-6c34-40b3-bf86-12514d9ca8a4",
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.5,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.4,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.6,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.fused": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 5,
+                "ndcg": 0.6054652472515126,
+                "recall": 0.5555555555555556,
+                "relevant_retrieved": 5,
+                "returned": 10,
+                "unjudged_returned": 5
+              },
+              "20": {
+                "judged_returned": 8,
+                "ndcg": 0.7929259440021231,
+                "recall": 0.8888888888888888,
+                "relevant_retrieved": 8,
+                "returned": 20,
+                "unjudged_returned": 12
+              },
+              "5": {
+                "judged_returned": 3,
+                "ndcg": 0.6548086577531307,
+                "recall": 0.3333333333333333,
+                "relevant_retrieved": 3,
+                "returned": 5,
+                "unjudged_returned": 2
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 30,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.16716740-8026-4b70-9b46-25a3ae791ff0",
+            "lexrel.1aa97247-6757-4a79-adb9-e872f06342d1",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.080c1b33-465c-4f25-91ff-7eeab8aa0803",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.39cd82f8-ed66-4362-914d-13f3350c4174",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.0aa937fc-a1f7-404c-b880-c39c12227120",
+            "lexrel.1222a756-e7cb-431e-af61-b8f30f0f2219",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.11feaa80-68b2-45fb-811a-25e179fbf677",
+            "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332",
+            "lexrel.0eded59f-6c34-40b3-bf86-12514d9ca8a4",
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.0d4fb34c-2355-41ba-821e-ed8dc98447ee",
+            "lexrel.203ea54c-b6b6-440d-9822-9586326714bb",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.19ee23f9-6aab-42d9-9618-6d30e27b0338",
+            "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+            "lexrel.17abe2fa-007d-48e2-a8a9-ae05092f0429"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.5,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.4,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.6,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.pool": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 5,
+                "ndcg": 0.6054652472515126,
+                "recall": 0.5555555555555556,
+                "relevant_retrieved": 5,
+                "returned": 10,
+                "unjudged_returned": 5
+              },
+              "20": {
+                "judged_returned": 8,
+                "ndcg": 0.7929259440021231,
+                "recall": 0.8888888888888888,
+                "relevant_retrieved": 8,
+                "returned": 20,
+                "unjudged_returned": 12
+              },
+              "5": {
+                "judged_returned": 3,
+                "ndcg": 0.6548086577531307,
+                "recall": 0.3333333333333333,
+                "relevant_retrieved": 3,
+                "returned": 5,
+                "unjudged_returned": 2
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.16716740-8026-4b70-9b46-25a3ae791ff0",
+            "lexrel.1aa97247-6757-4a79-adb9-e872f06342d1",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.080c1b33-465c-4f25-91ff-7eeab8aa0803",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.39cd82f8-ed66-4362-914d-13f3350c4174",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.0aa937fc-a1f7-404c-b880-c39c12227120",
+            "lexrel.1222a756-e7cb-431e-af61-b8f30f0f2219",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.11feaa80-68b2-45fb-811a-25e179fbf677",
+            "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332",
+            "lexrel.0eded59f-6c34-40b3-bf86-12514d9ca8a4",
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.5,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.4,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.6,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        }
+      },
+      "relation_type": "租赁合同关系",
+      "settings": {
+        "case_recall_top_k": 30,
+        "case_rerank_pool_size": 20,
+        "case_role_top_k": 3,
+        "cites_weight": 0.5,
+        "claim_weight": 0.8,
+        "fulltext_weight": 1.0,
+        "graph_weight": 1.0,
+        "per_condition_limit": 30,
+        "rrf_k": 60,
+        "rule_recall_top_k": 50,
+        "rule_top_k": 20,
+        "vector_weight": 1.0
+      }
+    },
+    {
+      "diagnostics": {
+        "cascade_status": "A_B_C_completed",
+        "pool_count": 20,
+        "projected_condition_count": 51,
+        "role_output_ids": {
+          "boundary": [],
+          "limiting": [],
+          "support": []
+        },
+        "rule_count": 20,
+        "undetermined_count": 20
+      },
+      "domain": "LexRel/物业服务合同关系",
+      "judgment_basis": "weak_relation_label_non_exhaustive: 独立原始 relation 注释含同一关系类型即记1；不是专家相似案判定，也不等同于事实满足查询中的所有要素。仅105条LexRel有此标签，其他51条候选未标注，不据此断言无关。",
+      "module": "C",
+      "qrels_sha256": "9e100f631fb9f1d22fefd82d7d03c46ecfcaa3fd72aeb15ff638a2ee7af2b87f",
+      "query_id": "C.lexrel.property_service",
+      "query_sha256": "7e653820f9af22d3542371441d91bf7b1f4e13bd8cd109629db206f5c8c61d06",
+      "rankings": {
+        "c.bm25": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 7,
+                "ndcg": 0.8550956239938449,
+                "recall": 0.7777777777777778,
+                "relevant_retrieved": 7,
+                "returned": 10,
+                "unjudged_returned": 3
+              },
+              "20": {
+                "judged_returned": 8,
+                "ndcg": 0.912599645080575,
+                "recall": 0.8888888888888888,
+                "relevant_retrieved": 8,
+                "returned": 20,
+                "unjudged_returned": 12
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.5555555555555556,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.13d3c173-4e22-4f04-935e-fda7431cfd94",
+            "lexrel.3f3de2a0-b276-494c-8695-99ff70cf242b",
+            "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+            "lexrel.6362b0e7-e276-4efc-8124-d72a04e0db51",
+            "lexrel.652b45ea-7e0f-431a-9741-f39948b68452",
+            "lexrel.611325f8-073b-4e66-b496-533c62d9cb41",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.01a9ed6c-a219-4e01-a335-548eba28069e",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.2093ca35-88c1-4cdc-b856-b857f04c5bbd",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.0e1eb7bf-758a-4fcc-907b-59823d88f00c",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.7,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.4,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.fused": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 7,
+                "ndcg": 0.8550956239938449,
+                "recall": 0.7777777777777778,
+                "relevant_retrieved": 7,
+                "returned": 10,
+                "unjudged_returned": 3
+              },
+              "20": {
+                "judged_returned": 8,
+                "ndcg": 0.912599645080575,
+                "recall": 0.8888888888888888,
+                "relevant_retrieved": 8,
+                "returned": 20,
+                "unjudged_returned": 12
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.5555555555555556,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 34,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.13d3c173-4e22-4f04-935e-fda7431cfd94",
+            "lexrel.3f3de2a0-b276-494c-8695-99ff70cf242b",
+            "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+            "lexrel.6362b0e7-e276-4efc-8124-d72a04e0db51",
+            "lexrel.652b45ea-7e0f-431a-9741-f39948b68452",
+            "lexrel.611325f8-073b-4e66-b496-533c62d9cb41",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.01a9ed6c-a219-4e01-a335-548eba28069e",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.2093ca35-88c1-4cdc-b856-b857f04c5bbd",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.0e1eb7bf-758a-4fcc-907b-59823d88f00c",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.0c5001c2-fdb1-48ba-9a0f-36beea55dede",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.203ea54c-b6b6-440d-9822-9586326714bb",
+            "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+            "lexrel.102f10d1-ca09-4ed1-ae2e-f45007ce3038",
+            "lexrel.1ec928ab-bb1e-4131-bafc-e17593454e1b",
+            "lexrel.829d6968-3b55-43c8-9e18-9d6ccccfd391",
+            "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.7,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.4,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.pool": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 7,
+                "ndcg": 0.8550956239938449,
+                "recall": 0.7777777777777778,
+                "relevant_retrieved": 7,
+                "returned": 10,
+                "unjudged_returned": 3
+              },
+              "20": {
+                "judged_returned": 8,
+                "ndcg": 0.912599645080575,
+                "recall": 0.8888888888888888,
+                "relevant_retrieved": 8,
+                "returned": 20,
+                "unjudged_returned": 12
+              },
+              "5": {
+                "judged_returned": 5,
+                "ndcg": 1.0,
+                "recall": 0.5555555555555556,
+                "relevant_retrieved": 5,
+                "returned": 5,
+                "unjudged_returned": 0
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.13d3c173-4e22-4f04-935e-fda7431cfd94",
+            "lexrel.3f3de2a0-b276-494c-8695-99ff70cf242b",
+            "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+            "lexrel.6362b0e7-e276-4efc-8124-d72a04e0db51",
+            "lexrel.652b45ea-7e0f-431a-9741-f39948b68452",
+            "lexrel.611325f8-073b-4e66-b496-533c62d9cb41",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.01a9ed6c-a219-4e01-a335-548eba28069e",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.2093ca35-88c1-4cdc-b856-b857f04c5bbd",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.0e1eb7bf-758a-4fcc-907b-59823d88f00c",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.7,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.4,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 1.0,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        }
+      },
+      "relation_type": "物业服务合同关系",
+      "settings": {
+        "case_recall_top_k": 30,
+        "case_rerank_pool_size": 20,
+        "case_role_top_k": 3,
+        "cites_weight": 0.5,
+        "claim_weight": 0.8,
+        "fulltext_weight": 1.0,
+        "graph_weight": 1.0,
+        "per_condition_limit": 30,
+        "rrf_k": 60,
+        "rule_recall_top_k": 50,
+        "rule_top_k": 20,
+        "vector_weight": 1.0
+      }
+    },
+    {
+      "diagnostics": {
+        "cascade_status": "A_B_C_completed",
+        "pool_count": 20,
+        "projected_condition_count": 47,
+        "role_output_ids": {
+          "boundary": [],
+          "limiting": [],
+          "support": []
+        },
+        "rule_count": 20,
+        "undetermined_count": 20
+      },
+      "domain": "LexRel/服务合同关系",
+      "judgment_basis": "weak_relation_label_non_exhaustive: 独立原始 relation 注释含同一关系类型即记1；不是专家相似案判定，也不等同于事实满足查询中的所有要素。仅105条LexRel有此标签，其他51条候选未标注，不据此断言无关。",
+      "module": "C",
+      "qrels_sha256": "4163e012a944988d0923d96590f2af255e656ec15922a49f3ef875cbe8e3fdf6",
+      "query_id": "C.lexrel.service",
+      "query_sha256": "c8eaf2360e1f92841bb320a74b7772b1309e0db2599eb117a94c8156ad40eb59",
+      "rankings": {
+        "c.bm25": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 1,
+                "ndcg": 0.2350455494144854,
+                "recall": 0.1111111111111111,
+                "relevant_retrieved": 1,
+                "returned": 10,
+                "unjudged_returned": 9
+              },
+              "20": {
+                "judged_returned": 3,
+                "ndcg": 0.3529482441292888,
+                "recall": 0.3333333333333333,
+                "relevant_retrieved": 3,
+                "returned": 20,
+                "unjudged_returned": 17
+              },
+              "5": {
+                "judged_returned": 1,
+                "ndcg": 0.3391602052736161,
+                "recall": 0.1111111111111111,
+                "relevant_retrieved": 1,
+                "returned": 5,
+                "unjudged_returned": 4
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.13d3c173-4e22-4f04-935e-fda7431cfd94",
+            "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+            "lexrel.6362b0e7-e276-4efc-8124-d72a04e0db51",
+            "lexrel.652b45ea-7e0f-431a-9741-f39948b68452",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.3f3de2a0-b276-494c-8695-99ff70cf242b",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.01a7d159-6001-4cdb-8897-0e52749493cf",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.611325f8-073b-4e66-b496-533c62d9cb41"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.1,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.15,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.2,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.fused": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 1,
+                "ndcg": 0.2350455494144854,
+                "recall": 0.1111111111111111,
+                "relevant_retrieved": 1,
+                "returned": 10,
+                "unjudged_returned": 9
+              },
+              "20": {
+                "judged_returned": 3,
+                "ndcg": 0.3529482441292888,
+                "recall": 0.3333333333333333,
+                "relevant_retrieved": 3,
+                "returned": 20,
+                "unjudged_returned": 17
+              },
+              "5": {
+                "judged_returned": 1,
+                "ndcg": 0.3391602052736161,
+                "recall": 0.1111111111111111,
+                "relevant_retrieved": 1,
+                "returned": 5,
+                "unjudged_returned": 4
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 33,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.13d3c173-4e22-4f04-935e-fda7431cfd94",
+            "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+            "lexrel.6362b0e7-e276-4efc-8124-d72a04e0db51",
+            "lexrel.652b45ea-7e0f-431a-9741-f39948b68452",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.3f3de2a0-b276-494c-8695-99ff70cf242b",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.01a7d159-6001-4cdb-8897-0e52749493cf",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.611325f8-073b-4e66-b496-533c62d9cb41",
+            "lexrel.2093ca35-88c1-4cdc-b856-b857f04c5bbd",
+            "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+            "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+            "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+            "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
+            "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+            "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7",
+            "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+            "lexrel.01a9ed6c-a219-4e01-a335-548eba28069e",
+            "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+            "lexrel.102f10d1-ca09-4ed1-ae2e-f45007ce3038",
+            "lexrel.1ec928ab-bb1e-4131-bafc-e17593454e1b",
+            "lexrel.829d6968-3b55-43c8-9e18-9d6ccccfd391"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.1,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.15,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.2,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        },
+        "c.pool": {
+          "metrics": {
+            "at_k": {
+              "10": {
+                "judged_returned": 1,
+                "ndcg": 0.2350455494144854,
+                "recall": 0.1111111111111111,
+                "relevant_retrieved": 1,
+                "returned": 10,
+                "unjudged_returned": 9
+              },
+              "20": {
+                "judged_returned": 3,
+                "ndcg": 0.3529482441292888,
+                "recall": 0.3333333333333333,
+                "relevant_retrieved": 3,
+                "returned": 20,
+                "unjudged_returned": 17
+              },
+              "5": {
+                "judged_returned": 1,
+                "ndcg": 0.3391602052736161,
+                "recall": 0.1111111111111111,
+                "relevant_retrieved": 1,
+                "returned": 5,
+                "unjudged_returned": 4
+              }
+            },
+            "candidate_count": 105,
+            "excluded_count": 0,
+            "judged_count": 9,
+            "positive_count": 9,
+            "ranking_count": 20,
+            "status": "scored"
+          },
+          "ranked_ids": [
+            "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c",
+            "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+            "lexrel.13d3c173-4e22-4f04-935e-fda7431cfd94",
+            "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+            "lexrel.6362b0e7-e276-4efc-8124-d72a04e0db51",
+            "lexrel.652b45ea-7e0f-431a-9741-f39948b68452",
+            "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+            "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+            "lexrel.3f3de2a0-b276-494c-8695-99ff70cf242b",
+            "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+            "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+            "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+            "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+            "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+            "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+            "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+            "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+            "lexrel.01a7d159-6001-4cdb-8897-0e52749493cf",
+            "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+            "lexrel.611325f8-073b-4e66-b496-533c62d9cb41"
+          ],
+          "relation_at_k": {
+            "10": {
+              "precision": 0.1,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 10,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "20": {
+              "precision": 0.15,
+              "recall_ceiling": 1.0,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 20,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            },
+            "5": {
+              "precision": 0.2,
+              "recall_ceiling": 0.5555555555555556,
+              "source_label_coverage": 1.0,
+              "source_labeled_returned": 5,
+              "unjudged_ratio": 0.0,
+              "unjudged_returned": 0
+            }
+          }
+        }
+      },
+      "relation_type": "服务合同关系",
+      "settings": {
+        "case_recall_top_k": 30,
+        "case_rerank_pool_size": 20,
+        "case_role_top_k": 3,
+        "cites_weight": 0.5,
+        "claim_weight": 0.8,
+        "fulltext_weight": 1.0,
+        "graph_weight": 1.0,
+        "per_condition_limit": 30,
+        "rrf_k": 60,
+        "rule_recall_top_k": 50,
+        "rule_top_k": 20,
+        "vector_weight": 1.0
+      }
+    }
+  ],
+  "query_scope": "contract_relation_types",
+  "relation_summary": {
+    "c.bm25": {
+      "empty_ranking_queries": 0,
+      "macro_at_k": {
+        "10": {
+          "precision": 0.54,
+          "recall_ceiling": 0.8377344877344877,
+          "source_label_coverage": 1.0,
+          "unjudged_ratio": 0.0
+        },
+        "20": {
+          "precision": 0.43499999999999994,
+          "recall_ceiling": 0.9507936507936507,
+          "source_label_coverage": 1.0,
+          "unjudged_ratio": 0.0
+        },
+        "5": {
+          "precision": 0.7,
+          "recall_ceiling": 0.45358946608946604,
+          "source_label_coverage": 1.0,
+          "unjudged_ratio": 0.0
+        }
+      },
+      "query_count": 10
+    },
+    "c.fused": {
+      "empty_ranking_queries": 0,
+      "macro_at_k": {
+        "10": {
+          "precision": 0.54,
+          "recall_ceiling": 0.8377344877344877,
+          "source_label_coverage": 1.0,
+          "unjudged_ratio": 0.0
+        },
+        "20": {
+          "precision": 0.43499999999999994,
+          "recall_ceiling": 0.9507936507936507,
+          "source_label_coverage": 1.0,
+          "unjudged_ratio": 0.0
+        },
+        "5": {
+          "precision": 0.7,
+          "recall_ceiling": 0.45358946608946604,
+          "source_label_coverage": 1.0,
+          "unjudged_ratio": 0.0
+        }
+      },
+      "query_count": 10
+    },
+    "c.pool": {
+      "empty_ranking_queries": 0,
+      "macro_at_k": {
+        "10": {
+          "precision": 0.54,
+          "recall_ceiling": 0.8377344877344877,
+          "source_label_coverage": 1.0,
+          "unjudged_ratio": 0.0
+        },
+        "20": {
+          "precision": 0.43499999999999994,
+          "recall_ceiling": 0.9507936507936507,
+          "source_label_coverage": 1.0,
+          "unjudged_ratio": 0.0
+        },
+        "5": {
+          "precision": 0.7,
+          "recall_ceiling": 0.45358946608946604,
+          "source_label_coverage": 1.0,
+          "unjudged_ratio": 0.0
+        }
+      },
+      "query_count": 10
+    }
+  },
+  "release_id": "f34a6547e51bb799bf8a03404c8632261b17c9a7ee0c5e6cfe4c602a1b6b1264",
+  "runtime": {
+    "commit": "7b9ff532a0654209b4858b9009d0baef54368763",
+    "dirty": true,
+    "python": "3.14.3"
+  },
+  "schema_version": "1.0",
+  "scope_label_mapping_sha256": "0a36370dd64027510af0c60efdd3a7069bc99491887b320d988cf9cd04f7688a",
+  "scope_policy": "original LexRel UUID membership, applied before search/graph construction",
+  "scoped_case_ids": [
+    "lexrel.006ffa55-8ac9-4dc3-bc54-c38435cca87d",
+    "lexrel.00ba86cd-a8f3-4ec2-9650-4e76457eb258",
+    "lexrel.010d89e4-1af0-4b25-a475-8e039bb67b2e",
+    "lexrel.0114c02d-dd97-4d79-8bfc-0c60323a0f7a",
+    "lexrel.017038e2-4159-4c52-ab1a-d3d774a6b56e",
+    "lexrel.01925b47-667a-4fd6-964e-4ca4aae46c58",
+    "lexrel.01a7d159-6001-4cdb-8897-0e52749493cf",
+    "lexrel.01a9ed6c-a219-4e01-a335-548eba28069e",
+    "lexrel.01b49f1c-4a9c-4971-b1e3-206d69e8bada",
+    "lexrel.01e7082e-6292-49c1-adf1-5508618012c2",
+    "lexrel.02c7c1df-dadd-4d2e-b70e-091c0890531a",
+    "lexrel.031a912f-2a18-4df3-8937-b4eb36a974a2",
+    "lexrel.0323a0ef-d71c-419b-aa0d-620a9137e614",
+    "lexrel.0534c690-cfb9-469f-9748-dde5f769b456",
+    "lexrel.06464300-c6d8-48cb-b322-dc2780d7d0a0",
+    "lexrel.068127fc-523f-47b0-a517-41ad7e7643d5",
+    "lexrel.071d3b57-4a23-4723-8c69-6f309efe62d8",
+    "lexrel.080c1b33-465c-4f25-91ff-7eeab8aa0803",
+    "lexrel.0823adb6-166b-4aff-8c6b-776ab2551b99",
+    "lexrel.082566c1-214f-4e53-bd93-1f364d199f15",
+    "lexrel.087429b6-869a-404c-bc00-0a37ce1399cd",
+    "lexrel.0895ba38-d6fb-49c6-920e-9e6f31a4aeca",
+    "lexrel.08d64180-6634-4a0e-ac43-3a1a87ee8d08",
+    "lexrel.092bfc75-8767-4c39-a02e-58d61638f0d9",
+    "lexrel.09a2b0dc-6c3c-4c63-ac09-27462278c640",
+    "lexrel.09ea2056-3c5f-4af2-9458-a1f376e729cb",
+    "lexrel.0a41e121-1f80-4167-a11c-8da3b2a51e6d",
+    "lexrel.0a61fa3c-0d06-42f1-99a8-6cb14936acd8",
+    "lexrel.0aa937fc-a1f7-404c-b880-c39c12227120",
+    "lexrel.0b1b0a70-2daa-482c-887f-0ed90e6f0482",
+    "lexrel.0c1221b2-11bf-40d9-9f54-cae0edc83fdb",
+    "lexrel.0c4979f4-6431-4ec0-9e29-89f4d2db8a40",
+    "lexrel.0c5001c2-fdb1-48ba-9a0f-36beea55dede",
+    "lexrel.0c73cefb-f1f8-4cf6-8005-68fe9b8ac3c0",
+    "lexrel.0ca7defb-1f9e-4f1e-80df-777b40978c0c",
+    "lexrel.0caead6c-7c70-4b44-910a-5b8bf8d7d376",
+    "lexrel.0d05f3e5-91ce-4e47-a98a-454dc1e2789f",
+    "lexrel.0d4fb34c-2355-41ba-821e-ed8dc98447ee",
+    "lexrel.0daece4f-ad34-433c-a081-4f1aa74e60e9",
+    "lexrel.0e1eb7bf-758a-4fcc-907b-59823d88f00c",
+    "lexrel.0e47a547-83fb-4616-bd19-8eb449a973d2",
+    "lexrel.0ebe9c47-5d7a-4804-88d6-bdfd2d642917",
+    "lexrel.0eded59f-6c34-40b3-bf86-12514d9ca8a4",
+    "lexrel.0f5dd223-d34d-49be-b96b-62aae95948c2",
+    "lexrel.102f10d1-ca09-4ed1-ae2e-f45007ce3038",
+    "lexrel.106d406b-0c43-461b-908c-f3479d454bdc",
+    "lexrel.11569b8f-6c32-4355-9ce2-dab7c2897a94",
+    "lexrel.118f1445-e256-43e6-b828-97ff030fdd51",
+    "lexrel.11feaa80-68b2-45fb-811a-25e179fbf677",
+    "lexrel.1222a756-e7cb-431e-af61-b8f30f0f2219",
+    "lexrel.1361fe7d-e6e9-4dd3-b720-41d166606013",
+    "lexrel.13d3c173-4e22-4f04-935e-fda7431cfd94",
+    "lexrel.1418e87c-b0e6-4bc7-8ad1-0ce82839d487",
+    "lexrel.14a7d172-b123-4bb5-b7ef-343abbe08792",
+    "lexrel.1505ad06-02b5-4676-901b-31a664539f6b",
+    "lexrel.151b69d3-eb5a-4839-9df7-7c6f72e00291",
+    "lexrel.152bc590-4b5f-49c9-92f8-369f4a0fcc2b",
+    "lexrel.16716740-8026-4b70-9b46-25a3ae791ff0",
+    "lexrel.16c8387d-8a1d-4b3c-95b3-80d57580892c",
+    "lexrel.16ffc77b-6a63-4318-96da-628e560f8f3a",
+    "lexrel.17abe2fa-007d-48e2-a8a9-ae05092f0429",
+    "lexrel.197012fe-3538-49eb-9adc-e5a644c0aae5",
+    "lexrel.199e60db-7e3c-4b93-9536-3652e7485ff1",
+    "lexrel.19ee23f9-6aab-42d9-9618-6d30e27b0338",
+    "lexrel.1aa97247-6757-4a79-adb9-e872f06342d1",
+    "lexrel.1b988107-e399-4e04-b48c-a44ae47428bb",
+    "lexrel.1e5b0a23-5f82-4de2-b487-8fdb5ca6989f",
+    "lexrel.1ec928ab-bb1e-4131-bafc-e17593454e1b",
+    "lexrel.1eccaed8-bf66-448b-a37e-b86d0b2cc505",
+    "lexrel.203ea54c-b6b6-440d-9822-9586326714bb",
+    "lexrel.2093ca35-88c1-4cdc-b856-b857f04c5bbd",
+    "lexrel.20ac88c0-ddc4-40dc-9701-b0a3600858d9",
+    "lexrel.22c67685-32c8-4c11-9cb4-9110f6f605db",
+    "lexrel.2340a13a-e4cb-4a6b-8ea0-ef1fa51a50da",
+    "lexrel.23d214d9-d4fc-450e-abae-a1d087c0537c",
+    "lexrel.252a0418-a93e-4ddb-8343-15b3a7fe8680",
+    "lexrel.25d4826f-a5dd-4f84-a2b9-c553fe3d7f29",
+    "lexrel.26f9dc81-2eb0-4add-8f50-18ca43aba532",
+    "lexrel.270feb5b-66d3-4c12-91ee-d159413fa3b7",
+    "lexrel.274d7b2b-e3d9-4d82-8ae1-74b010f23261",
+    "lexrel.29d8ac1c-bd87-4547-b647-cd2c68b086db",
+    "lexrel.2a256119-5a3b-4d20-8051-96e1abba2da1",
+    "lexrel.2a907f6d-5ed4-473a-a86a-a9c10c98b9fc",
+    "lexrel.2c1b0eb2-d97d-48b7-a3f8-337473859004",
+    "lexrel.2dacc190-2ac1-498d-88df-307cef80792d",
+    "lexrel.31eee4ac-820d-4dae-a14f-595cae51c2c3",
+    "lexrel.3309ce95-f2bc-43d8-bdd6-6330c808e350",
+    "lexrel.34242265-7233-4c98-8604-20d0c7f67ceb",
+    "lexrel.39cd82f8-ed66-4362-914d-13f3350c4174",
+    "lexrel.3b46376f-5d5d-4de8-a2dd-4230bce5f82f",
+    "lexrel.3bafa03b-acdc-4c4f-bfcb-46633ac3ec65",
+    "lexrel.3f3de2a0-b276-494c-8695-99ff70cf242b",
+    "lexrel.4252f64f-37b5-4736-948e-89098f4de830",
+    "lexrel.55d87466-4e50-4e16-bfd3-7ff06aaeaad6",
+    "lexrel.611325f8-073b-4e66-b496-533c62d9cb41",
+    "lexrel.6362b0e7-e276-4efc-8124-d72a04e0db51",
+    "lexrel.6461b1e8-eae7-45a2-aacc-35377488bc04",
+    "lexrel.652b45ea-7e0f-431a-9741-f39948b68452",
+    "lexrel.698f1ab4-dae7-47b5-a0b3-3b4c64f954aa",
+    "lexrel.6fe73e51-8955-4f28-a9cf-188b2aeda6e9",
+    "lexrel.829d6968-3b55-43c8-9e18-9d6ccccfd391",
+    "lexrel.83dfccf1-1ba7-47d5-890a-a97e0208c09e",
+    "lexrel.8a246ddf-5387-4d25-b4fb-cd1847d2c66b",
+    "lexrel.aea77fcf-9dae-4e62-85b6-05c56d79e332",
+    "lexrel.dc2bb512-fe17-4ec2-bc66-00703647dc6c"
+  ],
+  "scoped_source_label_coverage": 1.0,
+  "summary": {
+    "c.bm25": {
+      "by_domain": {
+        "LexRel/保证合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 1.0,
+              "recall": 0.47619047619047616
+            },
+            "20": {
+              "ndcg": 0.8650029589108509,
+              "recall": 0.7619047619047619
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.23809523809523808
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/借款合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.5551469705065497,
+              "recall": 0.16666666666666666
+            },
+            "20": {
+              "ndcg": 0.6788434076454569,
+              "recall": 0.4166666666666667
+            },
+            "5": {
+              "ndcg": 0.5296347172140421,
+              "recall": 0.08333333333333333
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/劳务合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.5390031312763821,
+              "recall": 0.375
+            },
+            "20": {
+              "ndcg": 0.5390031312763821,
+              "recall": 0.375
+            },
+            "5": {
+              "ndcg": 0.7227265726449519,
+              "recall": 0.375
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/房屋买卖合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.6701421017823512,
+              "recall": 0.5555555555555556
+            },
+            "20": {
+              "ndcg": 0.7992246751783418,
+              "recall": 0.7777777777777778
+            },
+            "5": {
+              "ndcg": 0.8539316501572937,
+              "recall": 0.4444444444444444
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/抵押合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.7935840677649109,
+              "recall": 0.6363636363636364
+            },
+            "20": {
+              "ndcg": 0.912291521080749,
+              "recall": 0.9090909090909091
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.45454545454545453
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/服务合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.2350455494144854,
+              "recall": 0.1111111111111111
+            },
+            "20": {
+              "ndcg": 0.3529482441292888,
+              "recall": 0.3333333333333333
+            },
+            "5": {
+              "ndcg": 0.3391602052736161,
+              "recall": 0.1111111111111111
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/物业服务合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.8550956239938449,
+              "recall": 0.7777777777777778
+            },
+            "20": {
+              "ndcg": 0.912599645080575,
+              "recall": 0.8888888888888888
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.5555555555555556
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/租赁合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.6054652472515126,
+              "recall": 0.5555555555555556
+            },
+            "20": {
+              "ndcg": 0.7929259440021231,
+              "recall": 0.8888888888888888
+            },
+            "5": {
+              "ndcg": 0.6548086577531307,
+              "recall": 0.3333333333333333
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/财产保险合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.9266360779006398,
+              "recall": 0.6428571428571429
+            },
+            "20": {
+              "ndcg": 0.9818305476313958,
+              "recall": 1.0
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.35714285714285715
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/除房屋外的买卖合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.13886244387355454,
+              "recall": 0.1
+            },
+            "20": {
+              "ndcg": 0.24759388357448503,
+              "recall": 0.3
+            },
+            "5": {
+              "ndcg": 0.21398626473452756,
+              "recall": 0.1
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        }
+      },
+      "by_judgment_basis": {
+        "weak_relation_label_non_exhaustive": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.6318981213764231,
+              "recall": 0.4397077922077922
+            },
+            "20": {
+              "ndcg": 0.7082263958509649,
+              "recall": 0.6651551226551227
+            },
+            "5": {
+              "ndcg": 0.7314248067777562,
+              "recall": 0.3052561327561328
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 10,
+          "scored_query_count": 10
+        }
+      },
+      "macro_at_k": {
+        "10": {
+          "ndcg": 0.6318981213764231,
+          "recall": 0.4397077922077922
+        },
+        "20": {
+          "ndcg": 0.7082263958509649,
+          "recall": 0.6651551226551227
+        },
+        "5": {
+          "ndcg": 0.7314248067777562,
+          "recall": 0.3052561327561328
+        }
+      },
+      "no_positive_query_count": 0,
+      "query_count": 10,
+      "scored_query_count": 10
+    },
+    "c.fused": {
+      "by_domain": {
+        "LexRel/保证合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 1.0,
+              "recall": 0.47619047619047616
+            },
+            "20": {
+              "ndcg": 0.8650029589108509,
+              "recall": 0.7619047619047619
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.23809523809523808
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/借款合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.5551469705065497,
+              "recall": 0.16666666666666666
+            },
+            "20": {
+              "ndcg": 0.6788434076454569,
+              "recall": 0.4166666666666667
+            },
+            "5": {
+              "ndcg": 0.5296347172140421,
+              "recall": 0.08333333333333333
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/劳务合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.5390031312763821,
+              "recall": 0.375
+            },
+            "20": {
+              "ndcg": 0.5390031312763821,
+              "recall": 0.375
+            },
+            "5": {
+              "ndcg": 0.7227265726449519,
+              "recall": 0.375
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/房屋买卖合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.6701421017823512,
+              "recall": 0.5555555555555556
+            },
+            "20": {
+              "ndcg": 0.7992246751783418,
+              "recall": 0.7777777777777778
+            },
+            "5": {
+              "ndcg": 0.8539316501572937,
+              "recall": 0.4444444444444444
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/抵押合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.7935840677649109,
+              "recall": 0.6363636363636364
+            },
+            "20": {
+              "ndcg": 0.912291521080749,
+              "recall": 0.9090909090909091
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.45454545454545453
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/服务合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.2350455494144854,
+              "recall": 0.1111111111111111
+            },
+            "20": {
+              "ndcg": 0.3529482441292888,
+              "recall": 0.3333333333333333
+            },
+            "5": {
+              "ndcg": 0.3391602052736161,
+              "recall": 0.1111111111111111
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/物业服务合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.8550956239938449,
+              "recall": 0.7777777777777778
+            },
+            "20": {
+              "ndcg": 0.912599645080575,
+              "recall": 0.8888888888888888
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.5555555555555556
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/租赁合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.6054652472515126,
+              "recall": 0.5555555555555556
+            },
+            "20": {
+              "ndcg": 0.7929259440021231,
+              "recall": 0.8888888888888888
+            },
+            "5": {
+              "ndcg": 0.6548086577531307,
+              "recall": 0.3333333333333333
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/财产保险合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.9266360779006398,
+              "recall": 0.6428571428571429
+            },
+            "20": {
+              "ndcg": 0.9818305476313958,
+              "recall": 1.0
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.35714285714285715
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/除房屋外的买卖合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.13886244387355454,
+              "recall": 0.1
+            },
+            "20": {
+              "ndcg": 0.24759388357448503,
+              "recall": 0.3
+            },
+            "5": {
+              "ndcg": 0.21398626473452756,
+              "recall": 0.1
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        }
+      },
+      "by_judgment_basis": {
+        "weak_relation_label_non_exhaustive": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.6318981213764231,
+              "recall": 0.4397077922077922
+            },
+            "20": {
+              "ndcg": 0.7082263958509649,
+              "recall": 0.6651551226551227
+            },
+            "5": {
+              "ndcg": 0.7314248067777562,
+              "recall": 0.3052561327561328
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 10,
+          "scored_query_count": 10
+        }
+      },
+      "macro_at_k": {
+        "10": {
+          "ndcg": 0.6318981213764231,
+          "recall": 0.4397077922077922
+        },
+        "20": {
+          "ndcg": 0.7082263958509649,
+          "recall": 0.6651551226551227
+        },
+        "5": {
+          "ndcg": 0.7314248067777562,
+          "recall": 0.3052561327561328
+        }
+      },
+      "no_positive_query_count": 0,
+      "query_count": 10,
+      "scored_query_count": 10
+    },
+    "c.pool": {
+      "by_domain": {
+        "LexRel/保证合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 1.0,
+              "recall": 0.47619047619047616
+            },
+            "20": {
+              "ndcg": 0.8650029589108509,
+              "recall": 0.7619047619047619
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.23809523809523808
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/借款合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.5551469705065497,
+              "recall": 0.16666666666666666
+            },
+            "20": {
+              "ndcg": 0.6788434076454569,
+              "recall": 0.4166666666666667
+            },
+            "5": {
+              "ndcg": 0.5296347172140421,
+              "recall": 0.08333333333333333
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/劳务合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.5390031312763821,
+              "recall": 0.375
+            },
+            "20": {
+              "ndcg": 0.5390031312763821,
+              "recall": 0.375
+            },
+            "5": {
+              "ndcg": 0.7227265726449519,
+              "recall": 0.375
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/房屋买卖合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.6701421017823512,
+              "recall": 0.5555555555555556
+            },
+            "20": {
+              "ndcg": 0.7992246751783418,
+              "recall": 0.7777777777777778
+            },
+            "5": {
+              "ndcg": 0.8539316501572937,
+              "recall": 0.4444444444444444
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/抵押合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.7935840677649109,
+              "recall": 0.6363636363636364
+            },
+            "20": {
+              "ndcg": 0.912291521080749,
+              "recall": 0.9090909090909091
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.45454545454545453
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/服务合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.2350455494144854,
+              "recall": 0.1111111111111111
+            },
+            "20": {
+              "ndcg": 0.3529482441292888,
+              "recall": 0.3333333333333333
+            },
+            "5": {
+              "ndcg": 0.3391602052736161,
+              "recall": 0.1111111111111111
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/物业服务合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.8550956239938449,
+              "recall": 0.7777777777777778
+            },
+            "20": {
+              "ndcg": 0.912599645080575,
+              "recall": 0.8888888888888888
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.5555555555555556
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/租赁合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.6054652472515126,
+              "recall": 0.5555555555555556
+            },
+            "20": {
+              "ndcg": 0.7929259440021231,
+              "recall": 0.8888888888888888
+            },
+            "5": {
+              "ndcg": 0.6548086577531307,
+              "recall": 0.3333333333333333
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/财产保险合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.9266360779006398,
+              "recall": 0.6428571428571429
+            },
+            "20": {
+              "ndcg": 0.9818305476313958,
+              "recall": 1.0
+            },
+            "5": {
+              "ndcg": 1.0,
+              "recall": 0.35714285714285715
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        },
+        "LexRel/除房屋外的买卖合同关系": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.13886244387355454,
+              "recall": 0.1
+            },
+            "20": {
+              "ndcg": 0.24759388357448503,
+              "recall": 0.3
+            },
+            "5": {
+              "ndcg": 0.21398626473452756,
+              "recall": 0.1
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 1,
+          "scored_query_count": 1
+        }
+      },
+      "by_judgment_basis": {
+        "weak_relation_label_non_exhaustive": {
+          "macro_at_k": {
+            "10": {
+              "ndcg": 0.6318981213764231,
+              "recall": 0.4397077922077922
+            },
+            "20": {
+              "ndcg": 0.7082263958509649,
+              "recall": 0.6651551226551227
+            },
+            "5": {
+              "ndcg": 0.7314248067777562,
+              "recall": 0.3052561327561328
+            }
+          },
+          "no_positive_query_count": 0,
+          "query_count": 10,
+          "scored_query_count": 10
+        }
+      },
+      "macro_at_k": {
+        "10": {
+          "ndcg": 0.6318981213764231,
+          "recall": 0.4397077922077922
+        },
+        "20": {
+          "ndcg": 0.7082263958509649,
+          "recall": 0.6651551226551227
+        },
+        "5": {
+          "ndcg": 0.7314248067777562,
+          "recall": 0.3052561327561328
+        }
+      },
+      "no_positive_query_count": 0,
+      "query_count": 10,
+      "scored_query_count": 10
+    }
+  },
+  "task": "relation_type_retrieval"
+}

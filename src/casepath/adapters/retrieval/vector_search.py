@@ -115,13 +115,15 @@ class VectorIndex:
 class VectorHybridSearch:
     vector_enabled = True
 
-    def __init__(self, catalog, model: EmbeddingModel, index: VectorIndex):
+    def __init__(
+        self, catalog, model: EmbeddingModel, index: VectorIndex, *, case_feedback: bool = False,
+    ):
         self.catalog, self.model = catalog, model
         self.spec = model.spec
         # 已经建立好的index向量索引
         self.vectors = index.validate(catalog, model)
         # 在建立一个BM25的检索器
-        self.lexical = MemoryHybridSearch(catalog)
+        self.lexical = MemoryHybridSearch(catalog, case_feedback=case_feedback)
         # 因此 MemoryHybridSearch 不是“只给 Demo 用”；混合检索仍依赖其关键词通道。
 
     def search(self, text, *, target, context, top_k):
