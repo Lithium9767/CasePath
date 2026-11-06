@@ -1,0 +1,10 @@
+{
+  "dataset_version": "e-questioning.v1-frozen",
+  "sample_count": 20,
+  "review_status": "reviewed",
+  "reviewer_type": "AI",
+  "review_method": "逐条阅读初始事实、条件状态、允许缺口和禁止重复事项后形成的 AI 辅助审核；不是独立人工盲评。",
+  "candidate_sha256": "f99da1bde4fe7ce92de6fa06f379f37d3a4cf87488e151310bc2ffe995af9872",
+  "decisions_sha256": "7df21cd85dfbd39c128430f63922c217a46dbfa2d33447db8291ebc3c9594d86",
+  "created_at": "2026-09-14T10:21:44.017584+00:00"
+}

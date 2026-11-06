@@ -1,0 +1,1514 @@
+[
+  {
+    "sample_id": "E001",
+    "full": {
+      "cond.performance_impossible": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "without_D": {
+      "cond.performance_impossible": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "without_A_scope": {
+      "cond.performance_impossible": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 30
+  },
+  {
+    "sample_id": "E002",
+    "full": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "合同解除后的终止履行、恢复原状与补救规则"
+      ],
+      "cond.performance_impossible": [
+        0,
+        1,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.alternative_performance": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "without_D": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "合同解除后的终止履行、恢复原状与补救规则"
+      ],
+      "cond.performance_impossible": [
+        0,
+        1,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.alternative_performance": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "without_A_scope": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "合同解除后的终止履行、恢复原状与补救规则"
+      ],
+      "cond.performance_impossible": [
+        0,
+        1,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.alternative_performance": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 30
+  },
+  {
+    "sample_id": "E003",
+    "full": {},
+    "without_D": {},
+    "without_A_scope": {},
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 30
+  },
+  {
+    "sample_id": "E004",
+    "full": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "合同解除后的终止履行、恢复原状与补救规则"
+      ],
+      "cond.performance_impossible": [
+        0,
+        1,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.alternative_performance": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "without_D": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "合同解除后的终止履行、恢复原状与补救规则"
+      ],
+      "cond.performance_impossible": [
+        0,
+        1,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.alternative_performance": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "without_A_scope": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "合同解除后的终止履行、恢复原状与补救规则"
+      ],
+      "cond.performance_impossible": [
+        0,
+        1,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.alternative_performance": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 30
+  },
+  {
+    "sample_id": "E005",
+    "full": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "合同解除后的终止履行、恢复原状与补救规则"
+      ],
+      "cond.performance_impossible": [
+        0,
+        1,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.alternative_performance": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "without_D": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "合同解除后的终止履行、恢复原状与补救规则"
+      ],
+      "cond.performance_impossible": [
+        0,
+        1,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.alternative_performance": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "without_A_scope": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "合同解除后的终止履行、恢复原状与补救规则"
+      ],
+      "cond.performance_impossible": [
+        0,
+        1,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.alternative_performance": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 30
+  },
+  {
+    "sample_id": "E006",
+    "full": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "without_D": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "without_A_scope": {
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 30
+  },
+  {
+    "sample_id": "E007",
+    "full": {
+      "cond.property_svc.service_provided": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "业主应付物业费，不得以未接受服务拒付，催收不得停水停电"
+      ],
+      "cond.property_svc.urged_reasonable_period": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "业主应付物业费，不得以未接受服务拒付，催收不得停水停电"
+      ],
+      "cond.main_obligation_delayed": [
+        0,
+        1,
+        "core condition group still unclear",
+        "迟延履行主要债务且经催告后仍未履行的法定解除规则"
+      ],
+      "cond.demand_delivered": [
+        0,
+        1,
+        "core condition group still unclear",
+        "迟延履行主要债务且经催告后仍未履行的法定解除规则"
+      ],
+      "cond.reasonable_period_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "迟延履行主要债务且经催告后仍未履行的法定解除规则"
+      ]
+    },
+    "without_D": {
+      "cond.property_svc.service_provided": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "业主应付物业费，不得以未接受服务拒付，催收不得停水停电"
+      ],
+      "cond.property_svc.urged_reasonable_period": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "业主应付物业费，不得以未接受服务拒付，催收不得停水停电"
+      ],
+      "cond.main_obligation_delayed": [
+        0,
+        1,
+        "core condition group still unclear",
+        "迟延履行主要债务且经催告后仍未履行的法定解除规则"
+      ],
+      "cond.demand_delivered": [
+        0,
+        1,
+        "core condition group still unclear",
+        "迟延履行主要债务且经催告后仍未履行的法定解除规则"
+      ],
+      "cond.reasonable_period_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "迟延履行主要债务且经催告后仍未履行的法定解除规则"
+      ]
+    },
+    "without_A_scope": {
+      "cond.property_svc.service_provided": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "业主应付物业费，不得以未接受服务拒付，催收不得停水停电"
+      ],
+      "cond.property_svc.urged_reasonable_period": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "业主应付物业费，不得以未接受服务拒付，催收不得停水停电"
+      ],
+      "cond.main_obligation_delayed": [
+        0,
+        1,
+        "core condition group still unclear",
+        "迟延履行主要债务且经催告后仍未履行的法定解除规则"
+      ],
+      "cond.demand_delivered": [
+        0,
+        1,
+        "core condition group still unclear",
+        "迟延履行主要债务且经催告后仍未履行的法定解除规则"
+      ],
+      "cond.reasonable_period_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "迟延履行主要债务且经催告后仍未履行的法定解除规则"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 40
+  },
+  {
+    "sample_id": "E008",
+    "full": {
+      "cond.property_svc.service_provided": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "业主应付物业费，不得以未接受服务拒付，催收不得停水停电"
+      ]
+    },
+    "without_D": {
+      "cond.property_svc.service_provided": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "业主应付物业费，不得以未接受服务拒付，催收不得停水停电"
+      ]
+    },
+    "without_A_scope": {
+      "cond.property_svc.service_provided": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "业主应付物业费，不得以未接受服务拒付，催收不得停水停电"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  },
+  {
+    "sample_id": "E009",
+    "full": {},
+    "without_D": {},
+    "without_A_scope": {},
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 20
+  },
+  {
+    "sample_id": "E010",
+    "full": {
+      "cond.transport.refund_or_change_overdue": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "旅客自身原因不能按票乘坐应在约定期限退改，逾期可不退且不再承运"
+      ]
+    },
+    "without_D": {
+      "cond.transport.refund_or_change_overdue": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "旅客自身原因不能按票乘坐应在约定期限退改，逾期可不退且不再承运"
+      ]
+    },
+    "without_A_scope": {
+      "cond.transport.refund_or_change_overdue": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "旅客自身原因不能按票乘坐应在约定期限退改，逾期可不退且不再承运"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  },
+  {
+    "sample_id": "E011",
+    "full": {
+      "cond.transport.refund_or_change_overdue": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "旅客自身原因不能按票乘坐应在约定期限退改，逾期可不退且不再承运"
+      ]
+    },
+    "without_D": {
+      "cond.transport.refund_or_change_overdue": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "旅客自身原因不能按票乘坐应在约定期限退改，逾期可不退且不再承运"
+      ]
+    },
+    "without_A_scope": {
+      "cond.transport.refund_or_change_overdue": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "旅客自身原因不能按票乘坐应在约定期限退改，逾期可不退且不再承运"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  },
+  {
+    "sample_id": "E012",
+    "full": {
+      "cond.succession.first_order_heir_exists": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "法定继承人顺序及子女父母兄弟姐妹范围规则"
+      ],
+      "cond.succession.has_will": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "法定继承、遗嘱与遗赠扶养协议的适用顺序规则"
+      ],
+      "cond.succession.has_legacy_support_agreement": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "法定继承、遗嘱与遗赠扶养协议的适用顺序规则"
+      ],
+      "cond.succession.estate_mixed_with_common_property": [
+        0,
+        2,
+        "core condition group still unclear",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ],
+      "cond.succession.spouses_agreed_other_share": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ]
+    },
+    "without_D": {
+      "cond.succession.first_order_heir_exists": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "法定继承人顺序及子女父母兄弟姐妹范围规则"
+      ],
+      "cond.succession.has_will": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "法定继承、遗嘱与遗赠扶养协议的适用顺序规则"
+      ],
+      "cond.succession.has_legacy_support_agreement": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "法定继承、遗嘱与遗赠扶养协议的适用顺序规则"
+      ],
+      "cond.succession.estate_mixed_with_common_property": [
+        0,
+        2,
+        "core condition group still unclear",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ],
+      "cond.succession.spouses_agreed_other_share": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ]
+    },
+    "without_A_scope": {
+      "cond.succession.first_order_heir_exists": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "法定继承人顺序及子女父母兄弟姐妹范围规则"
+      ],
+      "cond.succession.has_will": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "法定继承、遗嘱与遗赠扶养协议的适用顺序规则"
+      ],
+      "cond.succession.has_legacy_support_agreement": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "法定继承、遗嘱与遗赠扶养协议的适用顺序规则"
+      ],
+      "cond.succession.estate_mixed_with_common_property": [
+        0,
+        2,
+        "core condition group still unclear",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ],
+      "cond.succession.spouses_agreed_other_share": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  },
+  {
+    "sample_id": "E013",
+    "full": {
+      "cond.succession.estate_mixed_with_common_property": [
+        0,
+        2,
+        "core condition group still unclear",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ],
+      "cond.succession.spouses_agreed_other_share": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ]
+    },
+    "without_D": {
+      "cond.succession.estate_mixed_with_common_property": [
+        0,
+        2,
+        "core condition group still unclear",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ],
+      "cond.succession.spouses_agreed_other_share": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ]
+    },
+    "without_A_scope": {
+      "cond.succession.estate_mixed_with_common_property": [
+        0,
+        2,
+        "core condition group still unclear",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ],
+      "cond.succession.spouses_agreed_other_share": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "分割前先析出配偶一半及他人共有财产规则"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  },
+  {
+    "sample_id": "E014",
+    "full": {
+      "cond.succession.claimant_is_first_or_second_order": [
+        0,
+        0,
+        "core condition group still unclear",
+        "法定继承人顺序及子女父母兄弟姐妹范围规则"
+      ],
+      "cond.succession.has_legacy_support_agreement": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "法定继承、遗嘱与遗赠扶养协议的适用顺序规则"
+      ],
+      "cond.succession.will_portion_cannot_take_effect": [
+        0,
+        2,
+        "core condition group still unclear",
+        "遗嘱不能执行部分转法定继承规则"
+      ]
+    },
+    "without_D": {
+      "cond.succession.claimant_is_first_or_second_order": [
+        0,
+        0,
+        "core condition group still unclear",
+        "法定继承人顺序及子女父母兄弟姐妹范围规则"
+      ],
+      "cond.succession.has_legacy_support_agreement": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "法定继承、遗嘱与遗赠扶养协议的适用顺序规则"
+      ],
+      "cond.succession.will_portion_cannot_take_effect": [
+        0,
+        2,
+        "core condition group still unclear",
+        "遗嘱不能执行部分转法定继承规则"
+      ]
+    },
+    "without_A_scope": {
+      "cond.succession.claimant_is_first_or_second_order": [
+        0,
+        0,
+        "core condition group still unclear",
+        "法定继承人顺序及子女父母兄弟姐妹范围规则"
+      ],
+      "cond.succession.has_legacy_support_agreement": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "法定继承、遗嘱与遗赠扶养协议的适用顺序规则"
+      ],
+      "cond.succession.will_portion_cannot_take_effect": [
+        0,
+        2,
+        "core condition group still unclear",
+        "遗嘱不能执行部分转法定继承规则"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  },
+  {
+    "sample_id": "E015",
+    "full": {
+      "cond.payment_made": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.unperformed_balance": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.performance_impossible": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.contract.unsuitable_or_too_costly": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "非金钱债务请求履行及其除外与司法终止规则"
+      ],
+      "cond.contract.creditor_did_not_request_in_time": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "非金钱债务请求履行及其除外与司法终止规则"
+      ],
+      "cond.breach_prevents_contract_purpose": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "非金钱债务请求履行及其除外与司法终止规则"
+      ]
+    },
+    "without_D": {
+      "cond.payment_made": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.unperformed_balance": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.performance_impossible": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.contract.unsuitable_or_too_costly": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "非金钱债务请求履行及其除外与司法终止规则"
+      ],
+      "cond.contract.creditor_did_not_request_in_time": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "非金钱债务请求履行及其除外与司法终止规则"
+      ],
+      "cond.breach_prevents_contract_purpose": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "非金钱债务请求履行及其除外与司法终止规则"
+      ]
+    },
+    "without_A_scope": {
+      "cond.payment_made": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.unperformed_balance": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.performance_impossible": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.contract_terminated": [
+        0,
+        0,
+        "core condition group still unclear",
+        "民法典下一般服务合同解除与费用补救框架"
+      ],
+      "cond.contract.unsuitable_or_too_costly": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "非金钱债务请求履行及其除外与司法终止规则"
+      ],
+      "cond.contract.creditor_did_not_request_in_time": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "非金钱债务请求履行及其除外与司法终止规则"
+      ],
+      "cond.breach_prevents_contract_purpose": [
+        2,
+        2,
+        "diagnostic fact for case comparison",
+        "非金钱债务请求履行及其除外与司法终止规则"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 55
+  },
+  {
+    "sample_id": "E016",
+    "full": {
+      "cond.guardian_temporarily_unable_in_emergency": [
+        0,
+        0,
+        "core condition group still unclear",
+        "监护职责、最有利于被监护人及紧急临时照料规则"
+      ],
+      "cond.guardian_disposed_ward_property": [
+        0,
+        0,
+        "core condition group still unclear",
+        "监护职责、最有利于被监护人及紧急临时照料规则"
+      ],
+      "cond.disposition_was_for_ward_interest": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "监护职责、最有利于被监护人及紧急临时照料规则"
+      ]
+    },
+    "without_D": {
+      "cond.guardian_temporarily_unable_in_emergency": [
+        0,
+        0,
+        "core condition group still unclear",
+        "监护职责、最有利于被监护人及紧急临时照料规则"
+      ],
+      "cond.guardian_disposed_ward_property": [
+        0,
+        0,
+        "core condition group still unclear",
+        "监护职责、最有利于被监护人及紧急临时照料规则"
+      ],
+      "cond.disposition_was_for_ward_interest": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "监护职责、最有利于被监护人及紧急临时照料规则"
+      ]
+    },
+    "without_A_scope": {
+      "cond.guardian_temporarily_unable_in_emergency": [
+        0,
+        0,
+        "core condition group still unclear",
+        "监护职责、最有利于被监护人及紧急临时照料规则"
+      ],
+      "cond.guardian_disposed_ward_property": [
+        0,
+        0,
+        "core condition group still unclear",
+        "监护职责、最有利于被监护人及紧急临时照料规则"
+      ],
+      "cond.disposition_was_for_ward_interest": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "监护职责、最有利于被监护人及紧急临时照料规则"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  },
+  {
+    "sample_id": "E017",
+    "full": {
+      "cond.adoption.missing_parents_announced": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.act_void_under_general_or_this_book": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "收养成立后拟制血亲及违法收养无效规则"
+      ],
+      "cond.adoption.adoptee_is_orphan": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adoptee_parents_missing": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adoptee_parents_unable": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.sender_is_orphan_guardian": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.sender_is_welfare_institution": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.sender_is_unable_parent": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_zero_or_one_child": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_care_ability": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_no_disqualifying_disease": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_no_harmful_record": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_reached_30": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ]
+    },
+    "without_D": {
+      "cond.adoption.missing_parents_announced": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.act_void_under_general_or_this_book": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "收养成立后拟制血亲及违法收养无效规则"
+      ],
+      "cond.adoption.adoptee_is_orphan": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adoptee_parents_missing": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adoptee_parents_unable": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.sender_is_orphan_guardian": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.sender_is_welfare_institution": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.sender_is_unable_parent": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_zero_or_one_child": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_care_ability": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_no_disqualifying_disease": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_no_harmful_record": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_reached_30": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ]
+    },
+    "without_A_scope": {
+      "cond.adoption.missing_parents_announced": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.act_void_under_general_or_this_book": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "收养成立后拟制血亲及违法收养无效规则"
+      ],
+      "cond.adoption.adoptee_is_orphan": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adoptee_parents_missing": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adoptee_parents_unable": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.sender_is_orphan_guardian": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.sender_is_welfare_institution": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.sender_is_unable_parent": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_zero_or_one_child": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_care_ability": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_no_disqualifying_disease": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_has_no_harmful_record": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ],
+      "cond.adoption.adopter_reached_30": [
+        0,
+        2,
+        "core condition group still unclear",
+        "被收养人、送养人和收养人法定资格规则"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  },
+  {
+    "sample_id": "E018",
+    "full": {
+      "cond.adoption.parties_are_voluntary": [
+        0,
+        0,
+        "core condition group still unclear",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.married_couple_adopt_together": [
+        0,
+        0,
+        "core condition group still unclear",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.adoptee_over_8_consented": [
+        0,
+        0,
+        "core condition group still unclear",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.missing_parents_announced": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "共同收养、本人同意与民政登记成立规则"
+      ]
+    },
+    "without_D": {
+      "cond.adoption.parties_are_voluntary": [
+        0,
+        0,
+        "core condition group still unclear",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.married_couple_adopt_together": [
+        0,
+        0,
+        "core condition group still unclear",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.adoptee_over_8_consented": [
+        0,
+        0,
+        "core condition group still unclear",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.missing_parents_announced": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "共同收养、本人同意与民政登记成立规则"
+      ]
+    },
+    "without_A_scope": {
+      "cond.adoption.parties_are_voluntary": [
+        0,
+        0,
+        "core condition group still unclear",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.married_couple_adopt_together": [
+        0,
+        0,
+        "core condition group still unclear",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.adoptee_over_8_consented": [
+        0,
+        0,
+        "core condition group still unclear",
+        "共同收养、本人同意与民政登记成立规则"
+      ],
+      "cond.adoption.missing_parents_announced": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "共同收养、本人同意与民政登记成立规则"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  },
+  {
+    "sample_id": "E019",
+    "full": {
+      "cond.person_is_minor_at_least_eight": [
+        0,
+        1,
+        "core condition group still unclear",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ],
+      "cond.act_is_purely_beneficial": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ],
+      "cond.act_suited_to_limited_capacity": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ],
+      "cond.guardian_consented_or_ratified": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ]
+    },
+    "without_D": {
+      "cond.person_is_minor_at_least_eight": [
+        0,
+        1,
+        "core condition group still unclear",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ],
+      "cond.act_is_purely_beneficial": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ],
+      "cond.act_suited_to_limited_capacity": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ],
+      "cond.guardian_consented_or_ratified": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ]
+    },
+    "without_A_scope": {
+      "cond.person_is_minor_at_least_eight": [
+        0,
+        1,
+        "core condition group still unclear",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ],
+      "cond.act_is_purely_beneficial": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ],
+      "cond.act_suited_to_limited_capacity": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ],
+      "cond.guardian_consented_or_ratified": [
+        2,
+        1,
+        "diagnostic fact for case comparison",
+        "未成年及不能辨认自己行为时的无或限制民事行为能力规则"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  },
+  {
+    "sample_id": "E020",
+    "full": {
+      "cond.act_based_on_material_mistake": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.third_party_committed_fraud": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.act_induced_by_duress": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.act_unconscionable_at_formation": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.other_party_knew_or_should_know_third_fraud": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.voidable_one_year_from_knowledge_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.mistake_ninety_days_from_knowledge_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.duress_one_year_from_end_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.voidable_right_waived": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.voidable_five_years_from_act_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ]
+    },
+    "without_D": {
+      "cond.act_based_on_material_mistake": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.third_party_committed_fraud": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.act_induced_by_duress": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.act_unconscionable_at_formation": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.other_party_knew_or_should_know_third_fraud": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.voidable_one_year_from_knowledge_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.mistake_ninety_days_from_knowledge_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.duress_one_year_from_end_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.voidable_right_waived": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.voidable_five_years_from_act_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ]
+    },
+    "without_A_scope": {
+      "cond.act_based_on_material_mistake": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.third_party_committed_fraud": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.act_induced_by_duress": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.act_unconscionable_at_formation": [
+        0,
+        0,
+        "core condition group still unclear",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.other_party_knew_or_should_know_third_fraud": [
+        2,
+        0,
+        "diagnostic fact for case comparison",
+        "重大误解、欺诈、胁迫或显失公平时可请求撤销规则"
+      ],
+      "cond.voidable_one_year_from_knowledge_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.mistake_ninety_days_from_knowledge_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.duress_one_year_from_end_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.voidable_right_waived": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ],
+      "cond.voidable_five_years_from_act_expired": [
+        0,
+        1,
+        "core condition group still unclear",
+        "可撤销民事法律行为的撤销权消灭期间规则"
+      ]
+    },
+    "D_changes_candidates": false,
+    "scope_changes_candidates": false,
+    "D_explicit_case_n": 0
+  }
+]

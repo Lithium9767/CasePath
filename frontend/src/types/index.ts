@@ -199,6 +199,8 @@ export interface ConditionEvidence {
   relation: EvidenceRelation;
   confidence: number;
   reason: string;
+  // 后端默认 0；旧快照可缺省，新结果记录证据来自哪轮。
+  source_turn?: number;
 }
 
 export interface QueryConditionState {

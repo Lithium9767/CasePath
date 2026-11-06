@@ -1,7 +1,8 @@
 # P2 规范规则层数据
 
 本目录由 `python -m casepath.rule_layer.stage2_refinement` 确定性生成，请勿手工修改 JSONL。
-第二阶段完成内容、核验命令、案例补充与剩余限制统一见[根目录 README](../../../README.md#p2-规范规则数据)。
+结项口径见[交付说明](../../../docs/DELIVERY.md)，核验命令见[运行指南](../../../docs/RUNNING.md)。
+第二阶段修订与来源核对过程保留在[旧 README](../../../README.history.md#p2-规范规则数据)。
 
 | 文件 | 记录数 | 用途 |
 |---|---:|---|

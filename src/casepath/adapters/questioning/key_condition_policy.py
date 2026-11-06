@@ -139,6 +139,10 @@ class KeyConditionQuestionPolicy:
         self.generation_budget_limit = generation_budget
 
     def select(self, state, bundle, comparison):
+        # 【E 总览】state 是 B 的事实/条件状态，bundle 是 C 的候选，comparison 是 D 的比较。
+        # 当前流程：筛条件 → 识别具体缺失事实 → 验证/过滤/排序 → 生成一句追问。
+        # 返回 QuestionCandidate 或 None；None 的具体原因另存 meta.last_stop_reason，
+        # 不能一律解释成“事实齐全”。这里不模拟用户回答，也不计算预期信息增益。
         from casepath.adapters.retrieval.retrieval_catalog import current_scope
         from casepath.application.runtime_meta import current_runtime_meta
 
@@ -153,6 +157,8 @@ class KeyConditionQuestionPolicy:
         selected_conditions: list[str] = []
         discard_reasons: list[str] = []
         budget = CallBudget(self.generation_budget_limit)
+        # 识别与措辞生成共用同一预算，避免每个子步骤各用一份预算导致调用失控。
+        # 这是算法层调用次数；客户端内部的 HTTP 重试不是这里的计数单位。
         try:
             scope = current_scope()
             meta = current_runtime_meta()
@@ -167,7 +173,8 @@ class KeyConditionQuestionPolicy:
                 succeeded = True
                 return None
 
-            # Program-side history guard before any identify/generate call.
+            # 【E 1：条件级守卫】先排除已答/无法回答/拒答等条件，节省模型调用。
+            # 这层主要按 condition_id 检查，不等于已经完成跨条件的语义防重。
             guarded: dict[str, tuple[int, int, str, str]] = {}
             for cid, meta_row in condition_candidates.items():
                 outcome, _detail = self.fact_checker(
@@ -194,6 +201,8 @@ class KeyConditionQuestionPolicy:
                 return None
 
             if self.language_model is None:
+                # 无模型的保守分支，与下方 Live 缺失事实识别是不同路径。
+                # 不应拿此分支的测试效果证明 LLM 语义去重已经生效。
                 question = self._select_without_llm(
                     state, comparison, condition_candidates, unable, declined, meta, excluded
                 )
@@ -214,6 +223,8 @@ class KeyConditionQuestionPolicy:
                 state, condition_candidates, comparison, meta
             )
             try:
+                # 【E 2：识别缺口】把有效事实、历史及候选条件交给识别步骤。
+                # 先明确“到底缺什么事实”，不是此时直接对每个 UNKNOWN 生成问题。
                 drafts = self._identify_missing_facts(context, budget)
             except QuestionGenerationFailed as exc:
                 if str(exc) == "question_budget_exhausted":
@@ -235,6 +246,8 @@ class KeyConditionQuestionPolicy:
                 turn.question_id for turn in state.dialogue_history if turn.question_id
             }
             merged = merge_drafts_by_description(drafts)
+            # 【E 3：验收模型候选】合并描述后检查条件/事实/历史问题引用是否合法。
+            # 语义判断由识别流程承担；ID 校验本身不能证明问句没有语义重复。
             validated, discard_reasons = validate_missing_fact_drafts(
                 merged,
                 allowed_condition_ids=allowed,
@@ -249,10 +262,12 @@ class KeyConditionQuestionPolicy:
                 raise QuestionGenerationFailed("missing_fact_candidates_invalid")
 
             candidates = assign_candidate_ids(validated, condition_meta=condition_candidates)
+            # 给合法缺口分配内部 ID，再过滤不可追问项；保留过滤原因用于解释停问。
             askable, filtered_excluded = filter_missing_facts(candidates)
             for key, value in filtered_excluded.items():
                 excluded[key] = excluded.get(key, 0) + value
             ranked = rank_missing_facts(askable)
+            # 此处是缺失事实的优先级排序，不是 RRF，也不是模拟回答后的收益排序。
             if not ranked:
                 stop_reason = self._stop_from_exclusions(excluded, unable, declined, stop_reason)
                 if meta is not None:
@@ -263,6 +278,8 @@ class KeyConditionQuestionPolicy:
 
             rejected = 0
             for missing in ranked:
+                # 【E 4：生成措辞】依次尝试高优先级缺口，成功后立即返回一个问题。
+                # 一个缺口可能服务多个条件；公共问题的 condition_id 使用第一个主条件。
                 primary = missing.condition_ids[0]
                 try:
                     draft = self._generate_question(state, missing, budget)
@@ -290,12 +307,15 @@ class KeyConditionQuestionPolicy:
                     records = {item.condition_id: item for item in comparison.condition_comparisons}
                     record = records.get(primary)
                 return QuestionCandidate(
+                    # 【E 5：打包】question 给用户看，why_asked 解释为何需要补充，
+                    # score_components 留给调试/展示；工作流决定追问状态并交给 API。
                     question_id=f"question.fact.{primary}.1",
                     condition_id=primary,
                     question=text,
                     options=["不清楚", "暂不回答"],
                     why_asked=draft.reason.strip(),
                     utility=1.0 / (missing.priority_tier + 1),
+                    # utility 只是优先级等级的换算值，不是概率或实际信息增益。
                     score_components=[
                         ScoreComponent(
                             name="priority_tier",

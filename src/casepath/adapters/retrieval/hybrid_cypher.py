@@ -229,15 +229,27 @@ class HybridCypherRuleRetriever:
                     source_span_ids=[],
                 )
             )
+
+        # 【A 结果打包】前面的 fused 已完成融合：{规则 ID: 加权 RRF 分数}。
+        # 这里不再执行检索，而是把分数、命中来源和证据整理成统一的 ScoredReference。
         results: list[ScoredReference] = []
+        # fused.items() 每项是 (rule_id, score)。负号让分数从高到低排；
+        # 同分时按 ID 升序，避免字典插入顺序造成结果顺序不稳定。
         for rule_id, score in sorted(fused.items(), key=lambda item: (-item[1], item[0])):
+            # 通过 ID 取本地规则卡片，后面需要它的原文引用；目录里不存在则跳过。
             rule = self.catalog.rules.get(rule_id)
             if rule is None:
                 continue
+            # ranked 保存各通道的排名列表；同一规则可能同时被 bm25/vector/claim/graph 命中。
+            # channels 记录“由哪些通道召回”，不是重新计算排名或叠加分数。
             channels = [name for name, ids in ranked.items() if rule_id in ids]
+            # components 是给解释、日志和前端检查的分项记录。
+            # 排序使用已算好的 RRF 分数；下面附带的 BM25/余弦原始分不会在此再加一次。
             components = [
                 ScoreComponent(name="rrf", value=score, explanation="加权RRF融合，缺席通道为0"),
             ]
+            # raw 用 (规则 ID, 通道名) 作键。只记录真实存在的原始分；缺席不伪造命中。
+            # BM25 与余弦分数的尺度不同，不能直接拿原始值相加来代替 RRF。
             if (rule_id, "bm25") in raw:
                 components.append(
                     ScoreComponent(
@@ -252,6 +264,8 @@ class HybridCypherRuleRetriever:
                         explanation="向量原始余弦分数",
                     )
                 )
+            # reasons 是可读的“召回原因”，不是法律适用结论，也不改变分数。
+            # 向量命中目前由 channels 和上面的 vector 分项记录，没有单独追加原因文案。
             reasons = []
             if rule_id in ranked["claim"]:
                 reasons.append("请求权类型与规则 claim_types 重合")
@@ -259,7 +273,11 @@ class HybridCypherRuleRetriever:
                 reasons.append("与已召回规则共享条件邻接")
             if rule_id in ranked["bm25"]:
                 reasons.append("规则卡片全文命中")
+            # 只有图通道命中才附邻接路径；文本/向量命中不能凭空补一条图路径。
+            # 即使图命中，没取得路径详情也保留空列表，不编造关系。
             paths = neighbor_paths.get(rule_id, []) if rule_id in ranked["graph"] else []
+            # 每条规则打包一次：ID + 融合分 + 通道 + 分项 + 原因 + 原文 span ID + 图路径。
+            # span_ids 指向原文证据对象，并不是把法条全文复制进这个检索引用。
             results.append(
                 scored_reference(
                     rule_id,
@@ -271,10 +289,14 @@ class HybridCypherRuleRetriever:
                     paths=paths,
                 )
             )
-        # 图扩展保留为低权重边界候选，不能靠任意邻接顺序占据解释头部。
+        # 【A 截取 Top-K】按上面的融合顺序取前 K 条，不足 K 条就全部返回。
+        # 图通道权重由前面的融合控制；这里不额外预留图候选名额，
+        # 也不保证图命中的规则一定进入 Top-K，更不将其自动判为“边界”角色。
         limit = min(self.settings.rule_top_k, len(results))
         limited = results[:limit]
-        # 无外层用途分层时写入默认 ACTIVE scope；RelevantRuleRetriever 会覆盖。
+        # 【交给后续阶段】登记本次候选的默认活动规则范围，供后续条件投影等读取。
+        # 默认 ACTIVE 只是流程用途，不代表规则已经适用或全部条件已经满足。
+        # 若外面装配了 RelevantRuleRetriever，它会再做用途分层并覆盖这个默认范围。
         from casepath.adapters.retrieval.rule_relevance import bind_default_scope_from_refs
 
         bind_default_scope_from_refs(limited, self.catalog)
@@ -553,9 +575,12 @@ class HybridCypherCaseRetriever:
         state: QueryState,
         rule_refs: list[ScoredReference],
     ) -> RetrievalBundle:
-        # 【C 阅读顺序】文本/向量与三种图路径独立取候选 → 并集融合 → 条件相容性重排。
+        # 【C 输入】state 是 B 更新后的用户事实/条件状态，rule_refs 是 A 的候选规则。
+        # 【C 阅读顺序】多通道召回 → RRF → 条件比较/角色资格 → 分类排序 → 打包。
+        # 当前不再使用“RRF + 正负相容性分”：条件不同可以有对照价值，不直接扣分。
         # 最后才分配支持/限制/边界角色；分数高不代表一定有资格进入公共角色列表。
         context = require_context()
+        # 复用 A 绑定的本轮检索版本，不能把不同发布版本的规则、案例和图路径混起来。
         if context.release_id != self.catalog.release_id:
             raise RetrieverUnavailable("案例索引与本轮图发布不一致")
         # 把 A 阶段找到的规则 ID 拿出来。
@@ -565,6 +590,8 @@ class HybridCypherCaseRetriever:
         query = _query_text(state)
         try:
             # 然后先做文本/向量案例搜索：
+            # target="case" 与 A 的 target="rule" 区分搜索对象；实际通道取决于注入的 search。
+            # case_recall_top_k 是搜索召回预算，不是最终给用户展示的案例数量。
             hybrid = self.search.search(
                 query,
                 target="case",
@@ -577,13 +604,20 @@ class HybridCypherCaseRetriever:
         for rule_id in rule_ids:
             condition_ids.extend(self.catalog.rules[rule_id].condition_ids)
         condition_ids = list(dict.fromkeys(condition_ids))
+        # 【C 图通道 1】Case → HAS_ASSESSMENT → ConditionFinding → ABOUT → RuleCondition。
+        # 按候选规则的条件找案例，不要求用户已满足该条件，也不要求案例先被全文命中。
         graph_hits = self.navigator.cases_by_conditions(context, condition_ids)
         # 找同一条件的案例认定；下两路分别找裁判适用关系和相关法条引用。
         # 这些图候选不要求先被 BM25 命中，因此能补回词面不相似的案例。
+        # 【C 图通道 2】Case → HAS_REASONING → ReasoningStep → APPLIES → LegalRule。
+        # 找理由中有显式规则适用关联的案例；不是看到法条引用就当成适用规则。
         apply_hits = self.navigator.cases_applying_rules(context, rule_ids)
+        # 【C 图通道 3】LegalRule → BASED_ON → Provision ← CITES_PROVISION ← Case。
+        # 引用了相关法条也可作为候选，但单凭引用不能证明条件满足或支持用户主张。
         cite_hits = self.navigator.cases_citing_provisions(context, rule_ids)
         graph_ids = list(dict.fromkeys(item.case_id for item in graph_hits))
         if len(graph_ids) > self.settings.per_condition_limit * max(1, len(condition_ids)):
+            # 当前实现是去重后按“每条件预算 × 条件数”截总量，并非逐条件单独限额。
             graph_ids = graph_ids[: self.settings.per_condition_limit * len(condition_ids)]
         cite_ids = list(dict.fromkeys(item.case_id for item in cite_hits))
         apply_ids = list(dict.fromkeys(item.case_id for item in apply_hits))
@@ -594,6 +628,8 @@ class HybridCypherCaseRetriever:
             "applies": apply_ids,
             "cites": cite_ids,
         }
+        # 同一案例可被多个通道命中；RRF 按各通道名次累计贡献，最终按案例 ID 合并。
+        # 不直接相加 BM25 与余弦原始分，缺席某个通道的贡献为 0。
         fused = weighted_rrf(
             ranked,
             weights={
@@ -607,10 +643,14 @@ class HybridCypherCaseRetriever:
         )
 
         known = _known_states(state)
+        # known 实际包含 state 中全部条件状态，也可能含 UNKNOWN，并非全是“已知满足”。
+        # 后面的 _compare_conditions 再判断哪些状态及证据能够进行有效对照。
         user_claims = {item.claim_type for item in state.candidate_claims}
         assessments_by_case: dict[str, list[CaseAssessment]] = defaultdict(list)
         paths: dict[str, list[GraphHit]] = defaultdict(list)
         for hit in [*graph_hits, *apply_hits, *cite_hits]:
+            # paths 按案例收集各路图路径；只有带条件和状态的命中才整理为 CaseAssessment。
+            # 法条引用/规则适用命中不能凭空转成“某个条件满足”的认定。
             paths[hit.case_id].append(hit)
             if hit.condition_id and hit.status:
                 assessments_by_case[hit.case_id].append(
@@ -627,10 +667,12 @@ class HybridCypherCaseRetriever:
         roles_by_case = {}
         raw_case_scores = _raw_scores(hybrid)
         for case_id, rrf_score in fused.items():
+            # 【C 比较】只处理目录中存在的案例，以统一 condition_id 对齐用户与案例。
             case = self.catalog.cases.get(case_id)
             if case is None:
                 continue
             comparison = _compare_conditions(case, known, self.catalog, set(rule_ids))
+            # comparison 记录相同、不同、未知及证据覆盖；不是裁判结果预测。
             comparisons[case_id] = comparison
             # 在截断前判断所有已召回候选的角色；不是仅因条件不同就认定限制案例。
             roles_by_case[case_id] = _assign_role(
@@ -669,8 +711,11 @@ class HybridCypherCaseRetriever:
             if role is not None:
                 groups[role].append(row)
         for rows in groups.values():
+            # 类内先看有证据的可比条件覆盖，再看检索分，最后按 ID 稳定打破同分。
             rows.sort(key=lambda row: (-comparisons[row[1]].coverage, -row[0], row[1]))
         pool = []
+        # 轮流从支持/限制/边界三组取一条，直到候选池预算用完。
+        # 这是保留不同对照角色，不会把不够资格的案例硬改成缺少的角色。
         for index in range(max((len(rows) for rows in groups.values()), default=0)):
             for rows in groups.values():
                 if index < len(rows) and len(pool) < self.settings.case_rerank_pool_size:
@@ -706,6 +751,8 @@ class HybridCypherCaseRetriever:
                 channels = [name for name, ids in ranked.items() if case_id in ids]
                 channels_by_case[case_id] = tuple(channels)
                 graph_paths = []
+                # 和 A 一样，将原始图命中转为公共 RetrievalPath，供解释与可视化使用。
+                # score 使用案例检索分，并不是单独计算出的路径质量分。
                 for hit in paths.get(case_id, ()):
                     if _valid_path(hit.path_nodes, hit.path_edges):
                         graph_paths.append(
@@ -741,7 +788,8 @@ class HybridCypherCaseRetriever:
             fused_ids = tuple(case_id for _, case_id, _, _ in pool)
             set_round(
                 # 把本轮路径和认定交给后续比较器复用，避免再查一套不一致的图结果。
-                # 注意 D/E 使用公共角色候选，不等于对融合池的所有未定案例也进行了模拟。
+                # 未定角色与原因也存入本轮上下文；不等于未检索到案例。
+                # 这里是请求内证据交接，不写 Neo4j，也没有执行回答模拟。
                 RoundEvidence(
                     context=context,
                     assessments_by_case={
@@ -774,6 +822,8 @@ class HybridCypherCaseRetriever:
             degraded = len(support) + len(limiting) + len(boundary) <= 1
             succeeded = True
             return RetrievalBundle(
+                # 【C 输出】候选规则原样带回，案例按三类分装，原文引用去重。
+                # 工作流将这个 bundle 和 B 的 state 一起交给 D 做跨案例条件统计。
                 rule_refs=rule_refs,
                 support_case_refs=support,
                 limiting_case_refs=limiting,

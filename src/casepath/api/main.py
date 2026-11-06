@@ -20,6 +20,7 @@ from casepath.contracts.registry import CONTRACTS
 from casepath.ports.session_repository import SessionRepository
 
 from .errors import register_error_handlers
+from .graph import router as graph_router
 from .sessions import router
 
 
@@ -91,6 +92,7 @@ def create_app(
     # 下一站 api/errors.py：注册异常到 HTTP 响应的映射，比如会话冲突 409、模型不可用 503。
     # 此刻只登记处理器；请求执行时抛出对应异常，框架才调用它，不泄露内部堆栈或密钥。
     application.include_router(router)
+    application.include_router(graph_router)
     # 【启动 10】router 来自 api/sessions.py，注册 /v1/sessions 等 URL。
     # 注册不等于执行路由函数；启动结束后，收到匹配的 HTTP 请求才调用它们。
 

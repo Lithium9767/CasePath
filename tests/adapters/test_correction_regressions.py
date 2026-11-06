@@ -126,7 +126,7 @@ def test_invalid_quote_fails_without_completing_ledger():
 
 
 def test_evidenced_condition_remaps_when_active_scope_empty():
-    """A 本轮无 ACTIVE 时，已有付款证据仍须能接收新事实的 OPPOSES，形成冲突。"""
+    """A 本轮无 ACTIVE 时，已有付款证据仍须能接收新事实的 OPPOSES；较新轮次优先。"""
 
     class Model:
         def generate_structured(self, **kwargs):
@@ -163,8 +163,9 @@ def test_evidenced_condition_remaps_when_active_scope_empty():
         )
         out = SemanticConditionProjector(catalog, Model()).project(state, [])
     payment = next(item for item in out.condition_states if item.condition_id == "cond.payment_made")
-    assert payment.status == ConditionStatus.CONFLICTING
+    assert payment.status == ConditionStatus.NOT_SATISFIED
     assert {item.relation for item in payment.evidence} == {"SUPPORTS", "OPPOSES"}
+    assert any("按更新轮次裁决" in reason for reason in payment.mapping_reasons)
 
 
 def test_correction_target_condition_remaps_replacement_after_evidence_cleared():

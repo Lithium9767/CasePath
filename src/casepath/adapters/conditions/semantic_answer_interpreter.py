@@ -301,6 +301,7 @@ class SemanticAnswerInterpreter:
                 relation=relation,
                 confidence=0.7,
                 reason="本轮问题选项/自由回答映射；分数未经过标注集校准",
+                source_turn=turn_id,
             ),
         ]
         # 明确纠正时，旧目标事实不参与本轮条件聚合。

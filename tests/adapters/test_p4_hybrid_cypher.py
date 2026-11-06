@@ -1272,9 +1272,13 @@ def test_new_fact_updates_other_condition_and_preserves_history():
         ],
     )
     output = SemanticConditionProjector(_mapping_catalog()).project(state, [])
-    assert _status_of(output, "cond.payment_made") is ConditionStatus.CONFLICTING
+    assert _status_of(output, "cond.payment_made") is ConditionStatus.NOT_SATISFIED
     assert _status_of(output, "cond.unperformed_balance") is ConditionStatus.SATISFIED
     assert len(state.condition_states) == 2
+    payment = next(
+        item for item in output.condition_states if item.condition_id == "cond.payment_made"
+    )
+    assert any("按更新轮次裁决" in reason for reason in payment.mapping_reasons)
 
 
 def test_calibration_requires_labels_and_is_monotone():

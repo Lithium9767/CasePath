@@ -28,6 +28,12 @@
           "minLength": 1,
           "title": "Reason",
           "type": "string"
+        },
+        "source_turn": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Source Turn",
+          "type": "integer"
         }
       },
       "required": [

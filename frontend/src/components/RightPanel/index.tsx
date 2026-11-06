@@ -3,6 +3,7 @@ import type { ResolvedSnapshot, TurnSnapshot } from '@/types';
 import { conditionLabels } from '@/utils/contracts';
 import { UnderstandingPanel } from './UnderstandingPanel';
 import { KnowledgeGraphPanel } from './KnowledgeGraphPanel';
+import { LiveRetrievalGraph } from './LiveRetrievalGraph';
 import { ProjectionMatrix } from './ProjectionMatrix';
 import { ComparisonPanel } from './ComparisonPanel';
 import { QuestionUtilityPanel } from './QuestionUtilityPanel';
@@ -43,6 +44,7 @@ export function RightPanel({ snapshot, history, viewingTurn, onViewTurn }: Props
     return (
       <div className="right-panel">
         <EmptyOverview />
+        {import.meta.env.VITE_USE_MOCK !== 'true' && <LiveRetrievalGraph snapshot={null} />}
       </div>
     );
   }

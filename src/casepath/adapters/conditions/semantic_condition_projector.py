@@ -141,6 +141,7 @@ def _lexical_candidates(fact: UserFact, condition_id: str) -> list[ConditionEvid
                 relation="OPPOSES",
                 confidence=0.58,
                 reason=f"词法候选：原话含「{oppose}」",
+                source_turn=fact.source_turn,
             )
         ]
     if support:
@@ -150,6 +151,7 @@ def _lexical_candidates(fact: UserFact, condition_id: str) -> list[ConditionEvid
                 relation="SUPPORTS",
                 confidence=0.58,
                 reason=f"词法候选：原话含「{support}」",
+                source_turn=fact.source_turn,
             )
         ]
     return []
@@ -162,30 +164,50 @@ def _aggregate(
     reasons: list[str],
     conflicting: bool = False,
 ) -> QueryConditionState:
-    supports = [item for item in evidence if item.relation == "SUPPORTS"]
-    opposes = [item for item in evidence if item.relation == "OPPOSES"]
     unique = list({item.fact_id: item for item in evidence}.values())
-    # 支持和反对并存标 CONFLICTING；只有一侧则取其状态；仅限定信息仍为 UNKNOWN。
-    # 当前取最高单条置信度而非把分数相加，避免重复证据越多看起来就越可信。
-    if conflicting or (supports and opposes):
+    # 状态决裁只看 SUPPORTS/OPPOSES；同条件按 source_turn 越大越优先。
+    # 仅当「最新一轮」上仍同时存在支持与反对，或调用方强制 conflicting 时，才标 CONFLICTING。
+    directional = [item for item in unique if item.relation in {"SUPPORTS", "OPPOSES"}]
+    mapping_reasons = list(reasons)
+    if conflicting:
         status = ConditionStatus.CONFLICTING
         confidence = min(0.7, max((item.confidence for item in unique), default=0.5))
-    elif supports:
-        status = ConditionStatus.SATISFIED
-        confidence = max(item.confidence for item in supports)
-    elif opposes:
-        status = ConditionStatus.NOT_SATISFIED
-        confidence = max(item.confidence for item in opposes)
-    else:
+    elif not directional:
         status = ConditionStatus.UNKNOWN
         confidence = None
+    else:
+        max_turn = max(item.source_turn for item in directional)
+        decisive = [item for item in directional if item.source_turn == max_turn]
+        supports = [item for item in decisive if item.relation == "SUPPORTS"]
+        opposes = [item for item in decisive if item.relation == "OPPOSES"]
+        older = [item for item in directional if item.source_turn < max_turn]
+        if supports and opposes:
+            status = ConditionStatus.CONFLICTING
+            confidence = min(0.7, max((item.confidence for item in decisive), default=0.5))
+        elif supports:
+            status = ConditionStatus.SATISFIED
+            confidence = max(item.confidence for item in supports)
+            if any(item.relation == "OPPOSES" for item in older):
+                mapping_reasons.append(
+                    f"按更新轮次裁决：turn={max_turn} 的 SUPPORTS 优先于历史 OPPOSES"
+                )
+        elif opposes:
+            status = ConditionStatus.NOT_SATISFIED
+            confidence = max(item.confidence for item in opposes)
+            if any(item.relation == "SUPPORTS" for item in older):
+                mapping_reasons.append(
+                    f"按更新轮次裁决：turn={max_turn} 的 OPPOSES 优先于历史 SUPPORTS"
+                )
+        else:
+            status = ConditionStatus.UNKNOWN
+            confidence = None
     return QueryConditionState(
         condition_id=condition_id,
         status=status,
         supporting_fact_ids=[item.fact_id for item in unique],
         confidence=confidence,
         evidence=unique,
-        mapping_reasons=reasons,
+        mapping_reasons=mapping_reasons,
         score_components=[
             ScoreComponent(
                 name="mapping_confidence",
@@ -213,6 +235,9 @@ class SemanticConditionProjector:
 
     # 拿到 A 召回的规则，找出这些规则要检查的条件，再根据用户说过的话，为每个条件生成“状态＋依据”。
     def project(self, state: QueryState, rule_refs: list[ScoredReference]) -> QueryState:
+        # 【B 总览】输入 A 的候选规则和会话事实，输出带条件状态的新 QueryState 给 C。
+        # 阅读顺序：确定条件范围 → 找未处理配对 → LLM 映射 → 合并证据 → 聚合状态。
+        # 这里只判断原话与条件的对应关系，不检索案例，也不直接生成最终法律解释。
         # 【B】活动条件来自 RuleScope；历史条件状态保留但不自动进入本轮映射任务。
         # 增量账本在 SessionRuntimeMeta：已成功处理的事实—条件对不再无条件重判。
         import time
@@ -257,13 +282,20 @@ class SemanticConditionProjector:
                 if item.condition_id in self.catalog.conditions
             ]
             output_ids = list(dict.fromkeys([*history_ids, *active_condition_ids]))
+            # output_ids 是“需要保存在输出里的条件”，不等于“本轮全部要交给 LLM 的条件”。
+            # 例如旧规则退出活动范围，其历史条件仍保留，避免用户之前的证据丢失。
 
             facts = _fact_from_query(state)
+            fact_turns = {item.fact_id: item.source_turn for item in facts}
             existing = {item.condition_id: item for item in state.condition_states}
             meta = current_runtime_meta()
             done = successful_ledger_keys(meta) if meta is not None else set()
+            # done 是成功处理记录，不只是 fact_id：还包含条件 ID、条件定义版本、
+            # 映射器版本和事实文本版本。内容/定义变化后，允许同一 ID 重新参与映射。
 
             def _corrected(fact_id: str, condition_id: str) -> bool:
+                # 明确纠正仅让指定范围的旧事实证据失效，不删除用户历史原话。
+                # 同一句里“付了钱”和“店关门”可对应不同条件，不能因纠正金额全句作废。
                 if meta is None:
                     return False
                 for item in meta.corrections:
@@ -294,6 +326,8 @@ class SemanticConditionProjector:
                 )
             )
             delta_pairs: list[tuple[UserFact, str]] = []
+            # 增量的单位是“事实—条件配对”，而不是只取本轮新说的话：
+            # 新激活的条件也需要检查旧事实；已完成且未变化的配对则跳过。
             for fact in facts:
                 # 纯“不清楚”类短答不作为否定/支持证据参与重映射。
                 if fact.text.strip() in {
@@ -325,6 +359,8 @@ class SemanticConditionProjector:
                 key: {} for key in mapping_condition_ids
             }
             conflicts: set[str] = set()
+            # links[condition_id][fact_id] 保存本轮映射证据（支持/反对等），不是案例证据。
+            # 同一事实能映射多个条件；同一条件也能接收多个事实，随后统一聚合。
             allowed_pairs = {(fact.fact_id, condition_id) for fact, condition_id in delta_pairs}
             delta_condition_ids = list(dict.fromkeys(cid for _, cid in delta_pairs))
             delta_facts = list(
@@ -332,6 +368,8 @@ class SemanticConditionProjector:
             )
 
             if delta_pairs and self.language_model is not None:
+                # 正式 LLM 路径直接做受约束映射，不先把词法判断当作结论。
+                # allowed_pairs 限制模型只能处理本轮待办；非法 ID/引句不能成为有效证据。
                 rejected_pairs: set[tuple[str, str]] = set()
                 self._merge_llm(
                     state,
@@ -349,6 +387,7 @@ class SemanticConditionProjector:
                     else "LLM分数未校准，不作为正确率解释"
                 )
             elif delta_pairs:
+                # 仅在没有注入模型时走词法基线；并非模型调用报错后的自动回退。
                 rejected_pairs = set()
                 for fact, condition_id in delta_pairs:
                     for evidence in _lexical_candidates(fact, condition_id):
@@ -382,6 +421,9 @@ class SemanticConditionProjector:
                         meta.projection_ledger.append(entry)
 
             states: list[QueryConditionState] = []
+            # 先过滤已纠正的旧证据，再按 fact_id 合并新增映射，最后计算条件状态。
+            # 新旧相反证据仍保留在 evidence 中；当前 _aggregate 按较新轮次选方向，
+            # 只有最新轮仍相反或显式 conflicting 时才输出 CONFLICTING。
             for condition_id in output_ids:
                 prior = existing.get(condition_id)
                 active = condition_id in active_condition_ids
@@ -394,7 +436,15 @@ class SemanticConditionProjector:
                     for old_evidence in prior.evidence:
                         if _corrected(old_evidence.fact_id, condition_id):
                             continue
-                        merged[old_evidence.fact_id] = old_evidence
+                        turn = old_evidence.source_turn
+                        if turn == 0 and old_evidence.fact_id in fact_turns:
+                            turn = fact_turns[old_evidence.fact_id]
+                        if turn != old_evidence.source_turn:
+                            merged[old_evidence.fact_id] = old_evidence.model_copy(
+                                update={"source_turn": turn}
+                            )
+                        else:
+                            merged[old_evidence.fact_id] = old_evidence
                 new_links = links.get(condition_id) or {}
                 # 活动条件，或本轮对历史已证条件写入了新映射（含冲突 OPPOSES）。
                 if active or new_links:
@@ -402,9 +452,17 @@ class SemanticConditionProjector:
                         # 新映射可覆盖同事实旧解释；纠正目标已在上方排除。
                         if _corrected(fact_id, condition_id):
                             continue
+                        turn = evidence.source_turn
+                        if turn == 0 and fact_id in fact_turns:
+                            turn = fact_turns[fact_id]
+                        if turn != evidence.source_turn:
+                            evidence = evidence.model_copy(update={"source_turn": turn})
                         merged[fact_id] = evidence
                 evidence = list(merged.values())
                 if evidence:
+                    # _aggregate 把多条 ConditionEvidence 汇总成一条 QueryConditionState。
+                    # 方向状态优先看最新轮的 SUPPORTS/OPPOSES，显式冲突标记优先；
+                    # 不把保留了多轮证据误解为所有轮次对状态具有相同权重。
                     aggregated = _aggregate(
                         condition_id,
                         evidence,
@@ -444,6 +502,7 @@ class SemanticConditionProjector:
                     )
             claims = state.candidate_claims or self._guess_claims(state.initial_query)
             succeeded = True
+            # model_copy 返回更新后的状态给工作流；本函数不直接保存会话或发 HTTP 响应。
             return state.model_copy(
                 update={
                     "user_facts": facts,
@@ -736,6 +795,10 @@ class SemanticConditionProjector:
                     else min(max(item.raw_confidence, 0.0), 1.0)
                 ),
                 reason=item.rationale[:80] or "受约束LLM映射",
+                source_turn=next(
+                    (row.source_turn for row in facts if row.fact_id == owner),
+                    0,
+                ),
             )
             # 仅写入通过校验的模型映射；同一事实对同一条件只保留一条证据。
             links[item.condition_id][owner] = llm_evidence
@@ -756,4 +819,5 @@ class SemanticConditionProjector:
                     relation="SUPPORTS",
                     confidence=max(evidence.confidence, 0.62),
                     reason="纠正替换事实确认目标条件属性，程序将 QUALIFIES 升为 SUPPORTS",
+                    source_turn=evidence.source_turn,
                 )

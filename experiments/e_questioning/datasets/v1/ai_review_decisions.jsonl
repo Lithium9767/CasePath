@@ -1,0 +1,20 @@
+{"sample_id":"E001","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"健身房已给出付款和未消费余额，但是否永久无法履行及是否存在可用替代门店仍未确定；应询问这项缺口，不能重问付款或余额。"}
+{"sample_id":"E002","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"已有转店安排但未说明替代服务是否实际可用及距离是否造成实质不便；属于必要细化，不是重复确认合同、付款或余额。"}
+{"sample_id":"E003","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"永久关店、无替代门店、解除合同和未消费余额均已明确，当前解除返还比较所需事实足够，应停止。"}
+{"sample_id":"E004","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"培训机构停课不当然等于永久不能履行，恢复安排或可实际使用的替代课程仍是关键缺口，应询问。"}
+{"sample_id":"E005","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"已经知道转课、地点变化和剩余课程，但替代课程时间及内容是否仍可使用需要细化；不应重复问付款、转课或原课程。"}
+{"sample_id":"E006","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"用户明确无法核实替代或恢复安排，并拒绝继续回答转课主题；应保留 UNKNOWN 并停止，不能换措辞重问。"}
+{"sample_id":"E007","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"原话明确长期欠费，催告是否存在和是否给出合理期限仍未知；只应追问催告事实，不重复合同或欠费。"}
+{"sample_id":"E008","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"合同、欠费和催缴通知均已说明，但通知是否给出明确合理期限仍是影响后续路径的必要细化。"}
+{"sample_id":"E009","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"物业合同、欠费、催告、三十日期限和逾期未缴均已明确，当前比较所需事实充分，应停止。"}
+{"sample_id":"E010","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"购票和因自身原因误车已明确，但约定退改期限及申请时间缺失，直接影响退改边界，应询问。"}
+{"sample_id":"E011","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"已知购票、误车和车站称逾期，仍需核对票面或购票规则中的具体期限；不是重复问购票或误车。"}
+{"sample_id":"E012","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"父亲死亡和两个子女主张继承已明确，但配偶及其他第一顺序继承人范围缺失，会改变继承顺序，应询问。"}
+{"sample_id":"E013","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"本样本限定为说明法定继承顺序和协商处理的基础解释；死亡、无遗嘱、第一顺序继承人和共同处理意愿均已明确，额外分割细节不作为本轮必要追问。"}
+{"sample_id":"E014","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"遗嘱和继承人范围均无法核实，且用户明确拒答后者；应停止并保留 UNKNOWN，不得重问。"}
+{"sample_id":"E015","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"本样本要求组织已有事实下可讨论的救济方式，而非选择唯一结果；合同成立、非金钱义务未履行和客观不能履行已明确，允许用条件化方式说明，不强求付款或解除细节。"}
+{"sample_id":"E016","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"家庭安全和监护失职事实无法确认且用户拒绝补充；应停止，不得把 UNKNOWN 解释成不存在危险。"}
+{"sample_id":"E017","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"双方及八岁以上被收养人同意已明确，收养登记是否完成仍是效力关键细节，应只询问登记状态。"}
+{"sample_id":"E018","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"登记状态无法核实且用户拒绝继续回答手续问题，应停止并保留 UNKNOWN，不得重复问登记。"}
+{"sample_id":"E019","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"本样本只评估民事法律行为有效要件的高层说明；签署、真实意思、行为能力和无明显违法事实已明确，形式细节不作为本轮必要追问。"}
+{"sample_id":"E020","review_status":"reviewed","reviewer_type":"AI","decision":"accept","review_comment":"欺诈和真实意思无法核实，用户拒绝说明签约经过；应说明不能直接认定无效并停止，不能换问法继续追问。"}

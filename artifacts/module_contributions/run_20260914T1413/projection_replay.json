@@ -1,0 +1,113 @@
+[
+  {
+    "sample_id": "E001",
+    "variant": "without_ledger",
+    "calls": 1,
+    "seconds": 2.6279951999895275,
+    "changed_states": {
+      "cond.alternative_performance": [
+        "NOT_SATISFIED",
+        "UNKNOWN"
+      ]
+    },
+    "error": null
+  },
+  {
+    "sample_id": "E001",
+    "variant": "ledger",
+    "calls": 0,
+    "seconds": 0.004273299942724407,
+    "changed_states": {},
+    "error": null
+  },
+  {
+    "sample_id": "E002",
+    "variant": "ledger",
+    "calls": 0,
+    "seconds": 0.0006545999785885215,
+    "changed_states": {},
+    "error": null
+  },
+  {
+    "sample_id": "E002",
+    "variant": "without_ledger",
+    "calls": 1,
+    "seconds": 2.495498300064355,
+    "changed_states": {
+      "cond.contract_terminated": [
+        "UNKNOWN",
+        "NOT_SATISFIED"
+      ]
+    },
+    "error": null
+  },
+  {
+    "sample_id": "E003",
+    "variant": "ledger",
+    "calls": 0,
+    "seconds": 0.001312499982304871,
+    "changed_states": {},
+    "error": null
+  },
+  {
+    "sample_id": "E003",
+    "variant": "without_ledger",
+    "calls": 1,
+    "seconds": 2.64633589994628,
+    "changed_states": {},
+    "error": null
+  },
+  {
+    "sample_id": "E004",
+    "variant": "without_ledger",
+    "calls": 1,
+    "seconds": 2.7128327999962494,
+    "changed_states": {
+      "cond.contract_exists": [
+        "SATISFIED",
+        "UNKNOWN"
+      ]
+    },
+    "error": null
+  },
+  {
+    "sample_id": "E004",
+    "variant": "ledger",
+    "calls": 0,
+    "seconds": 0.0011423000833019614,
+    "changed_states": {},
+    "error": null
+  },
+  {
+    "sample_id": "E005",
+    "variant": "without_ledger",
+    "calls": 1,
+    "seconds": 2.8981666000327095,
+    "changed_states": {},
+    "error": null
+  },
+  {
+    "sample_id": "E005",
+    "variant": "ledger",
+    "calls": 0,
+    "seconds": 0.0014216999989002943,
+    "changed_states": {},
+    "error": null
+  },
+  {
+    "sample_id": "E006",
+    "variant": "ledger",
+    "calls": 0,
+    "seconds": 0.0013042999198660254,
+    "changed_states": {},
+    "error": null
+  },
+  {
+    "sample_id": "E006",
+    "variant": "without_ledger",
+    "calls": 1,
+    "seconds": 2.8767358000623062,
+    "changed_states": {},
+    "error": null
+  }
+]

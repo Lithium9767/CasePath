@@ -30,6 +30,8 @@ class ConditionEvidence(ContractModel):
     relation: Literal["SUPPORTS", "OPPOSES", "QUALIFIES"] # 支持、反对或限定条件状态
     confidence: Confidence # 该事实与条件之间映射的可靠程度，不是胜诉概率
     reason: str = Field(min_length=1) # 面向调试和解释的简短映射依据
+    # 来源轮次：越大表示越近提出；同条件决裁时较新证据优先于历史相反证据。
+    source_turn: int = Field(default=0, ge=0)
 
 
 class QueryConditionState(ContractModel): # 当前用户事实在一个RuleCondition上的投影状态
