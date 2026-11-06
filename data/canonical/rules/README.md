@@ -2,7 +2,7 @@
 
 本目录由 `python -m casepath.rule_layer.stage2_refinement` 确定性生成，请勿手工修改 JSONL。
 结项口径见[交付说明](../../../docs/DELIVERY.md)，核验命令见[运行指南](../../../docs/RUNNING.md)。
-第二阶段修订与来源核对过程保留在[旧 README](../../../README.history.md#p2-规范规则数据)。
+第二阶段规则修订与来源核对信息见下文 manifest。
 
 | 文件 | 记录数 | 用途 |
 |---|---:|---|

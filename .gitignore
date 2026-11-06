@@ -12,3 +12,8 @@ build/
 
 # Upstream LexRel has no explicit redistribution license; local evaluation only.
 data/derived/lexrel_retrieval/
+
+# Local diagnostic archives are not part of the public project presentation.
+/artifacts/
+/README.history.md
+/.local-notes/

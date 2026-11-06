@@ -1,5 +1,0 @@
-﻿variant,expected_action,n,n_ask,n_error,decision_accuracy,ask_quality_accuracy,repeat_known_rate,reask_unable_or_declined_rate,bundles_extra_fact_rate
-E0,ASK,20,19,0,0.95,0.6842105263157895,0.0,0.0,0.21052631578947367
-E0,STOP,20,7,1,0.6,0.0,0.0,0.14285714285714285,0.5714285714285714
-E1,ASK,20,19,0,0.95,0.21052631578947367,0.0,0.0,0.10526315789473684
-E1,STOP,20,14,0,0.3,0.0,0.0,0.0,0.5

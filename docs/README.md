@@ -7,7 +7,7 @@
 - [团队分工](TEAM.md)：P1–P5 职责、交付与协作。
 - [架构与代码阅读](ARCHITECTURE.md)：离线图谱、运行调用链、A–E 与接口。
 - [运行指南](RUNNING.md)：安装、Demo、Live、图/向量准备及验证命令。
-- [交付说明](DELIVERY.md)：数据口径、版本范围、证据材料与保留限制。
+- [交付说明](DELIVERY.md)：数据口径、交付内容与代码检查结果。
 - [合同变更记录](../contracts/CHANGELOG.md)、[Schema](../contracts/schemas/)、[合同示例](../contracts/examples/)。
 - [规则数据说明](../data/canonical/rules/README.md)、[案例数据说明](../data/canonical/cases/README.md)、[评测数据说明](../data/evaluation/README.md)。
 
@@ -17,7 +17,6 @@
 
 | 文档 | 定位 |
 | --- | --- |
-| [整理前 README](../README.history.md) | 原说明完整快照，含多个阶段的数量、测试成绩和教程 |
 | [D2–D7 分工计划](../D2-D7-五人并行开发计划.md) | 初期时间表、旧目录分工，不再作为待办 |
 | [完整优化方案](../CasePath-完整优化执行方案-v2.md) | 研究/架构设计历史，非逐项完成声明 |
 | [newplan](../newplan.md) | 阶段规划 |
